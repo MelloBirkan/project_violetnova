@@ -8,7 +8,6 @@ class Planet:
         self.obstacle_count = obstacle_count  # Number of obstacles based on planet size
         self.quiz_questions = quiz_questions  # List of dict with 'question', 'options', and 'answer'
         self.completed = False
-        self.portal_active = False
         
         # Calculate actual gravity value (Earth gravity * factor)
         self.gravity = 0.25 * (self.gravity_factor / 100.0) 

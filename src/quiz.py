@@ -167,7 +167,7 @@ class Quiz:
     
     def is_complete(self):
         """Check if the quiz has been completed"""
-        return self.active and self.result is not None and self.result_timer <= 0
+        return self.result is not None and self.result_timer <= 0
     
     def is_correct(self):
         """Check if the player answered correctly"""

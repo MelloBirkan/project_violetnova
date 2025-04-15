@@ -9,7 +9,6 @@ from src.planet import Planet
 from src.highscore import HighScore
 from src.nova_ai import NovaAI
 from src.quiz import Quiz
-from src.portal import Portal
 
 # Initialize pygame
 pygame.init()
@@ -303,9 +302,11 @@ class Game:
         self.weapon_active = False
         self.weapon_timer = 0
         
-        # Portal for level progression
-        self.portal = None
-        self.portal_spawn_threshold = 10  # Score needed to spawn portal
+        # Score thresholds for automatic level progression
+        self.level_progression_thresholds = {
+            "Earth": 4,   # 4 points needed for Earth
+            "Moon": 2,    # 2 points needed for Moon
+        }
         
         # NOVA AI assistant
         self.nova = NovaAI(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -350,12 +351,11 @@ class Game:
         self.weapon_active = False
         self.weapon_timer = 0
         
-        # Reset portal
-        self.portal = None
-        
         if new_planet:
             # Remember the score for progression
             previous_score = self.score
+            # Reset score for the new planet
+            self.score = 0
             # Update difficulty based on planet index
             self.difficulty_multiplier = 1.0 + (self.current_planet_index * 0.1)
         else:
@@ -410,8 +410,8 @@ class Game:
                         elif self.state == GAME_OVER:
                             self.reset()
                         elif self.state == TRANSITION:
-                            # Skip transition if already showing
-                            self.transition_time = min(self.transition_time, self.transition_duration - 10)
+                            # Skip transition and force start game on new planet
+                            self.reset(new_planet=True)
                     
                     # Change spacecraft color with C key in menu
                     if event.key == pygame.K_c and self.state == MENU:
@@ -437,8 +437,8 @@ class Game:
                         elif self.state == GAME_OVER:
                             self.reset()
                         elif self.state == TRANSITION:
-                            # Skip transition if already showing
-                            self.transition_time = min(self.transition_time, self.transition_duration - 10)
+                            # Skip transition and force start game on new planet
+                            self.reset(new_planet=True)
     
     def _use_weapon(self):
         """Use weapon to destroy obstacles"""
@@ -519,19 +519,20 @@ class Game:
                     obstacle.scored = True
                     score_sound.play()
                     
-                    # Check if we should spawn a portal
-                    if self.portal is None and self.score >= self.portal_spawn_threshold:
-                        # Only spawn portal if there's a next planet
-                        if self.current_planet_index < len(self.planets) - 1:
-                            next_planet = self.planets[self.current_planet_index + 1]
-                            self.portal = Portal(
-                                SCREEN_WIDTH - 100, 
-                                SCREEN_HEIGHT // 2 - Portal.HEIGHT // 2,
-                                next_planet.name
-                            )
-                            
-                            # NOVA announces portal
-                            self.nova.show_message(f"Portal to {next_planet.name} detected!", "excited")
+                    # Get the threshold for the current planet or use default
+                    current_threshold = self.level_progression_thresholds.get(
+                        self.current_planet.name, 
+                        10  # Default threshold for planets not specified
+                    )
+                    
+                    # Check if we've hit or exceeded the score threshold to automatically progress
+                    if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
+                        # NOVA announces automatic progression
+                        next_planet = self.planets[self.current_planet_index + 1]
+                        self.nova.show_message(f"Auto-navigation engaged! Heading to {next_planet.name}!", "excited")
+                        
+                        # Start quiz without incrementing planet index yet - let the quiz handle progression
+                        self._start_quiz()
             
             # Update collectibles
             for collectible in list(self.collectibles):
@@ -547,10 +548,42 @@ class Game:
                         # Show planet info
                         self.nova.give_random_fact(self.current_planet.name)
                         self.score += effect["value"]
+                        
+                        # Check if adding points triggered level progression
+                        current_threshold = self.level_progression_thresholds.get(
+                            self.current_planet.name, 
+                            10  # Default threshold for planets not specified
+                        )
+                        
+                        # Check for automatic progression after collecting points
+                        if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
+                            # NOVA announces automatic progression
+                            next_planet = self.planets[self.current_planet_index + 1]
+                            self.nova.show_message(f"Auto-navigation engaged! Heading to {next_planet.name}!", "excited")
+                            
+                            # Start quiz without incrementing planet index yet - let the quiz handle progression
+                            self._start_quiz()
+                            break  # Exit the loop to avoid processing more collectibles
                     elif effect["effect"] == "time":
                         # Extend play time (add score)
                         self.score += effect["value"]
                         self.nova.react_to_discovery("fuel")
+                        
+                        # Check if adding points triggered level progression
+                        current_threshold = self.level_progression_thresholds.get(
+                            self.current_planet.name, 
+                            10  # Default threshold for planets not specified
+                        )
+                        
+                        # Check for automatic progression after collecting points
+                        if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
+                            # NOVA announces automatic progression
+                            next_planet = self.planets[self.current_planet_index + 1]
+                            self.nova.show_message(f"Auto-navigation engaged! Heading to {next_planet.name}!", "excited")
+                            
+                            # Start quiz without incrementing planet index yet - let the quiz handle progression
+                            self._start_quiz()
+                            break  # Exit the loop to avoid processing more collectibles
                     elif effect["effect"] == "attack":
                         # Enable weapon temporarily
                         self.weapon_active = True
@@ -566,24 +599,6 @@ class Game:
                 if self.weapon_timer <= 0:
                     self.weapon_active = False
                     self.nova.show_message("Defensive systems offline", "normal")
-            
-            # Update portal if exists
-            if self.portal:
-                self.portal.update()
-                
-                # Check if spacecraft entered portal
-                if self.portal.check_collision(self.spacecraft):
-                    # Start transition to next planet
-                    self.current_planet_index += 1
-                    if self.current_planet_index < len(self.planets):
-                        # Show quiz before proceeding
-                        self._start_quiz()
-                    else:
-                        # Player completed all planets!
-                        self.state = GAME_OVER
-                        if self.score > self.high_score_manager.get():
-                            self.high_score = self.score
-                            self.high_score_manager.save(self.score)
             
             # Remove off-screen obstacles and collectibles
             self.obstacles = [obs for obs in self.obstacles if obs.x > -obs.WIDTH]
@@ -638,6 +653,20 @@ class Game:
         """Start transition to next planet"""
         self.state = TRANSITION
         self.transition_time = 0
+        
+        # Increment planet index to advance to the next planet (only happens after passing a quiz)
+        self.current_planet_index += 1
+        
+        # Ensure current_planet_index is valid
+        if self.current_planet_index >= len(self.planets):
+            # Player reached the end of all planets, show game over
+            self.state = GAME_OVER
+            if self.score > self.high_score_manager.get():
+                self.high_score = self.score
+                self.high_score_manager.save(self.score)
+            return
+        
+        # Make sure we're using the correct planet after the quiz
         self.current_planet = self.planets[self.current_planet_index]
         
         # NOVA shows excitement about new planet
@@ -690,10 +719,6 @@ class Game:
             for collectible in self.collectibles:
                 collectible.draw(screen)
             
-            # Draw portal if exists
-            if self.portal and self.state == PLAYING:
-                self.portal.draw(screen)
-            
             # Draw floor/ground
             self.current_planet.draw_ground(screen, self.floor_x, SCREEN_HEIGHT)
             
@@ -705,7 +730,13 @@ class Game:
                 planet_text = SMALL_FONT.render(f"Planet: {self.current_planet.name}", True, (255, 255, 255))
                 screen.blit(planet_text, (20, 20))
                 
-                score_text = SMALL_FONT.render(f"Score: {self.score}", True, (255, 255, 255))
+                # Get threshold for current planet
+                current_threshold = self.level_progression_thresholds.get(
+                    self.current_planet.name, 
+                    10  # Default threshold
+                )
+                
+                score_text = SMALL_FONT.render(f"Score: {self.score}/{current_threshold}", True, (255, 255, 255))
                 screen.blit(score_text, (20, 50))
                 
                 high_score_text = SMALL_FONT.render(f"High Score: {self.high_score_manager.get()}", True, (255, 255, 255))
