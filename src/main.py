@@ -20,6 +20,7 @@ SCREEN_HEIGHT = 600
 FLOOR_HEIGHT = 100
 GAME_FONT = pygame.font.Font(None, 36)
 SMALL_FONT = pygame.font.Font(None, 24)
+COUNTDOWN_FONT = pygame.font.Font(None, 180)  # Larger font for countdown
 
 # Game states
 MENU = 0
@@ -27,6 +28,7 @@ PLAYING = 1
 GAME_OVER = 2
 TRANSITION = 3
 QUIZ = 4
+QUIZ_FAILURE = 5  # New state for quiz failure delay
 
 # Screen setup
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -324,6 +326,9 @@ class Game:
         # Enhanced visuals
         self.stars = self._generate_stars(100)
         
+        self.quiz_failure_timer = 0  # Timer for quiz failure delay
+        self.last_countdown_number = 0  # Last displayed countdown number
+        
     def _generate_stars(self, count):
         """Generate stars for the background"""
         stars = []
@@ -397,9 +402,10 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 
-                if self.state == QUIZ:
-                    # Pass events to quiz system
-                    self.quiz.handle_event(event)
+                if self.state == QUIZ or self.state == QUIZ_FAILURE:
+                    # Pass events to quiz system only if in QUIZ state (not in QUIZ_FAILURE)
+                    if self.state == QUIZ:
+                        self.quiz.handle_event(event)
                 else:
                     if event.key == pygame.K_SPACE:
                         if self.state == MENU:
@@ -425,9 +431,10 @@ class Game:
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
-                    if self.state == QUIZ:
-                        # Pass events to quiz system
-                        self.quiz.handle_event(event)
+                    if self.state == QUIZ or self.state == QUIZ_FAILURE:
+                        # Pass events to quiz system only if in QUIZ state (not in QUIZ_FAILURE)
+                        if self.state == QUIZ:
+                            self.quiz.handle_event(event)
                     else:
                         if self.state == MENU:
                             self.reset()
@@ -632,12 +639,41 @@ class Game:
                     # Proceed to next planet
                     self._start_transition()
                 else:
-                    # Failed quiz, stay on current planet
-                    self.state = PLAYING
+                    # Failed quiz, set 2-second delay before returning to gameplay
+                    self.state = QUIZ_FAILURE
+                    self.quiz_failure_timer = 120  # 2 seconds at 60fps
+                    self.last_countdown_number = 2  # Start countdown from 2
+                    # Add a message from NOVA about the quiz failure
+                    self.nova.show_message("Quiz failed! Returning to orbit in...", "alert")
+        
+        elif self.state == QUIZ_FAILURE:
+            # Update quiz failure delay timer
+            self.quiz_failure_timer -= 1
+            
+            # Check current countdown number
+            current_countdown = self.quiz_failure_timer // 60 + 1
+            
+            # If countdown number changed, play a sound effect
+            if current_countdown < self.last_countdown_number and current_countdown >= 0:
+                self.last_countdown_number = current_countdown
+                score_sound.play()  # Reuse the score sound for countdown
+                
+                # Add a message from NOVA about the countdown
+                if current_countdown > 0:
+                    self.nova.show_message(f"Returning to orbit in {current_countdown}...", "alert")
+            
+            if self.quiz_failure_timer <= 0:
+                # Delay complete, return to gameplay
+                self.state = PLAYING
+                self.nova.show_message("Back to orbital flight! Continue exploring.", "info")
+                self.last_countdown_number = 0  # Reset for next time
     
     def _start_quiz(self):
         """Start a quiz for the current planet"""
         self.state = QUIZ
+        
+        # Reset countdown number tracker
+        self.last_countdown_number = 2
         
         # Select a random quiz question for this planet
         question_data = random.choice(self.current_planet.quiz_questions)
@@ -710,7 +746,7 @@ class Game:
         screen.blit(bg_overlay, (0, 0))
         
         # Draw different screens based on game state
-        if self.state == PLAYING or self.state == MENU or self.state == GAME_OVER:
+        if self.state == PLAYING or self.state == MENU or self.state == GAME_OVER or self.state == QUIZ_FAILURE:
             # Draw obstacles
             for obstacle in self.obstacles:
                 obstacle.draw(screen)
@@ -801,7 +837,7 @@ class Game:
                 screen.blit(high_score_text, (SCREEN_WIDTH // 2 - high_score_text.get_width() // 2, 270))
                 screen.blit(planet_text, (SCREEN_WIDTH // 2 - planet_text.get_width() // 2, 320))
                 screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, 400))
-                
+        
         elif self.state == TRANSITION:
             # Draw transition screen
             
@@ -854,6 +890,56 @@ class Game:
         elif self.state == QUIZ:
             # Draw quiz
             self.quiz.draw(screen)
+        
+        elif self.state == QUIZ_FAILURE:
+            # Add a semi-transparent overlay
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 180))  # More visible semi-transparent black
+            screen.blit(overlay, (0, 0))
+            
+            # Calculate countdown number (2, 1)
+            countdown_number = self.quiz_failure_timer // 60 + 1
+            
+            # Draw large countdown number
+            if countdown_number > 0:
+                # Add pulse effect - size oscillates slightly based on ticks
+                pulse_factor = 1.0 + 0.15 * math.sin(pygame.time.get_ticks() * 0.01)
+                pulse_size = int(180 * pulse_factor)
+                
+                # Use the global countdown font with the pulse effect
+                countdown_font = pygame.font.Font(None, pulse_size)
+                
+                # Color also pulses slightly - more pronounced effect
+                color_pulse = int(255 * (0.7 + 0.3 * math.sin(pygame.time.get_ticks() * 0.015)))
+                countdown_text = countdown_font.render(str(countdown_number), True, (255, color_pulse, color_pulse))
+                countdown_rect = countdown_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+                
+                # Draw with enhanced glow effect
+                glow_size = 12
+                for offset_x in range(-glow_size, glow_size + 1, 3):
+                    for offset_y in range(-glow_size, glow_size + 1, 3):
+                        if offset_x == 0 and offset_y == 0:
+                            continue
+                        # Calculate distance for glow fade effect
+                        distance = math.sqrt(offset_x**2 + offset_y**2)
+                        alpha = int(120 * (1 - distance/glow_size))
+                        if alpha <= 0:
+                            continue
+                            
+                        glow_rect = countdown_rect.move(offset_x, offset_y)
+                        glow_text = countdown_font.render(str(countdown_number), True, (80, 80, 220, alpha))
+                        screen.blit(glow_text, glow_rect)
+                
+                # Draw main text
+                screen.blit(countdown_text, countdown_rect)
+                
+                # Draw "Resuming..." text with pulsing effect
+                resume_font = pygame.font.Font(None, 42)
+                alpha_pulse = int(255 * (0.7 + 0.3 * math.sin(pygame.time.get_ticks() * 0.008)))
+                resume_text = resume_font.render("Returning to orbit...", True, (255, 255, 255))
+                resume_text.set_alpha(alpha_pulse)
+                resume_rect = resume_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+                screen.blit(resume_text, resume_rect)
         
         # Always draw NOVA AI assistant on top
         self.nova.draw(screen)
