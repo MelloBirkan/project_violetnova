@@ -581,7 +581,7 @@ class Game:
                     else:
                         # Player completed all planets!
                         self.state = GAME_OVER
-                        if self.score > self.high_score:
+                        if self.score > self.high_score_manager.get():
                             self.high_score = self.score
                             self.high_score_manager.save(self.score)
             
@@ -593,7 +593,7 @@ class Game:
             if self.check_collision():
                 hit_sound.play()
                 self.state = GAME_OVER
-                if self.score > self.high_score:
+                if self.score > self.high_score_manager.get():
                     self.high_score = self.score
                     self.high_score_manager.save(self.score)
             
@@ -700,13 +700,16 @@ class Game:
             # Draw spacecraft
             self.spacecraft.draw(screen)
             
-            # Draw score
-            score_text = GAME_FONT.render(f"Score: {self.score}", True, (255, 255, 255))
-            screen.blit(score_text, (10, 10))
-            
-            # Draw planet name
-            planet_text = GAME_FONT.render(f"Planet: {self.current_planet.name}", True, (255, 255, 255))
-            screen.blit(planet_text, (10, 50))
+            # Draw the current planet name and player score
+            if self.state != MENU:
+                planet_text = SMALL_FONT.render(f"Planet: {self.current_planet.name}", True, (255, 255, 255))
+                screen.blit(planet_text, (20, 20))
+                
+                score_text = SMALL_FONT.render(f"Score: {self.score}", True, (255, 255, 255))
+                screen.blit(score_text, (20, 50))
+                
+                high_score_text = SMALL_FONT.render(f"High Score: {self.high_score_manager.get()}", True, (255, 255, 255))
+                screen.blit(high_score_text, (20, 80))
             
             # Draw weapon status if active
             if self.weapon_active:
@@ -755,7 +758,7 @@ class Game:
                 
                 game_over_text = GAME_FONT.render("MISSION COMPLETE", True, (255, 215, 0))
                 score_text = GAME_FONT.render(f"Final Score: {self.score}", True, (255, 255, 255))
-                high_score_text = GAME_FONT.render(f"High Score: {self.high_score}", True, (255, 255, 255))
+                high_score_text = GAME_FONT.render(f"High Score: {self.high_score_manager.get()}", True, (255, 255, 255))
                 restart_text = GAME_FONT.render("Press SPACE to Start New Mission", True, (255, 255, 255))
                 
                 # Calculate the furthest planet reached

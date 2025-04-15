@@ -37,7 +37,8 @@ class Spacecraft:
         
         # Thrust control
         self.thrusting = False
-        self.thrust_power = 0.5
+        self.thrust_power = 5.0  # Increased base thrust power
+        self.thrust_multiplier = 1.0
         
         # Animation variables
         self.animation_frames = 2  # Number of frames in animation
@@ -53,9 +54,12 @@ class Spacecraft:
         # Apply gravity and update position
         self.velocity += gravity
         
+        # Adapt thrust power based on planet gravity
+        self.thrust_multiplier = max(1.0, gravity * 4)
+        
         # Apply thrust if thrusting
         if self.thrusting:
-            self.velocity -= self.thrust_power
+            self.velocity -= self.thrust_power * self.thrust_multiplier
             self.thrusting = False
         
         self.y += self.velocity
@@ -72,6 +76,8 @@ class Spacecraft:
     def thrust(self):
         # Apply thrust
         self.thrusting = True
+        # Apply an immediate velocity change to make the thrust more responsive
+        self.velocity -= 0.5 * self.thrust_multiplier
     
     def create_animation_frames(self):
         """Create all frames for spacecraft animation"""
