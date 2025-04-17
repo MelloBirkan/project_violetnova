@@ -3,7 +3,7 @@ import random
 
 class Obstacle:
     WIDTH = 80
-    GAP = 150
+    GAP = 225
     
     # Types of space obstacles
     TYPES = {

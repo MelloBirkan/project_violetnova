@@ -763,6 +763,7 @@ class Game:
             
             # Draw the current planet name and player score
             if self.state != MENU:
+                # Left-side information (unchanged)
                 planet_text = SMALL_FONT.render(f"Planet: {self.current_planet.name}", True, (255, 255, 255))
                 screen.blit(planet_text, (20, 20))
                 
@@ -777,14 +778,14 @@ class Game:
                 
                 high_score_text = SMALL_FONT.render(f"High Score: {self.high_score_manager.get()}", True, (255, 255, 255))
                 screen.blit(high_score_text, (20, 80))
+                
+                # Draw weapon status at top-center if active (moved from right side)
+                if self.weapon_active:
+                    weapon_time = self.weapon_timer // 60  # Convert to seconds
+                    weapon_text = SMALL_FONT.render(f"Weapon Active: {weapon_time}s", True, (255, 100, 100))
+                    screen.blit(weapon_text, (SCREEN_WIDTH // 2 - weapon_text.get_width() // 2, 20))
             
-            # Draw weapon status if active
-            if self.weapon_active:
-                weapon_time = self.weapon_timer // 60  # Convert to seconds
-                weapon_text = SMALL_FONT.render(f"Weapon Active: {weapon_time}s", True, (255, 100, 100))
-                screen.blit(weapon_text, (10, 90))
-            
-            # Draw NOVA AI assistant
+            # Draw NOVA AI assistant (blue circle)
             self.nova.draw(screen)
             
             # Draw menu screen

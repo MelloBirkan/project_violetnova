@@ -176,7 +176,9 @@ class NovaAI:
             # Prepare the message text surface
             font = pygame.font.Font(None, 24)
             message_surf = font.render(self.message, True, (255, 255, 255))
-            message_rect = message_surf.get_rect(midtop=(self.x + self.WIDTH // 2, self.y + self.HEIGHT + 5))
+            
+            # Position message at the top-center of the screen
+            message_rect = message_surf.get_rect(midtop=(self.screen_width // 2, 10))
             
             # Draw a backdrop for the message
             backdrop_rect = message_rect.inflate(20, 10)
