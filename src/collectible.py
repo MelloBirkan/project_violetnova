@@ -9,17 +9,12 @@ class Collectible:
     TYPES = {
         "data": {
             "color": (0, 191, 255),  # Deep sky blue
-            "value": 1,  # Points value
+            "value": 0,  # Points value
             "effect": "info"  # Shows planet info
-        },
-        "fuel": {
-            "color": (255, 215, 0),  # Gold
-            "value": 3,  # Points value
-            "effect": "time"  # Extends gameplay time
         },
         "weapon": {
             "color": (220, 20, 60),  # Crimson
-            "value": 5,  # Points value
+            "value": 0,  # Points value
             "effect": "attack"  # Allows destroying obstacles
         }
     }
@@ -33,7 +28,8 @@ class Collectible:
         
         # Randomly select collectible type if not specified
         if collectible_type is None or collectible_type not in self.TYPES:
-            collectible_type = random.choice(["data", "fuel"])  # Weapons are rarer, so exclude from random
+            # Default to available types (data or weapon)
+            collectible_type = random.choice(list(self.TYPES.keys()))
         self.type = collectible_type
         self.properties = self.TYPES[self.type]
         

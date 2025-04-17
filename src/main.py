@@ -465,12 +465,20 @@ class Game:
                     target_obstacle = obstacle
         
         if target_obstacle:
-            # Remove the obstacle
+            # Remove the obstacle and award points
             self.obstacles.remove(target_obstacle)
-            # Add points
             self.score += 2
-            # Show effect
             self.nova.show_message("Obstacle destroyed!", "alert")
+            # Check for progression to next planet based on new score
+            current_threshold = self.level_progression_thresholds.get(
+                self.current_planet.name,
+                10  # Default threshold for planets not specified
+            )
+            if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
+                next_planet = self.planets[self.current_planet_index + 1]
+                self.nova.show_message(f"Auto-navigation engaged! Heading to {next_planet.name}!", "excited")
+                # Begin quiz for planet advancement
+                self._start_quiz()
     
     def update(self):
         # Update stars (twinkle effect)
@@ -501,18 +509,16 @@ class Game:
                 if random.random() < 0.3:  # 30% chance
                     self.nova.react_to_obstacle(obstacle_type)
             
-            # Generate collectibles
+            # Generate collectibles (data or weapon)
             if current_time - self.last_collectible_time > self.collectible_spawn_rate:
                 # Place collectible in a safe location
                 x = SCREEN_WIDTH
                 y = random.randint(100, SCREEN_HEIGHT - FLOOR_HEIGHT - 50)
-                
-                # Determine collectible type with rarity
-                if self.weapon_active or random.random() < 0.9:  # 90% chance for data or fuel
-                    collectible_type = random.choice(["data", "fuel"])
+                # Determine collectible type (90% data, 10% weapon)
+                if self.weapon_active or random.random() < 0.9:
+                    collectible_type = "data"
                 else:
-                    collectible_type = "weapon"  # 10% chance for weapon
-                
+                    collectible_type = "weapon"
                 self.collectibles.append(Collectible(x, y, collectible_type))
                 self.last_collectible_time = current_time
             
@@ -639,10 +645,10 @@ class Game:
                     # Proceed to next planet
                     self._start_transition()
                 else:
-                    # Failed quiz, set 2-second delay before returning to gameplay
+                    # Failed quiz, set 3-second delay before returning to gameplay
                     self.state = QUIZ_FAILURE
-                    self.quiz_failure_timer = 120  # 2 seconds at 60fps
-                    self.last_countdown_number = 2  # Start countdown from 2
+                    self.quiz_failure_timer = 180  # 3 seconds at 60fps
+                    self.last_countdown_number = 3  # Start countdown from 3
                     # Add a message from NOVA about the quiz failure
                     self.nova.show_message("Quiz failed! Returning to orbit in...", "alert")
         
@@ -651,7 +657,8 @@ class Game:
             self.quiz_failure_timer -= 1
             
             # Check current countdown number
-            current_countdown = self.quiz_failure_timer // 60 + 1
+            # Convert remaining frames to seconds (ceil)
+            current_countdown = math.ceil(self.quiz_failure_timer / 60)
             
             # If countdown number changed, play a sound effect
             if current_countdown < self.last_countdown_number and current_countdown >= 0:
@@ -787,6 +794,20 @@ class Game:
             
             # Draw NOVA AI assistant (blue circle)
             self.nova.draw(screen)
+            # If quiz failed, overlay large countdown before resuming
+            if self.state == QUIZ_FAILURE and self.quiz_failure_timer > 0:
+                # Calculate countdown seconds
+                countdown = math.ceil(self.quiz_failure_timer / 60)
+                # Render large countdown number
+                text_surf = COUNTDOWN_FONT.render(str(countdown), True, (255, 255, 255))
+                # Center on screen
+                screen.blit(
+                    text_surf,
+                    (
+                        SCREEN_WIDTH // 2 - text_surf.get_width() // 2,
+                        SCREEN_HEIGHT // 2 - text_surf.get_height() // 2
+                    )
+                )
             
             # Draw menu screen
             if self.state == MENU:
