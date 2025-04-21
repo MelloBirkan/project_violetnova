@@ -1,4 +1,5 @@
 import pygame
+import os
 
 class Planet:
     def __init__(self, name, gravity_factor, background_color, obstacle_count, quiz_questions):
@@ -22,10 +23,23 @@ class Planet:
         
         # Different ground styling based on planet
         if self.name == "Earth":
-            self.ground_texture.fill((34, 139, 34))  # Forest green
-            # Add some grass details
-            for i in range(0, 800, 20):
-                pygame.draw.rect(self.ground_texture, (0, 100, 0), (i, 0, 10, 20))
+            # Load ground texture image for Earth and tile it to avoid stretching
+            img_path = os.path.join("assets", "images", "earth_ground.png")
+            try:
+                tile_img = pygame.image.load(img_path).convert_alpha()
+                tile_w, tile_h = tile_img.get_size()
+                # Create a new surface for the ground texture with proper height
+                self.ground_texture = pygame.Surface((800, tile_h), pygame.SRCALPHA)
+                # Tile the image horizontally
+                for x in range(0, 800, tile_w):
+                    self.ground_texture.blit(tile_img, (x, 0))
+            except pygame.error:
+                # Fallback to default solid green if image load fails
+                self.ground_texture = pygame.Surface((800, 100))
+                self.ground_texture.fill((34, 139, 34))  # Forest green
+                # Add grass details
+                for i in range(0, 800, 20):
+                    pygame.draw.rect(self.ground_texture, (0, 100, 0), (i, 0, 10, 20))
         
         elif self.name == "Moon":
             self.ground_texture.fill((169, 169, 169))  # Dark grey
