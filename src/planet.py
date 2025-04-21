@@ -74,19 +74,28 @@ class Planet:
             self.ground_texture.fill((65, 105, 225))  # Royal blue
             for i in range(0, 800, 22):
                 pygame.draw.rect(self.ground_texture, (0, 0, 205), (i, 0, 11, 100))
+                
+        elif self.name == "Pluto":
+            # Pluto's icy surface
+            self.ground_texture.fill((220, 220, 230))  # Very light blue-gray
+            # Add some ice craters details
+            for i in range(0, 800, 60):
+                pygame.draw.circle(self.ground_texture, (200, 200, 210), (i, 25), 12)
+                pygame.draw.circle(self.ground_texture, (190, 190, 200), (i+30, 15), 8)
     
     def get_info_text(self):
         """Return information about the planet for the transition screen"""
         info_texts = {
-            "Earth": "Home planet with 100% gravity. Our blue planet is the only known celestial body to harbor life.",
-            "Moon": "Earth's satellite with 16.6% gravity. The Moon is about 1/4 the diameter of Earth.",
-            "Mercury": "Closest planet to the Sun with 38% gravity. Mercury has virtually no atmosphere.",
-            "Venus": "Second planet from the Sun with 90% gravity. Venus has a thick, toxic atmosphere filled with carbon dioxide.",
-            "Mars": "The Red Planet with 38% gravity. Mars has the largest dust storms in the solar system.",
-            "Jupiter": "Largest planet with 240% gravity. Jupiter is a gas giant and has the Great Red Spot, a storm that has lasted hundreds of years.",
-            "Saturn": "Known for its rings with 110% gravity. Saturn is a gas giant composed mostly of hydrogen and helium.",
-            "Uranus": "Ice giant with 90% gravity. Uranus rotates on its side with an axial tilt of about 98 degrees.",
-            "Neptune": "Furthest planet with 110% gravity. Neptune has the strongest winds in the Solar System, reaching up to 2,100 km/h."
+            "Earth": "Home planet with 100% gravity (g = 1.0). Our blue planet is the only known celestial body to harbor life.",
+            "Mercury": "Closest planet to the Sun with 40% gravity (g = 0.4). Mercury has virtually no atmosphere.",
+            "Venus": "Second planet from the Sun with 90% gravity (g = 0.9). Venus has a thick, toxic atmosphere filled with carbon dioxide.",
+            "Moon": "Earth's satellite with 16% gravity (g = 0.16). The Moon is about 1/4 the diameter of Earth.",
+            "Mars": "The Red Planet with 40% gravity (g = 0.4). Mars has the largest dust storms in the solar system.",
+            "Jupiter": "Largest planet with 240% gravity (g = 2.4). Jupiter is a gas giant and has the Great Red Spot, a storm that has lasted hundreds of years.",
+            "Saturn": "Known for its rings with 110% gravity (g = 1.1). Saturn is a gas giant composed mostly of hydrogen and helium.",
+            "Uranus": "Ice giant with 90% gravity (g = 0.9). Uranus rotates on its side with an axial tilt of about 98 degrees.",
+            "Neptune": "Furthest planet with 110% gravity (g = 1.1). Neptune has the strongest winds in the Solar System, reaching up to 2,100 km/h.",
+            "Pluto": "Dwarf planet with 6% gravity (g = 0.06). Pluto is part of the Kuiper Belt, a region of icy bodies beyond Neptune."
         }
         return info_texts.get(self.name, "Unknown planet")
     

@@ -53,9 +53,9 @@ def create_planet_data():
     planet_data = [
         {
             "name": "Earth",
-            "gravity_factor": 100,  # 100% of Earth gravity
+            "gravity_factor": 100,  # Base gravity (g = 1.0)
             "background_color": (25, 25, 112),  # Midnight blue
-            "obstacle_count": 4,  # Base obstacle count
+            "obstacle_count": 6,  # Updated from 4 to 6
             "quiz_questions": [
                 {
                     "question": "What percentage of Earth is covered by water?",
@@ -75,33 +75,10 @@ def create_planet_data():
             ]
         },
         {
-            "name": "Moon",
-            "gravity_factor": 16.6,  # 16.6% of Earth gravity
-            "background_color": (20, 20, 20),  # Very dark gray
-            "obstacle_count": 3,
-            "quiz_questions": [
-                {
-                    "question": "How far is the Moon from Earth on average?",
-                    "options": ["184,000 km", "238,000 km", "384,000 km", "584,000 km"],
-                    "answer": 2  # 384,000 km
-                },
-                {
-                    "question": "The first human to walk on the Moon was:",
-                    "options": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Alan Shepard"],
-                    "answer": 1  # Neil Armstrong
-                },
-                {
-                    "question": "What causes the Moon's phases?",
-                    "options": ["Earth's shadow", "The Sun's position", "Moon's rotation", "Clouds on the Moon"],
-                    "answer": 1  # The Sun's position
-                }
-            ]
-        },
-        {
             "name": "Mercury",
-            "gravity_factor": 38,  # 38% of Earth gravity
+            "gravity_factor": 40,  # Updated from 38 to 40 (g = 0.4)
             "background_color": (70, 50, 40),  # Brown
-            "obstacle_count": 5,
+            "obstacle_count": 2,  # Updated from 5 to 2
             "quiz_questions": [
                 {
                     "question": "Mercury is the _____ planet from the Sun.",
@@ -122,9 +99,9 @@ def create_planet_data():
         },
         {
             "name": "Venus",
-            "gravity_factor": 90,  # 90% of Earth gravity
+            "gravity_factor": 90,  # Unchanged (g = 0.9)
             "background_color": (140, 90, 40),  # Amber
-            "obstacle_count": 6,
+            "obstacle_count": 4,  # Updated from 6 to 4
             "quiz_questions": [
                 {
                     "question": "Venus rotates in which direction?",
@@ -144,10 +121,33 @@ def create_planet_data():
             ]
         },
         {
+            "name": "Moon",
+            "gravity_factor": 16,  # Updated from 16.6 to 16 (g = 0.16)
+            "background_color": (20, 20, 20),  # Very dark gray
+            "obstacle_count": 2,  # Updated from 3 to 2
+            "quiz_questions": [
+                {
+                    "question": "How far is the Moon from Earth on average?",
+                    "options": ["184,000 km", "238,000 km", "384,000 km", "584,000 km"],
+                    "answer": 2  # 384,000 km
+                },
+                {
+                    "question": "The first human to walk on the Moon was:",
+                    "options": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Alan Shepard"],
+                    "answer": 1  # Neil Armstrong
+                },
+                {
+                    "question": "What causes the Moon's phases?",
+                    "options": ["Earth's shadow", "The Sun's position", "Moon's rotation", "Clouds on the Moon"],
+                    "answer": 1  # The Sun's position
+                }
+            ]
+        },
+        {
             "name": "Mars",
-            "gravity_factor": 38,  # 38% of Earth gravity
+            "gravity_factor": 40,  # Updated from 38 to 40 (g = 0.4)
             "background_color": (150, 70, 40),  # Rust red
-            "obstacle_count": 5,
+            "obstacle_count": 3,  # Updated from 5 to 3
             "quiz_questions": [
                 {
                     "question": "What gives Mars its distinctive red color?",
@@ -168,9 +168,9 @@ def create_planet_data():
         },
         {
             "name": "Jupiter",
-            "gravity_factor": 240,  # 240% of Earth gravity
+            "gravity_factor": 240,  # Unchanged (g = 2.4)
             "background_color": (210, 140, 70),  # Tan
-            "obstacle_count": 8,
+            "obstacle_count": 20,  # Updated from 8 to 20
             "quiz_questions": [
                 {
                     "question": "What is Jupiter primarily made of?",
@@ -191,9 +191,9 @@ def create_planet_data():
         },
         {
             "name": "Saturn",
-            "gravity_factor": 110,  # 110% of Earth gravity
+            "gravity_factor": 110,  # Unchanged (g = 1.1)
             "background_color": (180, 150, 100),  # Light tan
-            "obstacle_count": 7,
+            "obstacle_count": 15,  # Updated from 7 to 15
             "quiz_questions": [
                 {
                     "question": "What are Saturn's rings primarily made of?",
@@ -214,9 +214,9 @@ def create_planet_data():
         },
         {
             "name": "Uranus",
-            "gravity_factor": 90,  # 90% of Earth gravity
+            "gravity_factor": 90,  # Unchanged (g = 0.9)
             "background_color": (140, 210, 210),  # Cyan
-            "obstacle_count": 6,
+            "obstacle_count": 12,  # Updated from 6 to 12
             "quiz_questions": [
                 {
                     "question": "Uranus rotates on its side with an axial tilt of about:",
@@ -237,9 +237,9 @@ def create_planet_data():
         },
         {
             "name": "Neptune",
-            "gravity_factor": 110,  # 110% of Earth gravity
+            "gravity_factor": 110,  # Unchanged (g = 1.1)
             "background_color": (30, 50, 180),  # Deep blue
-            "obstacle_count": 7,
+            "obstacle_count": 11,  # Updated from 7 to 11
             "quiz_questions": [
                 {
                     "question": "Neptune was discovered based on mathematical predictions in:",
@@ -255,6 +255,29 @@ def create_planet_data():
                     "question": "Neptune's largest moon is:",
                     "options": ["Triton", "Nereid", "Proteus", "Larissa"],
                     "answer": 0  # Triton
+                }
+            ]
+        },
+        {
+            "name": "Pluto",
+            "gravity_factor": 6,  # g = 0.06
+            "background_color": (50, 50, 80),  # Dark slate blue
+            "obstacle_count": 1,  # Terminal level with 1 obstacle
+            "quiz_questions": [
+                {
+                    "question": "In what year was Pluto reclassified as a dwarf planet?",
+                    "options": ["2000", "2006", "2010", "2015"],
+                    "answer": 1  # 2006
+                },
+                {
+                    "question": "What NASA spacecraft provided the first close-up images of Pluto?",
+                    "options": ["Voyager", "New Horizons", "Cassini", "Juno"],
+                    "answer": 1  # New Horizons
+                },
+                {
+                    "question": "Pluto's largest moon is called:",
+                    "options": ["Hydra", "Nix", "Charon", "Kerberos"],
+                    "answer": 2  # Charon
                 }
             ]
         }
@@ -306,8 +329,16 @@ class Game:
         
         # Score thresholds for automatic level progression
         self.level_progression_thresholds = {
-            "Earth": 4,   # 4 points needed for Earth
+            "Earth": 6,   # 6 points needed for Earth (matching the obstacle count)
+            "Mercury": 2, # 2 points needed for Mercury
+            "Venus": 4,   # 4 points needed for Venus
             "Moon": 2,    # 2 points needed for Moon
+            "Mars": 3,    # 3 points needed for Mars
+            "Jupiter": 20, # 20 points needed for Jupiter
+            "Saturn": 15,  # 15 points needed for Saturn
+            "Uranus": 12,  # 12 points needed for Uranus
+            "Neptune": 11, # 11 points needed for Neptune
+            "Pluto": 1,    # 1 point needed for Pluto (terminal level)
         }
         
         # NOVA AI assistant

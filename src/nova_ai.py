@@ -80,6 +80,13 @@ class NovaAI:
             "Neptune's blue color comes from methane in its atmosphere.",
             "Neptune has a Great Dark Spot, similar to Jupiter's Great Red Spot.",
             "Neptune's distance from the Sun changes due to its elliptical orbit."
+        ],
+        "Pluto": [
+            "Pluto was reclassified from a planet to a dwarf planet in 2006.",
+            "Pluto has five known moons, the largest being Charon.",
+            "The heart-shaped region on Pluto is called Tombaugh Regio.",
+            "Pluto's atmosphere expands and contracts as it moves closer to and further from the Sun.",
+            "Pluto takes 248 Earth years to orbit the Sun once."
         ]
     }
     
@@ -129,7 +136,9 @@ class NovaAI:
     
     def alert_gravity_change(self, planet_name, gravity_factor):
         """Alert the player about the gravity change on a new planet"""
-        self.show_message(f"Gravity on {planet_name}: {gravity_factor}% of Earth", "alert")
+        # Convert percentage to g-value (e.g., 100% -> g = 1.0)
+        g_value = gravity_factor / 100.0
+        self.show_message(f"Gravity on {planet_name}: {gravity_factor}% of Earth (g = {g_value})", "alert")
     
     def give_random_fact(self, planet_name):
         """Share a random scientific fact about the current planet"""
