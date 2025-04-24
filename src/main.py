@@ -52,6 +52,9 @@ GAME_OVER = 2
 TRANSITION = 3
 QUIZ = 4
 QUIZ_FAILURE = 5  # New state for quiz failure delay
+# Control modes
+CONTROL_MODE_FLAPPY = 0  # Tap only, Flappy Bird style
+CONTROL_MODE_HOLD = 1    # Hold space for continuous thrust
 
 # Screen setup
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.NOFRAME)
@@ -385,6 +388,8 @@ class Game:
         self.last_countdown_number = 0  # Last displayed countdown number
         # Track if space is held for continuous thrust
         self.space_held = False
+        # Current control mode: flappy or hold
+        self.control_mode = CONTROL_MODE_FLAPPY
 
     def _generate_stars(self, count):
         """Generate stars for the background"""
@@ -468,24 +473,39 @@ class Game:
                         self.quiz.handle_event(event)
                 else:
                     if event.key == pygame.K_SPACE:
-                        # Start continuous thrust hold
-                        if self.state == PLAYING:
-                            self.space_held = True
                         if self.state == MENU:
                             self.reset()
                         elif self.state == PLAYING:
+                            # One-off thrust on press
                             self.spacecraft.thrust()
                             thrust_sound.play()
+                            # Enable continuous thrust if in hold mode
+                            if self.control_mode == CONTROL_MODE_HOLD:
+                                self.space_held = True
                         elif self.state == GAME_OVER:
                             self.reset()
                         elif self.state == TRANSITION:
                             # Skip transition and force start game on new planet
                             self.reset(new_planet=True)
-                    # Change spacecraft color with C key in menu
-                    if event.key == pygame.K_c and self.state == MENU:
-                        self.current_color_index = (self.current_color_index + 1) % len(self.available_colors)
-                        self.spacecraft_color = self.available_colors[self.current_color_index]
-                        self.spacecraft.change_color(self.spacecraft_color)
+                    # Change spacecraft color with C key in menu and toggle control mode in play
+                    if event.key == pygame.K_c:
+                        if self.state == MENU:
+                            self.current_color_index = (self.current_color_index + 1) % len(self.available_colors)
+                            self.spacecraft_color = self.available_colors[self.current_color_index]
+                            self.spacecraft.change_color(self.spacecraft_color)
+                        elif self.state == PLAYING:
+                            # Toggle control mode between flappy and hold
+                            self.control_mode = CONTROL_MODE_HOLD if self.control_mode == CONTROL_MODE_FLAPPY else CONTROL_MODE_FLAPPY
+                            mode_name = "Hold" if self.control_mode == CONTROL_MODE_HOLD else "Flappy"
+                            # Update spacecraft flame colors for thrust effect
+                            if self.control_mode == CONTROL_MODE_HOLD:
+                                # Gradient from yellow to orange to red
+                                self.spacecraft.flame_colors = [(255, 255, 0), (255, 165, 0), (255, 69, 0)]
+                            else:
+                                # Single-color flame
+                                self.spacecraft.flame_colors = []
+                            self.spacecraft.update_image()
+                            self.nova.show_message(f"Control mode: {mode_name}", "info")
                     # Activate weapon with W key if available
                     if event.key == pygame.K_w and self.state == PLAYING and self.weapon_active:
                         self._use_weapon()
@@ -558,8 +578,8 @@ class Game:
         if self.state == PLAYING:
             # Update spacecraft with current planet's gravity
             self.spacecraft.update(self.current_planet.gravity)
-            # Continuous thrust while space is held
-            if self.space_held:
+            # Continuous thrust while space is held in hold mode
+            if self.control_mode == CONTROL_MODE_HOLD and self.space_held:
                 # Apply small continuous thrust (20% of thrust power)
                 cont = self.spacecraft.thrust_power * self.spacecraft.thrust_multiplier * 0.2
                 self.spacecraft.velocity -= cont

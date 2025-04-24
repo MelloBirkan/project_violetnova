@@ -36,6 +36,8 @@ class Spacecraft:
         self.angle = 0
         # Color selection
         self.color = color if color in self.COLORS else "silver"
+        # Flame colors override: if empty, use static engine color
+        self.flame_colors = []
         # Thrust control
         self.thrusting = False
         self.thrust_power = 5.0
@@ -101,23 +103,32 @@ class Spacecraft:
             (fe + self.WIDTH,      self.HEIGHT // 2 + 5)
         ])
         pygame.draw.ellipse(base, color_values["window"], (fe + self.WIDTH - 30, self.HEIGHT // 2 - 5, 10, 10))
-        # Small thrust flame frame
-        small = base.copy()
-        pygame.draw.polygon(small, color_values["engine"], [
-            (fe,               self.HEIGHT // 2 - 5),
-            (0,                self.HEIGHT // 2),
-            (fe,               self.HEIGHT // 2 + 5)
-        ])
-        # Large thrust flame frame
-        large = base.copy()
-        pygame.draw.polygon(large, color_values["engine"], [
-            (fe,               self.HEIGHT // 2 - 5),
-            (0,                self.HEIGHT // 2),
-            (fe,               self.HEIGHT // 2 + 5)
-        ])
-        # Store frames
+        # Determine engine colors: use flame_colors for gradient, else default engine color
+        engine_colors = self.flame_colors if self.flame_colors else [color_values["engine"]]
+        # Build thrust frames for each engine color
+        thrust_images = []
+        for ec in engine_colors:
+            # Small thrust flame frame
+            small = base.copy()
+            pygame.draw.polygon(small, ec, [
+                (fe,               self.HEIGHT // 2 - 5),
+                (0,                self.HEIGHT // 2),
+                (fe,               self.HEIGHT // 2 + 5)
+            ])
+            thrust_images.append(small)
+            # Large thrust flame frame
+            large = base.copy()
+            pygame.draw.polygon(large, ec, [
+                (fe,               self.HEIGHT // 2 - 5),
+                (0,                self.HEIGHT // 2),
+                (fe,               self.HEIGHT // 2 + 5)
+            ])
+            thrust_images.append(large)
+        # Store base image and generated thrust frames
         self.base_image = base
-        self.thrust_images = [small, large]
+        self.thrust_images = thrust_images
+        # Update frame count for animation
+        self.animation_frames = len(self.thrust_images)
     
     def update_image(self):
         """Update all animation frames with the current color"""
