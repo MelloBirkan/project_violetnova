@@ -29,25 +29,28 @@ class Spacecraft:
     }
     
     def __init__(self, x, y, color="silver"):
+        # Position and physics
         self.x = x
         self.y = y
         self.velocity = 0
         self.angle = 0
+        # Color selection
         self.color = color if color in self.COLORS else "silver"
-        
         # Thrust control
         self.thrusting = False
-        self.thrust_power = 5.0  # Increased base thrust power
+        self.thrust_power = 5.0
         self.thrust_multiplier = 1.0
-        
-        # Animation variables
-        self.animation_frames = 2  # Number of frames in animation
+        # Thrust visual timing and flame extent (ms & px)
+        self.last_thrust_time = 0
+        self.thrust_display_time = 400  # ms to display thrust flame
+        # Flame extension width for more prominent engine flame
+        self.flame_extent = 30
+        # Flame animation variables
+        self.animation_frames = 2
         self.current_frame = 0
-        self.animation_speed = 0.1  # How fast to animate
+        self.animation_speed = 0.1
         self.animation_counter = 0
-        
-        # Create spacecraft images for animation
-        self.images = []
+        # Create spacecraft base and thrust frames
         self.create_animation_frames()
     
     def update(self, gravity):
@@ -57,7 +60,7 @@ class Spacecraft:
         # Adapt thrust power based on planet gravity
         self.thrust_multiplier = max(1.0, gravity * 4)
         
-        # Apply thrust if thrusting
+        # Apply thrust impulse
         if self.thrusting:
             self.velocity -= self.thrust_power * self.thrust_multiplier
             self.thrusting = False
@@ -67,7 +70,7 @@ class Spacecraft:
         # Update spacecraft angle based on velocity
         self.angle = min(max(-30, -self.velocity * 2), 60)
         
-        # Update animation
+        # Animate thrust flame frames (always cycling)
         self.animation_counter += self.animation_speed
         if self.animation_counter >= 1:
             self.animation_counter = 0
@@ -76,59 +79,45 @@ class Spacecraft:
     def thrust(self):
         # Apply thrust
         self.thrusting = True
-        # Apply an immediate velocity change to make the thrust more responsive
+        # Immediate velocity for responsiveness
         self.velocity -= 0.5 * self.thrust_multiplier
+        # Record time to show thrust flame
+        self.last_thrust_time = pygame.time.get_ticks()
     
     def create_animation_frames(self):
         """Create all frames for spacecraft animation"""
-        self.images = []
-        
-        # Get color values
+        # Prepare base and thrust frames with horizontal flame extension
         color_values = self.COLORS[self.color]
-        
-        # Create first frame (normal thrust)
-        frame1 = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
-        frame1.fill((0, 0, 0, 0))  # Transparent
-        
-        # Draw spacecraft shape
-        # Main body (elongated ellipse)
-        pygame.draw.ellipse(frame1, color_values["body"], (0, 5, self.WIDTH - 10, self.HEIGHT - 10))
-        # Pointed nose
-        pygame.draw.polygon(frame1, color_values["body"], [
-            (self.WIDTH - 10, self.HEIGHT // 2),
-            (self.WIDTH, self.HEIGHT // 2 - 5),
-            (self.WIDTH, self.HEIGHT // 2 + 5)
+        fe = self.flame_extent
+        total_w = self.WIDTH + fe
+        # Base image surface (spacecraft without flame)
+        base = pygame.Surface((total_w, self.HEIGHT), pygame.SRCALPHA)
+        base.fill((0, 0, 0, 0))
+        # Draw spacecraft body offset by flame extent
+        pygame.draw.ellipse(base, color_values["body"], (fe, 5, self.WIDTH - 10, self.HEIGHT - 10))
+        pygame.draw.polygon(base, color_values["body"], [
+            (fe + self.WIDTH - 10, self.HEIGHT // 2),
+            (fe + self.WIDTH,      self.HEIGHT // 2 - 5),
+            (fe + self.WIDTH,      self.HEIGHT // 2 + 5)
         ])
-        # Cockpit/window
-        pygame.draw.ellipse(frame1, color_values["window"], (self.WIDTH - 30, self.HEIGHT // 2 - 5, 10, 10))
-        # Engine exhaust (normal)
-        pygame.draw.polygon(frame1, color_values["engine"], [
-            (0, self.HEIGHT // 2 - 5),
-            (-10, self.HEIGHT // 2),
-            (0, self.HEIGHT // 2 + 5)
+        pygame.draw.ellipse(base, color_values["window"], (fe + self.WIDTH - 30, self.HEIGHT // 2 - 5, 10, 10))
+        # Small thrust flame frame
+        small = base.copy()
+        pygame.draw.polygon(small, color_values["engine"], [
+            (fe,               self.HEIGHT // 2 - 5),
+            (0,                self.HEIGHT // 2),
+            (fe,               self.HEIGHT // 2 + 5)
         ])
-        
-        # Create second frame (larger thrust)
-        frame2 = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
-        frame2.fill((0, 0, 0, 0))  # Transparent
-        
-        # Draw spacecraft shape (same as frame1)
-        pygame.draw.ellipse(frame2, color_values["body"], (0, 5, self.WIDTH - 10, self.HEIGHT - 10))
-        pygame.draw.polygon(frame2, color_values["body"], [
-            (self.WIDTH - 10, self.HEIGHT // 2),
-            (self.WIDTH, self.HEIGHT // 2 - 5),
-            (self.WIDTH, self.HEIGHT // 2 + 5)
+        # Large thrust flame frame
+        large = base.copy()
+        pygame.draw.polygon(large, color_values["engine"], [
+            (fe,               self.HEIGHT // 2 - 5),
+            (0,                self.HEIGHT // 2),
+            (fe,               self.HEIGHT // 2 + 5)
         ])
-        pygame.draw.ellipse(frame2, color_values["window"], (self.WIDTH - 30, self.HEIGHT // 2 - 5, 10, 10))
-        # Engine exhaust (larger)
-        pygame.draw.polygon(frame2, color_values["engine"], [
-            (0, self.HEIGHT // 2 - 5),
-            (-15, self.HEIGHT // 2),
-            (0, self.HEIGHT // 2 + 5)
-        ])
-        
-        self.images.append(frame1)
-        self.images.append(frame2)
+        # Store frames
+        self.base_image = base
+        self.thrust_images = [small, large]
     
     def update_image(self):
         """Update all animation frames with the current color"""
@@ -141,14 +130,19 @@ class Spacecraft:
             self.update_image()
             
     def draw(self, screen):
-        # Get the current animation frame
-        current_image = self.images[self.current_frame]
-        
-        # Rotate the spacecraft image based on the angle
-        rotated_image = pygame.transform.rotate(current_image, -self.angle)
-        
-        # Get the rect of the rotated image and center it at the spacecraft's position
-        rect = rotated_image.get_rect(center=(self.x + self.WIDTH // 2, self.y + self.HEIGHT // 2))
-        
-        # Draw the rotated image
-        screen.blit(rotated_image, rect.topleft)
+        """Draw spacecraft, showing thrust flame if recently thrusted"""
+        # Determine if we should display thrust flame
+        now = pygame.time.get_ticks()
+        if now - self.last_thrust_time < self.thrust_display_time:
+            # Animated thrust image
+            current = self.thrust_images[self.current_frame]
+        else:
+            # Base image without exhaust
+            current = self.base_image
+        # Rotate current frame image (positive angle tilts nose up)
+        rotated = pygame.transform.rotate(current, self.angle)
+        # Compute center position considering flame extension
+        cx = self.x + self.WIDTH // 2 + self.flame_extent // 2
+        cy = self.y + self.HEIGHT // 2
+        rect = rotated.get_rect(center=(cx, cy))
+        screen.blit(rotated, rect.topleft)

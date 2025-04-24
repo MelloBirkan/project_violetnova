@@ -383,6 +383,8 @@ class Game:
 
         self.quiz_failure_timer = 0  # Timer for quiz failure delay
         self.last_countdown_number = 0  # Last displayed countdown number
+        # Track if space is held for continuous thrust
+        self.space_held = False
 
     def _generate_stars(self, count):
         """Generate stars for the background"""
@@ -466,6 +468,9 @@ class Game:
                         self.quiz.handle_event(event)
                 else:
                     if event.key == pygame.K_SPACE:
+                        # Start continuous thrust hold
+                        if self.state == PLAYING:
+                            self.space_held = True
                         if self.state == MENU:
                             self.reset()
                         elif self.state == PLAYING:
@@ -476,16 +481,18 @@ class Game:
                         elif self.state == TRANSITION:
                             # Skip transition and force start game on new planet
                             self.reset(new_planet=True)
-
                     # Change spacecraft color with C key in menu
                     if event.key == pygame.K_c and self.state == MENU:
                         self.current_color_index = (self.current_color_index + 1) % len(self.available_colors)
                         self.spacecraft_color = self.available_colors[self.current_color_index]
                         self.spacecraft.change_color(self.spacecraft_color)
-
                     # Activate weapon with W key if available
                     if event.key == pygame.K_w and self.state == PLAYING and self.weapon_active:
                         self._use_weapon()
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    # stop continuous thrust on release
+                    self.space_held = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
@@ -551,6 +558,13 @@ class Game:
         if self.state == PLAYING:
             # Update spacecraft with current planet's gravity
             self.spacecraft.update(self.current_planet.gravity)
+            # Continuous thrust while space is held
+            if self.space_held:
+                # Apply small continuous thrust (20% of thrust power)
+                cont = self.spacecraft.thrust_power * self.spacecraft.thrust_multiplier * 0.2
+                self.spacecraft.velocity -= cont
+                # Maintain flame effect
+                self.spacecraft.last_thrust_time = pygame.time.get_ticks()
 
             # Generate obstacles
             current_time = pygame.time.get_ticks()
