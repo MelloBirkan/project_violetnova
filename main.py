@@ -10,14 +10,14 @@ import sys
 
 def main():
     """Main entry point for the game"""
-    print("Starting Project Blue Nova: Solar System Explorer...")
+    print("Iniciando Project Blue Nova: Explorador do Sistema Solar...")
     
     # Check if requirements are installed
     try:
         import pygame
     except ImportError as e:
-        print(f"Missing dependency: {e}")
-        print("Please install required packages: pip install -r requirements.txt")
+        print(f"Dependência ausente: {e}")
+        print("Por favor, instale os pacotes necessários: pip install -r requirements.txt")
         sys.exit(1)
     
     # Check if sound files exist
@@ -28,13 +28,13 @@ def main():
     
     # If sound files are missing, generate them
     if missing_sounds:
-        print("Generating sound files...")
+        print("Gerando arquivos de som...")
         try:
             import src.create_sounds
             src.create_sounds.main()
         except Exception as e:
-            print(f"Error generating sound files: {e}")
-            print("You can manually generate sound files: python src/create_sounds.py")
+            print(f"Erro ao gerar arquivos de som: {e}")
+            print("Você pode gerar arquivos de som manualmente: python src/create_sounds.py")
     
     # Launch the game
     from src.main import main

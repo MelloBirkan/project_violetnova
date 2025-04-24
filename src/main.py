@@ -8,7 +8,28 @@ from src.collectible import Collectible
 from src.planet import Planet
 from src.highscore import HighScore
 from src.nova_ai import NovaAI
+# For quiz functionality
 from src.quiz import Quiz
+
+# Localization mappings for Portuguese display
+COLOR_NAME_PT = {
+    "silver": "Prateado",
+    "gold": "Dourado",
+    "blue": "Azul",
+    "red": "Vermelho"
+}
+PLANET_NAME_PT = {
+    "Earth": "Terra",
+    "Mercury": "Mercúrio",
+    "Venus": "Vênus",
+    "Moon": "Lua",
+    "Mars": "Marte",
+    "Jupiter": "Júpiter",
+    "Saturn": "Saturno",
+    "Uranus": "Urano",
+    "Neptune": "Netuno",
+    "Pluto": "Plutão"
+}
 
 # Initialize pygame
 pygame.init()
@@ -60,19 +81,19 @@ def create_planet_data():
             "obstacle_count": 6,  # Updated from 4 to 6
             "quiz_questions": [
                 {
-                    "question": "What percentage of Earth is covered by water?",
+                    "question": "Qual percentual da Terra é coberto por água?",
                     "options": ["51%", "61%", "71%", "81%"],
                     "answer": 2  # 71% (0-based index)
                 },
                 {
-                    "question": "Earth's atmosphere is mostly composed of which gas?",
-                    "options": ["Oxygen", "Carbon Dioxide", "Hydrogen", "Nitrogen"],
-                    "answer": 3  # Nitrogen
+                    "question": "A atmosfera da Terra é composta principalmente por qual gás?",
+                    "options": ["Oxigênio", "Dióxido de Carbono", "Hidrogênio", "Nitrogênio"],
+                    "answer": 3  # Nitrogênio
                 },
                 {
-                    "question": "How long does it take for Earth to rotate once on its axis?",
-                    "options": ["12 hours", "24 hours", "365 days", "28 days"],
-                    "answer": 1  # 24 hours
+                    "question": "Quanto tempo leva para a Terra girar uma vez em seu eixo?",
+                    "options": ["12 horas", "24 horas", "365 dias", "28 dias"],
+                    "answer": 1  # 24 horas
                 }
             ]
         },
@@ -83,17 +104,17 @@ def create_planet_data():
             "obstacle_count": 2,  # Updated from 5 to 2
             "quiz_questions": [
                 {
-                    "question": "Mercury is the _____ planet from the Sun.",
-                    "options": ["First", "Second", "Third", "Fourth"],
-                    "answer": 0  # First
+                    "question": "Mercúrio é o _____ planeta a partir do Sol.",
+                    "options": ["Primeiro", "Segundo", "Terceiro", "Quarto"],
+                    "answer": 0  # Primeiro
                 },
                 {
-                    "question": "One day on Mercury is equivalent to about how many Earth days?",
-                    "options": ["29 days", "59 days", "88 days", "176 days"],
-                    "answer": 1  # 59 days
+                    "question": "Um dia em Mercúrio equivale a aproximadamente quantos dias terrestres?",
+                    "options": ["29 dias", "59 dias", "88 dias", "176 dias"],
+                    "answer": 1  # 59 dias
                 },
                 {
-                    "question": "Mercury's surface temperature can reach up to:",
+                    "question": "A temperatura na superfície de Mercúrio pode chegar a:",
                     "options": ["100°C", "230°C", "430°C", "530°C"],
                     "answer": 2  # 430°C
                 }
@@ -106,19 +127,19 @@ def create_planet_data():
             "obstacle_count": 4,  # Updated from 6 to 4
             "quiz_questions": [
                 {
-                    "question": "Venus rotates in which direction?",
-                    "options": ["Same as Earth", "Opposite to Earth", "It doesn't rotate", "Randomly changes"],
-                    "answer": 1  # Opposite to Earth (retrograde)
+                    "question": "Vênus gira em qual direção?",
+                    "options": ["Igual à Terra", "Oposta à Terra", "Não gira", "Muda aleatoriamente"],
+                    "answer": 1  # Oposto à Terra (retrógrado)
                 },
                 {
-                    "question": "Venus's atmosphere is primarily composed of:",
-                    "options": ["Nitrogen", "Carbon Dioxide", "Sulfuric Acid", "Methane"],
-                    "answer": 1  # Carbon Dioxide
+                    "question": "A atmosfera de Vênus é composta principalmente por:",
+                    "options": ["Nitrogênio", "Dióxido de Carbono", "Ácido Sulfúrico", "Metano"],
+                    "answer": 1  # Dióxido de Carbono
                 },
                 {
-                    "question": "Venus is often called Earth's sister planet because:",
-                    "options": ["It has oceans", "Similar size and mass", "It has life", "Same orbit time"],
-                    "answer": 1  # Similar size and mass
+                    "question": "Vênus é frequentemente chamado de planeta irmão da Terra porque:",
+                    "options": ["Tem oceanos", "Tamanho e massa similares", "Tem vida", "Mesmo tempo de órbita"],
+                    "answer": 1  # Tamanho e massa similares
                 }
             ]
         },
@@ -129,19 +150,19 @@ def create_planet_data():
             "obstacle_count": 2,  # Updated from 3 to 2
             "quiz_questions": [
                 {
-                    "question": "How far is the Moon from Earth on average?",
-                    "options": ["184,000 km", "238,000 km", "384,000 km", "584,000 km"],
-                    "answer": 2  # 384,000 km
+                    "question": "Qual é a distância média da Lua à Terra?",
+                    "options": ["184.000 km", "238.000 km", "384.000 km", "584.000 km"],
+                    "answer": 2  # 384.000 km
                 },
                 {
-                    "question": "The first human to walk on the Moon was:",
+                    "question": "O primeiro humano a caminhar na Lua foi:",
                     "options": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Alan Shepard"],
                     "answer": 1  # Neil Armstrong
                 },
                 {
-                    "question": "What causes the Moon's phases?",
-                    "options": ["Earth's shadow", "The Sun's position", "Moon's rotation", "Clouds on the Moon"],
-                    "answer": 1  # The Sun's position
+                    "question": "O que causa as fases da Lua?",
+                    "options": ["Sombra da Terra", "Posição do Sol", "Rotação da Lua", "Nuvens na Lua"],
+                    "answer": 1  # Posição do Sol
                 }
             ]
         },
@@ -152,18 +173,18 @@ def create_planet_data():
             "obstacle_count": 3,  # Updated from 5 to 3
             "quiz_questions": [
                 {
-                    "question": "What gives Mars its distinctive red color?",
-                    "options": ["Plant life", "Iron oxide (rust)", "Carbon dioxide", "Reflected sunlight"],
-                    "answer": 1  # Iron oxide
+                    "question": "O que dá a Marte sua cor vermelha distintiva?",
+                    "options": ["Vida vegetal", "Óxido de ferro (ferrugem)", "Dióxido de carbono", "Luz solar refletida"],
+                    "answer": 1  # Óxido de ferro
                 },
                 {
-                    "question": "How many moons does Mars have?",
-                    "options": ["None", "One", "Two", "Three"],
-                    "answer": 2  # Two (Phobos and Deimos)
+                    "question": "Quantas luas Marte possui?",
+                    "options": ["Nenhuma", "Uma", "Duas", "Três"],
+                    "answer": 2  # Duas (Phobos e Deimos)
                 },
                 {
-                    "question": "What is the name of the largest volcano on Mars?",
-                    "options": ["Mauna Loa", "Olympus Mons", "Mount Everest", "Mons Huygens"],
+                    "question": "Qual é o nome do maior vulcão em Marte?",
+                    "options": ["Mauna Loa", "Olympus Mons", "Monte Everest", "Mons Huygens"],
                     "answer": 1  # Olympus Mons
                 }
             ]
@@ -175,19 +196,19 @@ def create_planet_data():
             "obstacle_count": 20,  # Updated from 8 to 20
             "quiz_questions": [
                 {
-                    "question": "What is Jupiter primarily made of?",
-                    "options": ["Rock and metal", "Water and ice", "Hydrogen and helium", "Carbon dioxide"],
-                    "answer": 2  # Hydrogen and helium
+                    "question": "Do que Júpiter é composto principalmente?",
+                    "options": ["Rocha e metal", "Água e gelo", "Hidrogênio e hélio", "Dióxido de carbono"],
+                    "answer": 2  # Hidrogênio e hélio
                 },
                 {
-                    "question": "What is the Great Red Spot on Jupiter?",
-                    "options": ["A volcano", "A dust storm", "A hurricane-like storm", "An impact crater"],
-                    "answer": 2  # A hurricane-like storm
+                    "question": "O que é a Grande Mancha Vermelha em Júpiter?",
+                    "options": ["Um vulcão", "Uma tempestade de poeira", "Uma tempestade tipo furacão", "Uma cratera de impacto"],
+                    "answer": 2  # Uma tempestade tipo furacão
                 },
                 {
-                    "question": "Jupiter has the shortest day of any planet. How long is it?",
-                    "options": ["6 hours", "10 hours", "14 hours", "18 hours"],
-                    "answer": 1  # ~10 hours
+                    "question": "Júpiter tem o dia mais curto de qualquer planeta. Quanto tempo dura?",
+                    "options": ["6 horas", "10 horas", "14 horas", "18 horas"],
+                    "answer": 1  # ~10 horas
                 }
             ]
         },
@@ -198,19 +219,19 @@ def create_planet_data():
             "obstacle_count": 15,  # Updated from 7 to 15
             "quiz_questions": [
                 {
-                    "question": "What are Saturn's rings primarily made of?",
-                    "options": ["Gas", "Dust", "Rock and metal", "Ice particles"],
-                    "answer": 3  # Ice particles
+                    "question": "Do que são feitos os anéis de Saturno principalmente?",
+                    "options": ["Gás", "Poeira", "Rocha e metal", "Partículas de gelo"],
+                    "answer": 3  # Partículas de gelo
                 },
                 {
-                    "question": "How many major rings does Saturn have?",
+                    "question": "Quantos anéis principais Saturno possui?",
                     "options": ["3", "5", "7", "9"],
-                    "answer": 2  # 7 major rings
+                    "answer": 2  # 7 anéis principais
                 },
                 {
-                    "question": "Saturn is the only planet that could float in water because:",
-                    "options": ["It's hollow", "It's very small", "Its density is less than water", "It has helium"],
-                    "answer": 2  # Low density
+                    "question": "Saturno é o único planeta que poderia flutuar na água porque:",
+                    "options": ["É oco", "É muito pequeno", "Sua densidade é menor que a da água", "Tem hélio"],
+                    "answer": 2  # Baixa densidade
                 }
             ]
         },
@@ -221,19 +242,19 @@ def create_planet_data():
             "obstacle_count": 12,  # Updated from 6 to 12
             "quiz_questions": [
                 {
-                    "question": "Uranus rotates on its side with an axial tilt of about:",
-                    "options": ["23 degrees", "45 degrees", "72 degrees", "98 degrees"],
-                    "answer": 3  # 98 degrees
+                    "question": "Urano gira de lado com uma inclinação axial de aproximadamente:",
+                    "options": ["23 graus", "45 graus", "72 graus", "98 graus"],
+                    "answer": 3  # 98 graus
                 },
                 {
-                    "question": "What gives Uranus its blue-green color?",
-                    "options": ["Water", "Methane", "Ammonia", "Nitrogen"],
-                    "answer": 1  # Methane
+                    "question": "O que dá a Urano sua cor azul-esverdeada?",
+                    "options": ["Água", "Metano", "Amônia", "Nitrogênio"],
+                    "answer": 1  # Metano
                 },
                 {
-                    "question": "Uranus was the first planet discovered using a:",
-                    "options": ["Naked eye", "Telescope", "Space probe", "Radio telescope"],
-                    "answer": 1  # Telescope
+                    "question": "Urano foi o primeiro planeta descoberto usando um:",
+                    "options": ["Olho nu", "Telescópio", "Sonda espacial", "Radiotelescópio"],
+                    "answer": 1  # Telescópio
                 }
             ]
         },
@@ -244,19 +265,19 @@ def create_planet_data():
             "obstacle_count": 11,  # Updated from 7 to 11
             "quiz_questions": [
                 {
-                    "question": "Neptune was discovered based on mathematical predictions in:",
+                    "question": "Netuno foi descoberto com base em previsões matemáticas em:",
                     "options": ["1646", "1746", "1846", "1946"],
                     "answer": 2  # 1846
                 },
                 {
-                    "question": "What is the Great Dark Spot on Neptune?",
-                    "options": ["An ocean", "A storm system", "A crater", "A shadow"],
-                    "answer": 1  # A storm system
+                    "question": "O que é a Grande Mancha Escura em Netuno?",
+                    "options": ["Um oceano", "Um sistema de tempestade", "Uma cratera", "Uma sombra"],
+                    "answer": 1  # Um sistema de tempestade
                 },
                 {
-                    "question": "Neptune's largest moon is:",
-                    "options": ["Triton", "Nereid", "Proteus", "Larissa"],
-                    "answer": 0  # Triton
+                    "question": "A maior lua de Netuno é:",
+                    "options": ["Tritão", "Nereida", "Proteus", "Larissa"],
+                    "answer": 0  # Tritão
                 }
             ]
         },
@@ -267,19 +288,19 @@ def create_planet_data():
             "obstacle_count": 1,  # Terminal level with 1 obstacle
             "quiz_questions": [
                 {
-                    "question": "In what year was Pluto reclassified as a dwarf planet?",
+                    "question": "Em que ano Plutão foi reclassificado como planeta anão?",
                     "options": ["2000", "2006", "2010", "2015"],
                     "answer": 1  # 2006
                 },
                 {
-                    "question": "What NASA spacecraft provided the first close-up images of Pluto?",
+                    "question": "Qual sonda da NASA forneceu as primeiras imagens de perto de Plutão?",
                     "options": ["Voyager", "New Horizons", "Cassini", "Juno"],
                     "answer": 1  # New Horizons
                 },
                 {
-                    "question": "Pluto's largest moon is called:",
-                    "options": ["Hydra", "Nix", "Charon", "Kerberos"],
-                    "answer": 2  # Charon
+                    "question": "A maior lua de Plutão é chamada:",
+                    "options": ["Hydra", "Nix", "Caronte", "Kerberos"],
+                    "answer": 2  # Caronte
                 }
             ]
         }
@@ -807,8 +828,9 @@ class Game:
 
             # Draw the current planet name and player score
             if self.state != MENU:
-                # Left-side information (unchanged)
-                planet_text = SMALL_FONT.render(f"Planet: {self.current_planet.name}", True, (255, 255, 255))
+                # Left-side information
+                display_name = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
+                planet_text = SMALL_FONT.render(f"Planeta: {display_name}", True, (255, 255, 255))
                 screen.blit(planet_text, (20, 20))
 
                 # Get threshold for current planet
@@ -817,16 +839,16 @@ class Game:
                     10  # Default threshold
                 )
 
-                score_text = SMALL_FONT.render(f"Score: {self.score}/{current_threshold}", True, (255, 255, 255))
+                score_text = SMALL_FONT.render(f"Pontuação: {self.score}/{current_threshold}", True, (255, 255, 255))
                 screen.blit(score_text, (20, 50))
 
-                high_score_text = SMALL_FONT.render(f"High Score: {self.high_score_manager.get()}", True, (255, 255, 255))
+                high_score_text = SMALL_FONT.render(f"Maior Pontuação: {self.high_score_manager.get()}", True, (255, 255, 255))
                 screen.blit(high_score_text, (20, 80))
 
                 # Draw weapon status at top-center if active (moved from right side)
                 if self.weapon_active:
                     weapon_time = self.weapon_timer // 60  # Convert to seconds
-                    weapon_text = SMALL_FONT.render(f"Weapon Active: {weapon_time}s", True, (255, 100, 100))
+                    weapon_text = SMALL_FONT.render(f"Arma Ativa: {weapon_time}s", True, (255, 100, 100))
                     screen.blit(weapon_text, (SCREEN_WIDTH // 2 - weapon_text.get_width() // 2, 20))
 
             # Draw NOVA AI assistant (blue circle)
@@ -854,10 +876,10 @@ class Game:
                 screen.blit(overlay, (0, 0))
 
                 title_text = GAME_FONT.render("PROJECT BLUE NOVA", True, (255, 255, 255))
-                subtitle_text = SMALL_FONT.render("Solar System Explorer", True, (200, 200, 255))
-                instruction_text = GAME_FONT.render("Press SPACE to Start", True, (255, 255, 255))
-                color_text = GAME_FONT.render(f"Spacecraft: {self.spacecraft_color.capitalize()}", True, (255, 255, 255))
-                color_instruction = SMALL_FONT.render("Press C to change color", True, (255, 255, 255))
+                subtitle_text = SMALL_FONT.render("Explorador do Sistema Solar", True, (200, 200, 255))
+                instruction_text = GAME_FONT.render("Pressione ESPAÇO para Iniciar", True, (255, 255, 255))
+                color_text = GAME_FONT.render(f"Nave: {COLOR_NAME_PT.get(self.spacecraft_color, self.spacecraft_color)}", True, (255, 255, 255))
+                color_instruction = SMALL_FONT.render("Pressione C para mudar a cor", True, (255, 255, 255))
 
                 screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 180))
                 screen.blit(subtitle_text, (SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 220))
@@ -866,9 +888,9 @@ class Game:
                 screen.blit(color_instruction, (SCREEN_WIDTH // 2 - color_instruction.get_width() // 2, 370))
 
                 # Display controls
-                controls_title = SMALL_FONT.render("Controls:", True, (255, 255, 255))
-                controls_space = SMALL_FONT.render("SPACE - Thrust", True, (200, 200, 200))
-                controls_w = SMALL_FONT.render("W - Use Weapon (when available)", True, (200, 200, 200))
+                controls_title = SMALL_FONT.render("Controles:", True, (255, 255, 255))
+                controls_space = SMALL_FONT.render("ESPAÇO - Impulsionar", True, (200, 200, 200))
+                controls_w = SMALL_FONT.render("W - Usar Arma (quando disponível)", True, (200, 200, 200))
 
                 controls_y = SCREEN_HEIGHT - 120
                 screen.blit(controls_title, (SCREEN_WIDTH // 2 - controls_title.get_width() // 2, controls_y))
@@ -882,14 +904,14 @@ class Game:
                 overlay.fill((0, 0, 0, 180))
                 screen.blit(overlay, (0, 0))
 
-                game_over_text = GAME_FONT.render("MISSION COMPLETE", True, (255, 215, 0))
-                score_text = GAME_FONT.render(f"Final Score: {self.score}", True, (255, 255, 255))
-                high_score_text = GAME_FONT.render(f"High Score: {self.high_score_manager.get()}", True, (255, 255, 255))
-                restart_text = GAME_FONT.render("Press SPACE to Start New Mission", True, (255, 255, 255))
+                game_over_text = GAME_FONT.render("MISSÃO CONCLUÍDA", True, (255, 215, 0))
+                score_text = GAME_FONT.render(f"Pontuação Final: {self.score}", True, (255, 255, 255))
+                high_score_text = GAME_FONT.render(f"Maior Pontuação: {self.high_score_manager.get()}", True, (255, 255, 255))
+                restart_text = GAME_FONT.render("Pressione ESPAÇO para iniciar nova missão", True, (255, 255, 255))
 
                 # Calculate the furthest planet reached
                 furthest_planet = self.planets[min(self.current_planet_index, len(self.planets) - 1)].name
-                planet_text = GAME_FONT.render(f"Furthest Planet: {furthest_planet}", True, (255, 255, 255))
+                planet_text = GAME_FONT.render(f"Planeta mais distante: {furthest_planet}", True, (255, 255, 255))
 
                 screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, 150))
                 screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, 220))
@@ -906,11 +928,12 @@ class Game:
             screen.blit(overlay, (0, 0))
 
             # Draw destination planet name
-            planet_title = GAME_FONT.render(f"Welcome to {self.current_planet.name}", True, (255, 255, 255))
+            display_name = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
+            planet_title = GAME_FONT.render(f"Bem-vindo a {display_name}", True, (255, 255, 255))
             screen.blit(planet_title, (SCREEN_WIDTH // 2 - planet_title.get_width() // 2, 100))
 
             # Draw gravity info
-            gravity_text = GAME_FONT.render(f"Gravity: {self.current_planet.gravity_factor}% of Earth", True, (255, 255, 255))
+            gravity_text = GAME_FONT.render(f"Gravidade: {self.current_planet.gravity_factor}% da Terra", True, (255, 255, 255))
             screen.blit(gravity_text, (SCREEN_WIDTH // 2 - gravity_text.get_width() // 2, 150))
 
             # Draw planet info text
@@ -940,7 +963,7 @@ class Game:
 
             # Draw continue prompt
             if self.transition_time > 60:  # Only show after 1 second
-                continue_text = SMALL_FONT.render("Press SPACE to continue", True, (255, 255, 255))
+                continue_text = SMALL_FONT.render("Pressione ESPAÇO para continuar", True, (255, 255, 255))
                 # Make it pulse
                 alpha = int(128 + 127 * math.sin(pygame.time.get_ticks() * 0.005))
                 continue_text.set_alpha(alpha)
@@ -995,7 +1018,7 @@ class Game:
                 # Draw "Resuming..." text with pulsing effect
                 resume_font = pygame.font.Font(None, 42)
                 alpha_pulse = int(255 * (0.7 + 0.3 * math.sin(pygame.time.get_ticks() * 0.008)))
-                resume_text = resume_font.render("Returning to orbit...", True, (255, 255, 255))
+                resume_text = resume_font.render("Retornando à órbita...", True, (255, 255, 255))
                 resume_text.set_alpha(alpha_pulse)
                 resume_rect = resume_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
                 screen.blit(resume_text, resume_rect)

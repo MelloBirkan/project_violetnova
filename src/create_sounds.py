@@ -29,7 +29,7 @@ def create_dummy_sound_file(filename):
         f.write((1).to_bytes(4, byteorder='little'))   # Chunk size
         f.write((0).to_bytes(1, byteorder='little'))   # One sample of silence
     
-    print(f"Created {filename}")
+    print(f"Criado {filename}")
 
 def main():
     """Create dummy sound files for the game"""
@@ -40,8 +40,8 @@ def main():
     create_dummy_sound_file("score.wav")
     create_dummy_sound_file("hit.wav")
     
-    print("All sound files created successfully!")
-    print("NOTE: These are silent placeholders. Replace with real sounds for a better experience.")
+    print("Todos os arquivos de som foram criados com sucesso!")
+    print("OBS: Estes são marcadores silenciosos. Substitua por sons reais para uma melhor experiência.")
 
 if __name__ == "__main__":
     main()

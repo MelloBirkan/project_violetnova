@@ -100,18 +100,18 @@ class Planet:
     def get_info_text(self):
         """Return information about the planet for the transition screen"""
         info_texts = {
-            "Earth": "Home planet with 100% gravity (g = 1.0). Our blue planet is the only known celestial body to harbor life.",
-            "Mercury": "Closest planet to the Sun with 40% gravity (g = 0.4). Mercury has virtually no atmosphere.",
-            "Venus": "Second planet from the Sun with 90% gravity (g = 0.9). Venus has a thick, toxic atmosphere filled with carbon dioxide.",
-            "Moon": "Earth's satellite with 16% gravity (g = 0.16). The Moon is about 1/4 the diameter of Earth.",
-            "Mars": "The Red Planet with 40% gravity (g = 0.4). Mars has the largest dust storms in the solar system.",
-            "Jupiter": "Largest planet with 240% gravity (g = 2.4). Jupiter is a gas giant and has the Great Red Spot, a storm that has lasted hundreds of years.",
-            "Saturn": "Known for its rings with 110% gravity (g = 1.1). Saturn is a gas giant composed mostly of hydrogen and helium.",
-            "Uranus": "Ice giant with 90% gravity (g = 0.9). Uranus rotates on its side with an axial tilt of about 98 degrees.",
-            "Neptune": "Furthest planet with 110% gravity (g = 1.1). Neptune has the strongest winds in the Solar System, reaching up to 2,100 km/h.",
-            "Pluto": "Dwarf planet with 6% gravity (g = 0.06). Pluto is part of the Kuiper Belt, a region of icy bodies beyond Neptune."
+            "Earth": "Planeta natal com 100% de gravidade (g = 1,0). Nosso planeta azul é o único corpo celeste conhecido a abrigar vida.",
+            "Mercury": "Planeta mais próximo do Sol com 40% de gravidade (g = 0,4). Mercúrio praticamente não tem atmosfera.",
+            "Venus": "Segundo planeta a partir do Sol com 90% de gravidade (g = 0,9). Vênus tem uma atmosfera espessa e tóxica cheia de dióxido de carbono.",
+            "Moon": "Satélite da Terra com 16% de gravidade (g = 0,16). A Lua tem cerca de 1/4 do diâmetro da Terra.",
+            "Mars": "O Planeta Vermelho com 40% de gravidade (g = 0,4). Marte tem as maiores tempestades de poeira do sistema solar.",
+            "Jupiter": "Maior planeta com 240% de gravidade (g = 2,4). Júpiter é um gigante gasoso e tem a Grande Mancha Vermelha, uma tempestade que dura há centenas de anos.",
+            "Saturn": "Conhecido por seus anéis com 110% de gravidade (g = 1,1). Saturno é um gigante gasoso composto principalmente de hidrogênio e hélio.",
+            "Uranus": "Gigante de gelo com 90% de gravidade (g = 0,9). Urano gira de lado com uma inclinação axial de cerca de 98 graus.",
+            "Neptune": "Planeta mais distante com 110% de gravidade (g = 1,1). Netuno tem os ventos mais fortes do Sistema Solar, atingindo até 2.100 km/h.",
+            "Pluto": "Planeta anão com 6% de gravidade (g = 0,06). Plutão faz parte do Cinturão de Kuiper, uma região de corpos gelados além de Netuno."
         }
-        return info_texts.get(self.name, "Unknown planet")
+        return info_texts.get(self.name, "Planeta desconhecido")
 
     def draw_ground(self, screen, x, screen_height):
         """Draw the ground for this planet"""

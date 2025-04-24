@@ -19,74 +19,74 @@ class NovaAI:
     # Scientific facts about planets
     FACTS = {
         "Earth": [
-            "Earth's atmosphere protects us from solar radiation.",
-            "71% of Earth is covered by water.",
-            "Earth's magnetic field protects us from solar winds.",
-            "Earth is the only planet not named after a god.",
-            "Earth's rotation is gradually slowing down."
+            "A atmosfera da Terra nos protege da radiação solar.",
+            "71% da Terra é coberta por água.",
+            "O campo magnético da Terra nos protege dos ventos solares.",
+            "A Terra é o único planeta não nomeado em homenagem a um deus.",
+            "A rotação da Terra está gradualmente ficando mais lenta."
         ],
         "Moon": [
-            "The Moon is slowly moving away from Earth at 3.8 cm per year.",
-            "The Moon has no atmosphere or weather.",
-            "A day on the Moon lasts about 29.5 Earth days.",
-            "The Moon's gravity is 1/6th of Earth's gravity.",
-            "The Moon's surface is covered in regolith, a fine dust."
+            "A Lua está se afastando lentamente da Terra a 3,8 cm por ano.",
+            "A Lua não tem atmosfera ou clima.",
+            "Um dia na Lua dura cerca de 29,5 dias terrestres.",
+            "A gravidade da Lua é 1/6 da gravidade da Terra.",
+            "A superfície da Lua é coberta por regolito, um pó fino."
         ],
         "Mercury": [
-            "Mercury has no atmosphere and extreme temperature variations.",
-            "Mercury is the smallest planet in our solar system.",
-            "A day on Mercury is 59 Earth days long.",
-            "Mercury has a high iron content and a large core.",
-            "Mercury has no moons of its own."
+            "Mercúrio não tem atmosfera e tem variações extremas de temperatura.",
+            "Mercúrio é o menor planeta do nosso sistema solar.",
+            "Um dia em Mercúrio tem 59 dias terrestres.",
+            "Mercúrio tem alto teor de ferro e um grande núcleo.",
+            "Mercúrio não tem luas próprias."
         ],
         "Venus": [
-            "Venus rotates backwards compared to other planets.",
-            "Venus has the longest day of any planet at 243 Earth days.",
-            "Venus is the hottest planet due to its thick atmosphere.",
-            "Venus has no moons and no magnetic field.",
-            "Venus's atmosphere is 96% carbon dioxide."
+            "Vênus gira no sentido contrário em comparação com outros planetas.",
+            "Vênus tem o dia mais longo de qualquer planeta, com 243 dias terrestres.",
+            "Vênus é o planeta mais quente devido à sua atmosfera espessa.",
+            "Vênus não tem luas nem campo magnético.",
+            "A atmosfera de Vênus é 96% dióxido de carbono."
         ],
         "Mars": [
-            "Mars has the largest volcano in the solar system: Olympus Mons.",
-            "Mars has two small moons: Phobos and Deimos.",
-            "Mars has seasons similar to Earth, but twice as long.",
-            "Mars has polar ice caps made of water and carbon dioxide ice.",
-            "Mars's red color comes from iron oxide (rust) on its surface."
+            "Marte tem o maior vulcão do sistema solar: Olympus Mons.",
+            "Marte tem duas pequenas luas: Phobos e Deimos.",
+            "Marte tem estações semelhantes à Terra, mas duas vezes mais longas.",
+            "Marte tem calotas polares feitas de gelo de água e dióxido de carbono.",
+            "A cor vermelha de Marte vem do óxido de ferro (ferrugem) em sua superfície."
         ],
         "Jupiter": [
-            "Jupiter has the strongest magnetic field of any planet.",
-            "Jupiter has at least 79 moons, including the four large Galilean moons.",
-            "Jupiter's Great Red Spot is a storm that has lasted for centuries.",
-            "Jupiter is a gas giant with no solid surface.",
-            "Jupiter has faint, barely visible rings."
+            "Júpiter tem o campo magnético mais forte de qualquer planeta.",
+            "Júpiter tem pelo menos 79 luas, incluindo as quatro grandes luas galileanas.",
+            "A Grande Mancha Vermelha de Júpiter é uma tempestade que dura há séculos.",
+            "Júpiter é um gigante gasoso sem superfície sólida.",
+            "Júpiter tem anéis tênues, quase invisíveis."
         ],
         "Saturn": [
-            "Saturn's rings are made mostly of ice particles and rock debris.",
-            "Saturn has the lowest density of all planets and would float in water.",
-            "Saturn has at least 82 moons.",
-            "Saturn's moon Titan has a thick atmosphere.",
-            "Saturn's rings span up to 175,000 miles wide, but are only about 10 meters thick."
+            "Os anéis de Saturno são feitos principalmente de partículas de gelo e detritos rochosos.",
+            "Saturno tem a menor densidade de todos os planetas e flutuaria na água.",
+            "Saturno tem pelo menos 82 luas.",
+            "A lua de Saturno, Titã, tem uma atmosfera espessa.",
+            "Os anéis de Saturno têm até 175.000 milhas de largura, mas são apenas 10 metros de espessura."
         ],
         "Uranus": [
-            "Uranus rotates on its side, with its axis tilted at 98 degrees.",
-            "Uranus has 27 known moons, named after literary characters.",
-            "Uranus appears blue-green due to methane in its atmosphere.",
-            "Uranus is an ice giant composed mainly of water, methane, and ammonia ices.",
-            "Uranus has 13 narrow rings."
+            "Urano gira de lado, com seu eixo inclinado em 98 graus.",
+            "Urano tem 27 luas conhecidas, nomeadas após personagens literários.",
+            "Urano aparece azul-esverdeado devido ao metano em sua atmosfera.",
+            "Urano é um gigante de gelo composto principalmente de gelos de água, metano e amônia.",
+            "Urano tem 13 anéis estreitos."
         ],
         "Neptune": [
-            "Neptune has the strongest winds in the solar system, reaching 2,100 km/h.",
-            "Neptune has 14 known moons, including Triton which orbits backwards.",
-            "Neptune's blue color comes from methane in its atmosphere.",
-            "Neptune has a Great Dark Spot, similar to Jupiter's Great Red Spot.",
-            "Neptune's distance from the Sun changes due to its elliptical orbit."
+            "Netuno tem os ventos mais fortes do sistema solar, atingindo 2.100 km/h.",
+            "Netuno tem 14 luas conhecidas, incluindo Tritão que orbita para trás.",
+            "A cor azul de Netuno vem do metano em sua atmosfera.",
+            "Netuno tem uma Grande Mancha Escura, semelhante à Grande Mancha Vermelha de Júpiter.",
+            "A distância de Netuno ao Sol muda devido à sua órbita elíptica."
         ],
         "Pluto": [
-            "Pluto was reclassified from a planet to a dwarf planet in 2006.",
-            "Pluto has five known moons, the largest being Charon.",
-            "The heart-shaped region on Pluto is called Tombaugh Regio.",
-            "Pluto's atmosphere expands and contracts as it moves closer to and further from the Sun.",
-            "Pluto takes 248 Earth years to orbit the Sun once."
+            "Plutão foi reclassificado de planeta para planeta anão em 2006.",
+            "Plutão tem cinco luas conhecidas, sendo Caronte a maior.",
+            "A região em forma de coração em Plutão é chamada Região Tombaugh.",
+            "A atmosfera de Plutão expande e contrai à medida que se aproxima e se afasta do Sol.",
+            "Plutão leva 248 anos terrestres para orbitar o Sol uma vez."
         ]
     }
     
@@ -138,7 +138,7 @@ class NovaAI:
         """Alert the player about the gravity change on a new planet"""
         # Convert percentage to g-value (e.g., 100% -> g = 1.0)
         g_value = gravity_factor / 100.0
-        self.show_message(f"Gravity on {planet_name}: {gravity_factor}% of Earth (g = {g_value})", "alert")
+        self.show_message(f"Gravidade em {planet_name}: {gravity_factor}% da Terra (g = {g_value})", "alert")
     
     def give_random_fact(self, planet_name):
         """Share a random scientific fact about the current planet"""
@@ -149,20 +149,20 @@ class NovaAI:
     def react_to_discovery(self, collectible_type):
         """React to the player collecting an item"""
         if collectible_type == "data":
-            self.show_message("Scientific data collected!", "excited")
+            self.show_message("Dados científicos coletados!", "excited")
         elif collectible_type == "fuel":
-            self.show_message("Fuel cells acquired!", "happy")
+            self.show_message("Células de combustível adquiridas!", "happy")
         elif collectible_type == "weapon":
-            self.show_message("Defensive systems online!", "alert")
+            self.show_message("Sistemas defensivos online!", "alert")
     
     def react_to_obstacle(self, obstacle_type):
         """React to an approaching obstacle"""
         if obstacle_type == "asteroid":
-            self.show_message("Asteroid field ahead!", "warning")
+            self.show_message("Campo de asteroides à frente!", "warning")
         elif obstacle_type == "debris":
-            self.show_message("Space debris detected!", "warning")
+            self.show_message("Detritos espaciais detectados!", "warning")
         elif obstacle_type == "storm":
-            self.show_message("Solar storm approaching!", "warning")
+            self.show_message("Tempestade solar se aproximando!", "warning")
     
     def update(self):
         """Update the AI assistant"""

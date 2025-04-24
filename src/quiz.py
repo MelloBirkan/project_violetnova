@@ -104,7 +104,7 @@ class Quiz:
         screen.blit(backdrop, (0, 0))
         
         # Draw quiz title
-        title_text = self.font_large.render("Solar System Quiz", True, (255, 255, 255))
+        title_text = self.font_large.render("Quiz do Sistema Solar", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(self.screen_width // 2, 100))
         screen.blit(title_text, title_rect)
         
@@ -156,11 +156,11 @@ class Quiz:
         # Draw result message if appropriate
         if self.result is not None:
             if self.result == "correct":
-                result_text = self.font_large.render("Correct!", True, (0, 255, 0))
+                result_text = self.font_large.render("Correto!", True, (0, 255, 0))
             elif self.result == "incorrect":
-                result_text = self.font_large.render("Incorrect!", True, (255, 0, 0))
+                result_text = self.font_large.render("Incorreto!", True, (255, 0, 0))
             else:  # timeout
-                result_text = self.font_large.render("Time's Up!", True, (255, 165, 0))
+                result_text = self.font_large.render("Tempo Esgotado!", True, (255, 165, 0))
                 
             result_rect = result_text.get_rect(center=(self.screen_width // 2, self.screen_height - 100))
             screen.blit(result_text, result_rect)
