@@ -7,7 +7,6 @@ This script launches the Solar System exploration game.
 
 import os
 import sys
-import subprocess
 
 def main():
     """Main entry point for the game"""

@@ -15,8 +15,10 @@ pygame.init()
 pygame.mixer.init()
 
 # Game constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+# Get the display info to set fullscreen resolution
+display_info = pygame.display.Info()
+SCREEN_WIDTH = display_info.current_w
+SCREEN_HEIGHT = display_info.current_h
 FLOOR_HEIGHT = 100
 GAME_FONT = pygame.font.Font(None, 36)
 SMALL_FONT = pygame.font.Font(None, 24)
@@ -31,7 +33,7 @@ QUIZ = 4
 QUIZ_FAILURE = 5  # New state for quiz failure delay
 
 # Screen setup
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.NOFRAME)
 pygame.display.set_caption("Project Blue Nova: Solar System Explorer")
 clock = pygame.time.Clock()
 
@@ -41,7 +43,7 @@ try:
     thrust_sound = pygame.mixer.Sound("assets/sounds/flap.wav")
     score_sound = pygame.mixer.Sound("assets/sounds/score.wav")
     hit_sound = pygame.mixer.Sound("assets/sounds/hit.wav")
-    
+
 except pygame.error as e:
     print(f"Could not load asset: {e}")
     pygame.quit()
@@ -282,7 +284,7 @@ def create_planet_data():
             ]
         }
     ]
-    
+
     return planet_data
 
 class Game:
@@ -291,7 +293,7 @@ class Game:
         self.score = 0
         self.high_score_manager = HighScore()
         self.high_score = self.high_score_manager.get()
-        
+
         # Create planet data
         self.planet_data = create_planet_data()
         self.planets = [Planet(data["name"], 
@@ -300,33 +302,34 @@ class Game:
                               data["obstacle_count"], 
                               data["quiz_questions"]) 
                        for data in self.planet_data]
-        
+
         # Start at Earth
         self.current_planet_index = 0
         self.current_planet = self.planets[self.current_planet_index]
-        
+
         # Spacecraft setup
         self.spacecraft_color = "silver"  # Default color
-        self.spacecraft = Spacecraft(100, SCREEN_HEIGHT // 2, self.spacecraft_color)
+        self.spacecraft = Spacecraft(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.spacecraft_color)
         self.available_colors = list(Spacecraft.COLORS.keys())
         self.current_color_index = 0
-        
+
         # Game elements
         self.obstacles = []
         self.collectibles = []
-        self.last_obstacle_time = pygame.time.get_ticks()
+        # Initialize last_obstacle_time to a value that will trigger immediate obstacle spawn
+        self.last_obstacle_time = pygame.time.get_ticks() - 2000
         self.last_collectible_time = pygame.time.get_ticks()
         self.floor_x = 0
-        
+
         # Obstacle and collectible timing
-        self.obstacle_spawn_rate = 2000  # milliseconds
+        self.obstacle_spawn_rate = 2500  # milliseconds (increased for more horizontal spacing)
         self.collectible_spawn_rate = 3000  # milliseconds
-        
+
         # Game progression
         self.obstacle_speed = 3
         self.weapon_active = False
         self.weapon_timer = 0
-        
+
         # Score thresholds for automatic level progression
         self.level_progression_thresholds = {
             "Earth": 6,   # 6 points needed for Earth (matching the obstacle count)
@@ -340,26 +343,26 @@ class Game:
             "Neptune": 11, # 11 points needed for Neptune
             "Pluto": 1,    # 1 point needed for Pluto (terminal level)
         }
-        
+
         # NOVA AI assistant
         self.nova = NovaAI(SCREEN_WIDTH, SCREEN_HEIGHT)
-        
+
         # Quiz system
         self.quiz = Quiz(SCREEN_WIDTH, SCREEN_HEIGHT)
-        
+
         # Transition screen
         self.transition_time = 0
         self.transition_duration = 180  # 3 seconds at 60fps
-        
+
         # Difficulty progression
         self.difficulty_multiplier = 1.0
-        
+
         # Enhanced visuals
         self.stars = self._generate_stars(100)
-        
+
         self.quiz_failure_timer = 0  # Timer for quiz failure delay
         self.last_countdown_number = 0  # Last displayed countdown number
-        
+
     def _generate_stars(self, count):
         """Generate stars for the background"""
         stars = []
@@ -380,13 +383,13 @@ class Game:
                 "phase": phase
             })
         return stars
-        
+
     def reset(self, new_planet=False):
         """Reset the game, optionally switching to a new planet"""
         self.state = PLAYING
         self.weapon_active = False
         self.weapon_timer = 0
-        
+
         if new_planet:
             # Remember the score for progression
             previous_score = self.score
@@ -400,39 +403,42 @@ class Game:
             self.current_planet_index = 0
             self.current_planet = self.planets[self.current_planet_index]
             self.difficulty_multiplier = 1.0
-            
+
         # Reset spacecraft position
-        self.spacecraft = Spacecraft(100, SCREEN_HEIGHT // 2, self.spacecraft_color)
-        
+        self.spacecraft = Spacecraft(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.spacecraft_color)
+
         # Clear all obstacles and collectibles
         self.obstacles = []
         self.collectibles = []
-        self.last_obstacle_time = pygame.time.get_ticks()
+        # Initialize last_obstacle_time to a value that will trigger immediate obstacle spawn
+        self.last_obstacle_time = pygame.time.get_ticks() - 2000
         self.last_collectible_time = pygame.time.get_ticks()
-        
+        # Reset floor position
+        self.floor_x = 0
+
         # Base difficulty adjusted by planet and progression
         self.obstacle_speed = 3 * self.difficulty_multiplier
-        self.obstacle_spawn_rate = int(2000 / self.difficulty_multiplier)
+        self.obstacle_spawn_rate = int(2500 / self.difficulty_multiplier)  # Increased for more horizontal spacing
         self.collectible_spawn_rate = int(3000 / self.difficulty_multiplier)
-        
+
         # NOVA AI should alert about gravity
         if new_planet:
             self.nova.alert_gravity_change(
                 self.current_planet.name, 
                 self.current_planet.gravity_factor
             )
-        
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                
+
                 if self.state == QUIZ or self.state == QUIZ_FAILURE:
                     # Pass events to quiz system only if in QUIZ state (not in QUIZ_FAILURE)
                     if self.state == QUIZ:
@@ -449,17 +455,17 @@ class Game:
                         elif self.state == TRANSITION:
                             # Skip transition and force start game on new planet
                             self.reset(new_planet=True)
-                    
+
                     # Change spacecraft color with C key in menu
                     if event.key == pygame.K_c and self.state == MENU:
                         self.current_color_index = (self.current_color_index + 1) % len(self.available_colors)
                         self.spacecraft_color = self.available_colors[self.current_color_index]
                         self.spacecraft.change_color(self.spacecraft_color)
-                    
+
                     # Activate weapon with W key if available
                     if event.key == pygame.K_w and self.state == PLAYING and self.weapon_active:
                         self._use_weapon()
-            
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
                     if self.state == QUIZ or self.state == QUIZ_FAILURE:
@@ -477,16 +483,16 @@ class Game:
                         elif self.state == TRANSITION:
                             # Skip transition and force start game on new planet
                             self.reset(new_planet=True)
-    
+
     def _use_weapon(self):
         """Use weapon to destroy obstacles"""
         if not self.weapon_active:
             return
-            
+
         # Find the obstacle closest to the spacecraft that's in front of it
         target_obstacle = None
         min_distance = float('inf')
-        
+
         for obstacle in self.obstacles:
             # Only target obstacles in front of the spacecraft
             if obstacle.x > self.spacecraft.x:
@@ -494,7 +500,7 @@ class Game:
                 if distance < min_distance:
                     min_distance = distance
                     target_obstacle = obstacle
-        
+
         if target_obstacle:
             # Remove the obstacle and award points
             self.obstacles.remove(target_obstacle)
@@ -510,36 +516,36 @@ class Game:
                 self.nova.show_message(f"Auto-navigation engaged! Heading to {next_planet.name}!", "excited")
                 # Begin quiz for planet advancement
                 self._start_quiz()
-    
+
     def update(self):
         # Update stars (twinkle effect)
         for star in self.stars:
             star["phase"] += star["twinkle_speed"]
             twinkle_factor = 0.5 + 0.5 * math.sin(star["phase"])
             star["brightness"] = int(star["base_brightness"] * twinkle_factor)
-        
+
         # Update NOVA AI
         self.nova.update()
-        
+
         if self.state == PLAYING:
             # Update spacecraft with current planet's gravity
             self.spacecraft.update(self.current_planet.gravity)
-            
+
             # Generate obstacles
             current_time = pygame.time.get_ticks()
             if current_time - self.last_obstacle_time > self.obstacle_spawn_rate:
                 gap_y = random.randint(200, SCREEN_HEIGHT - FLOOR_HEIGHT - 150)
                 obstacle_type = random.choice(list(Obstacle.TYPES.keys()))
-                
+
                 # Create a new obstacle
-                new_obstacle = Obstacle(SCREEN_WIDTH, gap_y, self.obstacle_speed, obstacle_type)
+                new_obstacle = Obstacle(SCREEN_WIDTH, gap_y, self.obstacle_speed, obstacle_type, SCREEN_HEIGHT)
                 self.obstacles.append(new_obstacle)
                 self.last_obstacle_time = current_time
-                
+
                 # Occasionally have NOVA warn about obstacles
                 if random.random() < 0.3:  # 30% chance
                     self.nova.react_to_obstacle(obstacle_type)
-            
+
             # Generate collectibles (data or weapon)
             if current_time - self.last_collectible_time > self.collectible_spawn_rate:
                 # Place collectible in a safe location
@@ -552,59 +558,59 @@ class Game:
                     collectible_type = "weapon"
                 self.collectibles.append(Collectible(x, y, collectible_type))
                 self.last_collectible_time = current_time
-            
+
             # Update obstacles and check for score
             for obstacle in self.obstacles:
                 obstacle.update()
-                
+
                 # Score when passing obstacle
                 if not obstacle.scored and obstacle.x + obstacle.WIDTH < self.spacecraft.x:
                     self.score += 1
                     obstacle.scored = True
                     score_sound.play()
-                    
+
                     # Get the threshold for the current planet or use default
                     current_threshold = self.level_progression_thresholds.get(
                         self.current_planet.name, 
                         10  # Default threshold for planets not specified
                     )
-                    
+
                     # Check if we've hit or exceeded the score threshold to automatically progress
                     if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
                         # NOVA announces automatic progression
                         next_planet = self.planets[self.current_planet_index + 1]
                         self.nova.show_message(f"Auto-navigation engaged! Heading to {next_planet.name}!", "excited")
-                        
+
                         # Start quiz without incrementing planet index yet - let the quiz handle progression
                         self._start_quiz()
-            
+
             # Update collectibles
             for collectible in list(self.collectibles):
                 collectible.update()
                 collectible.x -= self.obstacle_speed  # Move at same speed as obstacles
-                
+
                 # Check collision with spacecraft
                 if collectible.check_collision(self.spacecraft):
                     # Apply collectible effect
                     effect = collectible.get_effect()
-                    
+
                     if effect["effect"] == "info":
                         # Show planet info
                         self.nova.give_random_fact(self.current_planet.name)
                         self.score += effect["value"]
-                        
+
                         # Check if adding points triggered level progression
                         current_threshold = self.level_progression_thresholds.get(
                             self.current_planet.name, 
                             10  # Default threshold for planets not specified
                         )
-                        
+
                         # Check for automatic progression after collecting points
                         if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
                             # NOVA announces automatic progression
                             next_planet = self.planets[self.current_planet_index + 1]
                             self.nova.show_message(f"Auto-navigation engaged! Heading to {next_planet.name}!", "excited")
-                            
+
                             # Start quiz without incrementing planet index yet - let the quiz handle progression
                             self._start_quiz()
                             break  # Exit the loop to avoid processing more collectibles
@@ -612,19 +618,19 @@ class Game:
                         # Extend play time (add score)
                         self.score += effect["value"]
                         self.nova.react_to_discovery("fuel")
-                        
+
                         # Check if adding points triggered level progression
                         current_threshold = self.level_progression_thresholds.get(
                             self.current_planet.name, 
                             10  # Default threshold for planets not specified
                         )
-                        
+
                         # Check for automatic progression after collecting points
                         if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
                             # NOVA announces automatic progression
                             next_planet = self.planets[self.current_planet_index + 1]
                             self.nova.show_message(f"Auto-navigation engaged! Heading to {next_planet.name}!", "excited")
-                            
+
                             # Start quiz without incrementing planet index yet - let the quiz handle progression
                             self._start_quiz()
                             break  # Exit the loop to avoid processing more collectibles
@@ -633,21 +639,21 @@ class Game:
                         self.weapon_active = True
                         self.weapon_timer = 600  # 10 seconds at 60fps
                         self.nova.react_to_discovery("weapon")
-                    
+
                     # Remove collected item
                     self.collectibles.remove(collectible)
-            
+
             # Update weapon timer
             if self.weapon_active:
                 self.weapon_timer -= 1
                 if self.weapon_timer <= 0:
                     self.weapon_active = False
                     self.nova.show_message("Defensive systems offline", "normal")
-            
+
             # Remove off-screen obstacles and collectibles
             self.obstacles = [obs for obs in self.obstacles if obs.x > -obs.WIDTH]
             self.collectibles = [col for col in self.collectibles if col.x > -col.WIDTH]
-            
+
             # Check for collisions
             if self.check_collision():
                 hit_sound.play()
@@ -655,21 +661,21 @@ class Game:
                 if self.score > self.high_score_manager.get():
                     self.high_score = self.score
                     self.high_score_manager.save(self.score)
-            
+
             # Move floor
-            self.floor_x = (self.floor_x - self.obstacle_speed) % SCREEN_WIDTH
-            
+            self.floor_x = (self.floor_x - self.obstacle_speed) % 800
+
         elif self.state == TRANSITION:
             # Update transition screen
             self.transition_time += 1
             if self.transition_time >= self.transition_duration:
                 # Transition complete, start game on new planet
                 self.reset(new_planet=True)
-                
+
         elif self.state == QUIZ:
             # Update quiz
             self.quiz.update()
-            
+
             # Check if quiz is complete
             if self.quiz.is_complete():
                 if self.quiz.is_correct():
@@ -682,55 +688,55 @@ class Game:
                     self.last_countdown_number = 3  # Start countdown from 3
                     # Add a message from NOVA about the quiz failure
                     self.nova.show_message("Quiz failed! Returning to orbit in...", "alert")
-        
+
         elif self.state == QUIZ_FAILURE:
             # Update quiz failure delay timer
             self.quiz_failure_timer -= 1
-            
+
             # Check current countdown number
             # Convert remaining frames to seconds (ceil)
             current_countdown = math.ceil(self.quiz_failure_timer / 60)
-            
+
             # If countdown number changed, play a sound effect
             if current_countdown < self.last_countdown_number and current_countdown >= 0:
                 self.last_countdown_number = current_countdown
                 score_sound.play()  # Reuse the score sound for countdown
-                
+
                 # Add a message from NOVA about the countdown
                 if current_countdown > 0:
                     self.nova.show_message(f"Returning to orbit in {current_countdown}...", "alert")
-            
+
             if self.quiz_failure_timer <= 0:
                 # Delay complete, return to gameplay
                 self.state = PLAYING
                 self.nova.show_message("Back to orbital flight! Continue exploring.", "info")
                 self.last_countdown_number = 0  # Reset for next time
-    
+
     def _start_quiz(self):
         """Start a quiz for the current planet"""
         self.state = QUIZ
-        
+
         # Reset countdown number tracker
         self.last_countdown_number = 2
-        
+
         # Select a random quiz question for this planet
         question_data = random.choice(self.current_planet.quiz_questions)
-        
+
         # Start the quiz
         self.quiz.start_quiz(
             question_data["question"],
             question_data["options"],
             question_data["answer"]
         )
-    
+
     def _start_transition(self):
         """Start transition to next planet"""
         self.state = TRANSITION
         self.transition_time = 0
-        
+
         # Increment planet index to advance to the next planet (only happens after passing a quiz)
         self.current_planet_index += 1
-        
+
         # Ensure current_planet_index is valid
         if self.current_planet_index >= len(self.planets):
             # Player reached the end of all planets, show game over
@@ -739,18 +745,18 @@ class Game:
                 self.high_score = self.score
                 self.high_score_manager.save(self.score)
             return
-        
+
         # Make sure we're using the correct planet after the quiz
         self.current_planet = self.planets[self.current_planet_index]
-        
+
         # NOVA shows excitement about new planet
         self.nova.show_message(f"Entering {self.current_planet.name} orbit!", "excited")
-    
+
     def check_collision(self):
         # Check floor and ceiling collision
         if self.spacecraft.y <= 0 or self.spacecraft.y + self.spacecraft.HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
             return True
-        
+
         # Check obstacle collision
         for obstacle in self.obstacles:
             # Top obstacle collision
@@ -758,71 +764,71 @@ class Game:
                 self.spacecraft.x < obstacle.x + obstacle.WIDTH and 
                 self.spacecraft.y < obstacle.gap_y - obstacle.GAP // 2):
                 return True
-            
+
             # Bottom obstacle collision
             if (self.spacecraft.x + self.spacecraft.WIDTH > obstacle.x and 
                 self.spacecraft.x < obstacle.x + obstacle.WIDTH and 
                 self.spacecraft.y + self.spacecraft.HEIGHT > obstacle.gap_y + obstacle.GAP // 2):
                 return True
-        
+
         return False
-    
+
     def draw(self):
         # Create a base dark background for space
         screen.fill((0, 0, 20))
-        
+
         # Draw stars based on current planet (foreground stars)
         for star in self.stars:
             # Draw star with current brightness
             color = (star["brightness"], star["brightness"], star["brightness"])
             pygame.draw.circle(screen, color, (int(star["x"]), int(star["y"])), star["size"])
-        
+
         # Apply planet's background color as a transparent overlay
         bg_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         bg_color = (*self.current_planet.background_color, 100)  # Add alpha
         bg_overlay.fill(bg_color)
         screen.blit(bg_overlay, (0, 0))
-        
+
         # Draw different screens based on game state
         if self.state == PLAYING or self.state == MENU or self.state == GAME_OVER or self.state == QUIZ_FAILURE:
             # Draw obstacles
             for obstacle in self.obstacles:
                 obstacle.draw(screen)
-            
+
             # Draw collectibles
             for collectible in self.collectibles:
                 collectible.draw(screen)
-            
+
             # Draw floor/ground
             self.current_planet.draw_ground(screen, self.floor_x, SCREEN_HEIGHT)
-            
+
             # Draw spacecraft
             self.spacecraft.draw(screen)
-            
+
             # Draw the current planet name and player score
             if self.state != MENU:
                 # Left-side information (unchanged)
                 planet_text = SMALL_FONT.render(f"Planet: {self.current_planet.name}", True, (255, 255, 255))
                 screen.blit(planet_text, (20, 20))
-                
+
                 # Get threshold for current planet
                 current_threshold = self.level_progression_thresholds.get(
                     self.current_planet.name, 
                     10  # Default threshold
                 )
-                
+
                 score_text = SMALL_FONT.render(f"Score: {self.score}/{current_threshold}", True, (255, 255, 255))
                 screen.blit(score_text, (20, 50))
-                
+
                 high_score_text = SMALL_FONT.render(f"High Score: {self.high_score_manager.get()}", True, (255, 255, 255))
                 screen.blit(high_score_text, (20, 80))
-                
+
                 # Draw weapon status at top-center if active (moved from right side)
                 if self.weapon_active:
                     weapon_time = self.weapon_timer // 60  # Convert to seconds
                     weapon_text = SMALL_FONT.render(f"Weapon Active: {weapon_time}s", True, (255, 100, 100))
                     screen.blit(weapon_text, (SCREEN_WIDTH // 2 - weapon_text.get_width() // 2, 20))
-            
+
             # Draw NOVA AI assistant (blue circle)
             self.nova.draw(screen)
             # If quiz failed, overlay large countdown before resuming
@@ -839,74 +845,74 @@ class Game:
                         SCREEN_HEIGHT // 2 - text_surf.get_height() // 2
                     )
                 )
-            
+
             # Draw menu screen
             if self.state == MENU:
                 # Semi-transparent overlay
                 overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
                 overlay.fill((0, 0, 0, 180))
                 screen.blit(overlay, (0, 0))
-                
+
                 title_text = GAME_FONT.render("PROJECT BLUE NOVA", True, (255, 255, 255))
                 subtitle_text = SMALL_FONT.render("Solar System Explorer", True, (200, 200, 255))
                 instruction_text = GAME_FONT.render("Press SPACE to Start", True, (255, 255, 255))
                 color_text = GAME_FONT.render(f"Spacecraft: {self.spacecraft_color.capitalize()}", True, (255, 255, 255))
                 color_instruction = SMALL_FONT.render("Press C to change color", True, (255, 255, 255))
-                
+
                 screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 180))
                 screen.blit(subtitle_text, (SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 220))
                 screen.blit(instruction_text, (SCREEN_WIDTH // 2 - instruction_text.get_width() // 2, 280))
                 screen.blit(color_text, (SCREEN_WIDTH // 2 - color_text.get_width() // 2, 330))
                 screen.blit(color_instruction, (SCREEN_WIDTH // 2 - color_instruction.get_width() // 2, 370))
-                
+
                 # Display controls
                 controls_title = SMALL_FONT.render("Controls:", True, (255, 255, 255))
                 controls_space = SMALL_FONT.render("SPACE - Thrust", True, (200, 200, 200))
                 controls_w = SMALL_FONT.render("W - Use Weapon (when available)", True, (200, 200, 200))
-                
+
                 controls_y = SCREEN_HEIGHT - 120
                 screen.blit(controls_title, (SCREEN_WIDTH // 2 - controls_title.get_width() // 2, controls_y))
                 screen.blit(controls_space, (SCREEN_WIDTH // 2 - controls_space.get_width() // 2, controls_y + 30))
                 screen.blit(controls_w, (SCREEN_WIDTH // 2 - controls_w.get_width() // 2, controls_y + 60))
-            
+
             # Draw game over screen
             if self.state == GAME_OVER:
                 # Semi-transparent overlay
                 overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
                 overlay.fill((0, 0, 0, 180))
                 screen.blit(overlay, (0, 0))
-                
+
                 game_over_text = GAME_FONT.render("MISSION COMPLETE", True, (255, 215, 0))
                 score_text = GAME_FONT.render(f"Final Score: {self.score}", True, (255, 255, 255))
                 high_score_text = GAME_FONT.render(f"High Score: {self.high_score_manager.get()}", True, (255, 255, 255))
                 restart_text = GAME_FONT.render("Press SPACE to Start New Mission", True, (255, 255, 255))
-                
+
                 # Calculate the furthest planet reached
                 furthest_planet = self.planets[min(self.current_planet_index, len(self.planets) - 1)].name
                 planet_text = GAME_FONT.render(f"Furthest Planet: {furthest_planet}", True, (255, 255, 255))
-                
+
                 screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, 150))
                 screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, 220))
                 screen.blit(high_score_text, (SCREEN_WIDTH // 2 - high_score_text.get_width() // 2, 270))
                 screen.blit(planet_text, (SCREEN_WIDTH // 2 - planet_text.get_width() // 2, 320))
                 screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, 400))
-        
+
         elif self.state == TRANSITION:
             # Draw transition screen
-            
+
             # Semi-transparent overlay
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 200))  # Darker overlay for text readability
             screen.blit(overlay, (0, 0))
-            
+
             # Draw destination planet name
             planet_title = GAME_FONT.render(f"Welcome to {self.current_planet.name}", True, (255, 255, 255))
             screen.blit(planet_title, (SCREEN_WIDTH // 2 - planet_title.get_width() // 2, 100))
-            
+
             # Draw gravity info
             gravity_text = GAME_FONT.render(f"Gravity: {self.current_planet.gravity_factor}% of Earth", True, (255, 255, 255))
             screen.blit(gravity_text, (SCREEN_WIDTH // 2 - gravity_text.get_width() // 2, 150))
-            
+
             # Draw planet info text
             info_text = self.current_planet.get_info_text()
             # Wrap text to fit screen
@@ -922,16 +928,16 @@ class Game:
                     wrapped_lines.append(line)
                     line = word + " "
             wrapped_lines.append(line)  # Add the last line
-            
+
             # Draw wrapped text
             for i, line in enumerate(wrapped_lines):
                 line_surface = SMALL_FONT.render(line, True, (200, 200, 255))
                 screen.blit(line_surface, (SCREEN_WIDTH // 2 - line_surface.get_width() // 2, 220 + i * 30))
-            
+
             # Draw progress indicator
             progress_text = SMALL_FONT.render(f"Planet {self.current_planet_index + 1} of {len(self.planets)}", True, (180, 180, 180))
             screen.blit(progress_text, (SCREEN_WIDTH // 2 - progress_text.get_width() // 2, 350))
-            
+
             # Draw continue prompt
             if self.transition_time > 60:  # Only show after 1 second
                 continue_text = SMALL_FONT.render("Press SPACE to continue", True, (255, 255, 255))
@@ -939,34 +945,34 @@ class Game:
                 alpha = int(128 + 127 * math.sin(pygame.time.get_ticks() * 0.005))
                 continue_text.set_alpha(alpha)
                 screen.blit(continue_text, (SCREEN_WIDTH // 2 - continue_text.get_width() // 2, 450))
-        
+
         elif self.state == QUIZ:
             # Draw quiz
             self.quiz.draw(screen)
-        
+
         elif self.state == QUIZ_FAILURE:
             # Add a semi-transparent overlay
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 180))  # More visible semi-transparent black
             screen.blit(overlay, (0, 0))
-            
+
             # Calculate countdown number (2, 1)
             countdown_number = self.quiz_failure_timer // 60 + 1
-            
+
             # Draw large countdown number
             if countdown_number > 0:
                 # Add pulse effect - size oscillates slightly based on ticks
                 pulse_factor = 1.0 + 0.15 * math.sin(pygame.time.get_ticks() * 0.01)
                 pulse_size = int(180 * pulse_factor)
-                
+
                 # Use the global countdown font with the pulse effect
                 countdown_font = pygame.font.Font(None, pulse_size)
-                
+
                 # Color also pulses slightly - more pronounced effect
                 color_pulse = int(255 * (0.7 + 0.3 * math.sin(pygame.time.get_ticks() * 0.015)))
                 countdown_text = countdown_font.render(str(countdown_number), True, (255, color_pulse, color_pulse))
                 countdown_rect = countdown_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-                
+
                 # Draw with enhanced glow effect
                 glow_size = 12
                 for offset_x in range(-glow_size, glow_size + 1, 3):
@@ -978,14 +984,14 @@ class Game:
                         alpha = int(120 * (1 - distance/glow_size))
                         if alpha <= 0:
                             continue
-                            
+
                         glow_rect = countdown_rect.move(offset_x, offset_y)
                         glow_text = countdown_font.render(str(countdown_number), True, (80, 80, 220, alpha))
                         screen.blit(glow_text, glow_rect)
-                
+
                 # Draw main text
                 screen.blit(countdown_text, countdown_rect)
-                
+
                 # Draw "Resuming..." text with pulsing effect
                 resume_font = pygame.font.Font(None, 42)
                 alpha_pulse = int(255 * (0.7 + 0.3 * math.sin(pygame.time.get_ticks() * 0.008)))
@@ -993,20 +999,20 @@ class Game:
                 resume_text.set_alpha(alpha_pulse)
                 resume_rect = resume_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
                 screen.blit(resume_text, resume_rect)
-        
+
         # Always draw NOVA AI assistant on top
         self.nova.draw(screen)
 
 def main():
     # Create and start the game
     game = Game()
-    
+
     # Game loop
     while True:
         game.handle_events()
         game.update()
         game.draw()
-        
+
         pygame.display.flip()
         clock.tick(60)
 
