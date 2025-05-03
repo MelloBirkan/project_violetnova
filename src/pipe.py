@@ -10,26 +10,26 @@ class Pipe:
         self.speed = speed
         self.scored = False
         
-        # Create pipe surfaces
+        # Cria superfícies do cano
         self.top_pipe = pygame.Surface((self.WIDTH, self.gap_y - self.GAP // 2))
-        self.top_pipe.fill((0, 128, 0))  # Green color
+        self.top_pipe.fill((0, 128, 0))  # Cor verde
         
         bottom_pipe_height = 600 - self.gap_y - self.GAP // 2
         self.bottom_pipe = pygame.Surface((self.WIDTH, bottom_pipe_height))
-        self.bottom_pipe.fill((0, 128, 0))  # Green color
+        self.bottom_pipe.fill((0, 128, 0))  # Cor verde
         
-        # Add pipe details
+        # Adiciona detalhes do cano
         pygame.draw.rect(self.top_pipe, (0, 100, 0), (0, self.top_pipe.get_height() - 30, self.WIDTH, 30))
         pygame.draw.rect(self.bottom_pipe, (0, 100, 0), (0, 0, self.WIDTH, 30))
     
     def update(self):
-        # Move pipe left
+        # Move o cano para a esquerda
         self.x -= self.speed
     
     def draw(self, screen):
-        # Draw top pipe
+        # Desenha cano superior
         screen.blit(self.top_pipe, (self.x, 0))
         
-        # Draw bottom pipe
+        # Desenha cano inferior
         bottom_pipe_y = self.gap_y + self.GAP // 2
         screen.blit(self.bottom_pipe, (self.x, bottom_pipe_y))

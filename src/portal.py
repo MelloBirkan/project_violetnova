@@ -12,29 +12,29 @@ class Portal:
         self.target_planet = target_planet
         self.active = True
         
-        # Animation variables
+        # Variáveis de animação
         self.animation_counter = 0
         self.particles = []
         self.generate_particles()
         
-        # Colors for different planet portals
+        # Cores para diferentes portais de planetas
         self.portal_colors = {
-            "Moon": (200, 200, 200),       # Silver
-            "Mercury": (255, 165, 0),     # Orange
-            "Venus": (255, 215, 0),       # Gold
-            "Earth": (0, 191, 255),       # Deep Sky Blue
-            "Mars": (255, 69, 0),         # Red-Orange
-            "Jupiter": (222, 184, 135),   # Sandy Brown
-            "Saturn": (245, 222, 179),    # Wheat
-            "Uranus": (64, 224, 208),     # Turquoise
-            "Neptune": (65, 105, 225)     # Royal Blue
+            "Moon": (200, 200, 200),       # Prata
+            "Mercury": (255, 165, 0),     # Laranja
+            "Venus": (255, 215, 0),       # Dourado
+            "Earth": (0, 191, 255),       # Azul Céu Profundo
+            "Mars": (255, 69, 0),         # Vermelho-Laranja
+            "Jupiter": (222, 184, 135),   # Marrom Arenoso
+            "Saturn": (245, 222, 179),    # Trigo
+            "Uranus": (64, 224, 208),     # Turquesa
+            "Neptune": (65, 105, 225)     # Azul Royal
         }
         
-        # Get color based on target planet
-        self.color = self.portal_colors.get(target_planet, (128, 0, 128))  # Default purple
+        # Obtém cor com base no planeta alvo
+        self.color = self.portal_colors.get(target_planet, (128, 0, 128))  # Roxo padrão
     
     def generate_particles(self):
-        """Generate particles for the portal effect"""
+        """Gera partículas para o efeito do portal"""
         self.particles = []
         for _ in range(20):
             angle = random.random() * 2 * math.pi
@@ -52,16 +52,16 @@ class Portal:
             })
     
     def update(self):
-        """Update portal animation"""
+        """Atualiza a animação do portal"""
         self.animation_counter += 0.05
         
-        # Update existing particles
+        # Atualiza partículas existentes
         for particle in self.particles:
             particle["x"] += math.cos(particle["angle"]) * particle["speed"]
             particle["y"] += math.sin(particle["angle"]) * particle["speed"]
             particle["current_life"] -= 1
             
-            # Reset dead particles
+            # Reinicia partículas mortas
             if particle["current_life"] <= 0:
                 particle["x"] = self.x + self.WIDTH // 2
                 particle["y"] = self.y + self.HEIGHT // 2
@@ -69,25 +69,25 @@ class Portal:
                 particle["current_life"] = particle["lifetime"]
     
     def draw(self, screen):
-        """Draw the portal"""
+        """Desenha o portal"""
         if not self.active:
             return
             
-        # Draw the main portal shape (oval with pulsing effect)
-        pulse = math.sin(self.animation_counter) * 0.2 + 0.8  # 0.6 to 1.0 scale factor
+        # Desenha a forma principal do portal (oval com efeito pulsante)
+        pulse = math.sin(self.animation_counter) * 0.2 + 0.8  # Fator de escala de 0.6 a 1.0
         
-        # Draw outer glow
-        glow_color = (self.color[0], self.color[1], self.color[2], 100)  # Add alpha
+        # Desenha brilho externo
+        glow_color = (self.color[0], self.color[1], self.color[2], 100)  # Adiciona alfa
         glow_surface = pygame.Surface((self.WIDTH + 20, self.HEIGHT + 20), pygame.SRCALPHA)
         pygame.draw.ellipse(glow_surface, glow_color, 
                           (0, 0, self.WIDTH + 20, self.HEIGHT + 20))
         
-        # Apply pulse effect to glow position
+        # Aplica efeito de pulso à posição do brilho
         glow_x = self.x - 10 + (1 - pulse) * 5
         glow_y = self.y - 10 + (1 - pulse) * 5
         screen.blit(glow_surface, (glow_x, glow_y))
         
-        # Draw main portal
+        # Desenha portal principal
         width = int(self.WIDTH * pulse)
         height = int(self.HEIGHT * pulse)
         x = self.x + (self.WIDTH - width) // 2
@@ -95,22 +95,22 @@ class Portal:
         
         pygame.draw.ellipse(screen, self.color, (x, y, width, height))
         
-        # Inner darker ellipse
+        # Elipse interna mais escura
         inner_width = width * 0.7
         inner_height = height * 0.7
         inner_x = self.x + (self.WIDTH - inner_width) // 2
         inner_y = self.y + (self.HEIGHT - inner_height) // 2
         
-        # Darker version of the color
+        # Versão mais escura da cor
         darker_color = (max(0, self.color[0] - 60), 
                         max(0, self.color[1] - 60), 
                         max(0, self.color[2] - 60))
         pygame.draw.ellipse(screen, darker_color, 
                           (inner_x, inner_y, inner_width, inner_height))
         
-        # Draw particles
+        # Desenha partículas
         for particle in self.particles:
-            # Calculate alpha based on remaining lifetime
+            # Calcula alfa com base na vida útil restante
             alpha = int(255 * (particle["current_life"] / particle["lifetime"]))
             particle_color = (self.color[0], self.color[1], self.color[2], alpha)
             particle_surface = pygame.Surface((int(particle["size"]), int(particle["size"])), pygame.SRCALPHA)
@@ -122,11 +122,11 @@ class Portal:
                         int(particle["y"] - particle["size"] // 2)))
     
     def check_collision(self, spacecraft):
-        """Check if the spacecraft has entered the portal"""
+        """Verifica se a nave espacial entrou no portal"""
         if not self.active:
             return False
             
-        # Simple rectangle collision
+        # Colisão simples de retângulo
         spacecraft_rect = pygame.Rect(spacecraft.x, spacecraft.y, spacecraft.WIDTH, spacecraft.HEIGHT)
         portal_rect = pygame.Rect(self.x, self.y, self.WIDTH, self.HEIGHT)
         

@@ -14,7 +14,7 @@ class HighScore:
                     return data.get("high_score", 0)
             return 0
         except Exception as e:
-            print(f"Error loading high score: {e}")
+            print(f"Erro ao carregar pontuação máxima: {e}")
             return 0
     
     def save(self, score):
@@ -25,7 +25,7 @@ class HighScore:
                     json.dump({"high_score": score}, f)
                 return True
             except Exception as e:
-                print(f"Error saving high score: {e}")
+                print(f"Erro ao salvar pontuação máxima: {e}")
                 return False
         return False
     

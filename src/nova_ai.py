@@ -5,7 +5,7 @@ class NovaAI:
     WIDTH = 80
     HEIGHT = 80
     
-    # Expressions the AI can show
+    # Expressões que a IA pode mostrar
     EXPRESSIONS = {
         "normal": "😊",
         "excited": "😃",
@@ -16,7 +16,7 @@ class NovaAI:
         "alert": "🚨"
     }
     
-    # Scientific facts about planets
+    # Fatos científicos sobre planetas
     FACTS = {
         "Earth": [
             "A atmosfera da Terra nos protege da radiação solar.",
@@ -98,56 +98,56 @@ class NovaAI:
         self.expression = "normal"
         self.message = ""
         self.message_timer = 0
-        self.message_duration = 180  # Frames (3 seconds at 60fps)
+        self.message_duration = 180  # Quadros (3 segundos a 60fps)
         
-        # Create the AI assistant surface
+        # Cria a superfície do assistente AI
         self.update_surface()
     
     def update_surface(self):
-        """Update the AI assistant surface with current expression"""
+        """Atualiza a superfície do assistente AI com a expressão atual"""
         self.surface = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
-        self.surface.fill((0, 0, 0, 0))  # Transparent
+        self.surface.fill((0, 0, 0, 0))  # Transparente
         
-        # Draw circular background
+        # Desenha fundo circular
         pygame.draw.circle(self.surface, (50, 50, 50, 200), 
                           (self.WIDTH // 2, self.HEIGHT // 2), self.WIDTH // 2)
         pygame.draw.circle(self.surface, (70, 130, 180, 230), 
                           (self.WIDTH // 2, self.HEIGHT // 2), self.WIDTH // 2 - 3)
         
-        # We'll use a font to display the emoji expression
-        # This is a simplified approach - for a real game, you'd want to use proper emoji support
-        font = pygame.font.Font(None, 50)  # Large font for the expression
+        # Usaremos uma fonte para exibir a expressão emoji
+        # Esta é uma abordagem simplificada - para um jogo real, você usaria suporte adequado a emojis
+        font = pygame.font.Font(None, 50)  # Fonte grande para a expressão
         expression_text = font.render(self.EXPRESSIONS[self.expression], True, (255, 255, 255))
         expression_rect = expression_text.get_rect(center=(self.WIDTH // 2, self.HEIGHT // 2))
         
         self.surface.blit(expression_text, expression_rect)
     
     def set_expression(self, expression):
-        """Change the AI's expression"""
+        """Muda a expressão da IA"""
         if expression in self.EXPRESSIONS:
             self.expression = expression
             self.update_surface()
     
     def show_message(self, message, expression="normal"):
-        """Display a message from the AI"""
+        """Exibe uma mensagem da IA"""
         self.message = message
         self.set_expression(expression)
         self.message_timer = self.message_duration
     
     def alert_gravity_change(self, planet_name, gravity_factor):
-        """Alert the player about the gravity change on a new planet"""
-        # Convert percentage to g-value (e.g., 100% -> g = 1.0)
+        """Alerta o jogador sobre a mudança de gravidade em um novo planeta"""
+        # Converte porcentagem para valor g (ex: 100% -> g = 1.0)
         g_value = gravity_factor / 100.0
         self.show_message(f"Gravidade em {planet_name}: {gravity_factor}% da Terra (g = {g_value})", "alert")
     
     def give_random_fact(self, planet_name):
-        """Share a random scientific fact about the current planet"""
+        """Compartilha um fato científico aleatório sobre o planeta atual"""
         if planet_name in self.FACTS:
             fact = random.choice(self.FACTS[planet_name])
             self.show_message(fact, "curious")
     
     def react_to_discovery(self, collectible_type):
-        """React to the player collecting an item"""
+        """Reage ao jogador coletando um item"""
         if collectible_type == "data":
             self.show_message("Dados científicos coletados!", "excited")
         elif collectible_type == "fuel":
@@ -156,7 +156,7 @@ class NovaAI:
             self.show_message("Sistemas defensivos online!", "alert")
     
     def react_to_obstacle(self, obstacle_type):
-        """React to an approaching obstacle"""
+        """Reage a um obstáculo se aproximando"""
         if obstacle_type == "asteroid":
             self.show_message("Campo de asteroides à frente!", "warning")
         elif obstacle_type == "debris":
@@ -165,33 +165,33 @@ class NovaAI:
             self.show_message("Tempestade solar se aproximando!", "warning")
     
     def update(self):
-        """Update the AI assistant"""
-        # Update message timer
+        """Atualiza o assistente AI"""
+        # Atualiza temporizador da mensagem
         if self.message_timer > 0:
             self.message_timer -= 1
             
-            # Reset to normal expression when message expires
+            # Reinicia para expressão normal quando a mensagem expira
             if self.message_timer == 0:
                 self.message = ""
                 self.set_expression("normal")
     
     def draw(self, screen):
-        """Draw the AI assistant and any active messages"""
-        # Draw the AI circle
+        """Desenha o assistente AI e quaisquer mensagens ativas"""
+        # Desenha o círculo da IA
         screen.blit(self.surface, (self.x, self.y))
         
-        # Draw any active message
+        # Desenha qualquer mensagem ativa
         if self.message and self.message_timer > 0:
-            # Prepare the message text surface
+            # Prepara a superfície do texto da mensagem
             font = pygame.font.Font(None, 24)
             message_surf = font.render(self.message, True, (255, 255, 255))
             
-            # Position message at the top-center of the screen
+            # Posiciona a mensagem no centro superior da tela
             message_rect = message_surf.get_rect(midtop=(self.screen_width // 2, 10))
             
-            # Draw a backdrop for the message
+            # Desenha um fundo para a mensagem
             backdrop_rect = message_rect.inflate(20, 10)
             pygame.draw.rect(screen, (0, 0, 0, 180), backdrop_rect, border_radius=5)
             
-            # Draw the message text
+            # Desenha o texto da mensagem
             screen.blit(message_surf, message_rect)
