@@ -37,19 +37,25 @@ class Spacecraft:
         self.angle = 0
         # Color selection
         self.color = color if color in self.COLORS else "silver"
-        # Flame colors override: if empty, use static engine color
-        self.flame_colors = []
+        # Flame colors override: gradient from outer to inner (static outer, dynamic inner)
+        self.flame_colors = [
+            (178, 34, 34),    # Dark red (outer)
+            (255, 69, 0),     # Red-orange
+            (255, 165, 0),    # Orange
+            (255, 255, 0),    # Yellow
+            (255, 200, 0)   # White (inner tip dynamic)
+        ]
         # Thrust control
         self.thrusting = False
-        self.thrust_power = 5.0
+        self.thrust_power = 3.0
         self.thrust_multiplier = 1.0
         # Thrust visual timing and flame extent (ms & px)
         self.last_thrust_time = 0
         self.thrust_display_time = 400  # ms to display thrust flame
-        # Flame extension width for more prominent engine flame
-        self.flame_extent = 30
+        # Flame extension width for more prominent engine flame (wider for bigger effect)
+        self.flame_extent = 40
         # Flame animation variables
-        self.animation_frames = 2
+        self.animation_frames = 10
         self.current_frame = 0
         self.animation_speed = 0.1
         self.animation_counter = 0
@@ -92,45 +98,51 @@ class Spacecraft:
         self.last_thrust_time = pygame.time.get_ticks()
     
     def create_animation_frames(self):
-        """Create all frames for spacecraft animation"""
-        # Prepare base and thrust frames with horizontal flame extension
-        color_values = self.COLORS[self.color]
+        """Create all frames for spacecraft animation with layered fire colors"""
+        # Prepare base surface with spacecraft sprite
         fe = self.flame_extent
         total_w = self.WIDTH + fe
-        # Base image surface (spacecraft without flame)
         base = pygame.Surface((total_w, self.HEIGHT), pygame.SRCALPHA)
         base.fill((0, 0, 0, 0))
-        
-        # Create base image with sprite instead of drawn shapes
-        # Position sprite on the surface with offset for flame
         sprite_rect = pygame.Rect(fe, 0, self.WIDTH, self.HEIGHT)
         base.blit(self.sprite, sprite_rect)
-        
-        # Determine engine colors: use flame_colors for gradient, else default engine color
-        engine_colors = self.flame_colors if self.flame_colors else [color_values["engine"]]
-        # Build thrust frames for each engine color
+
+        # Position flame slightly lower than center
+        lower_offset = int(self.HEIGHT * 0.2)
+        center_y = self.HEIGHT // 2 + lower_offset
+        height_offset = max(5, int(self.HEIGHT * 0.2))
+
+        # Separate outer static gradient layers and inner dynamic tip
+        engine_colors = self.flame_colors if self.flame_colors else [self.COLORS[self.color]["engine"]]
+        static_colors = engine_colors[:-1]
+        dynamic_color = engine_colors[-1]
+
+        # Flicker widths for dynamic tip animation
+        flicker_widths = [int(fe * 0.2), fe]
+
         thrust_images = []
-        for ec in engine_colors:
-            # Small thrust flame frame
-            small = base.copy()
-            pygame.draw.polygon(small, ec, [
-                (fe,               self.HEIGHT // 2 - 5),
-                (0,                self.HEIGHT // 2),
-                (fe,               self.HEIGHT // 2 + 5)
-            ])
-            thrust_images.append(small)
-            # Large thrust flame frame
-            large = base.copy()
-            pygame.draw.polygon(large, ec, [
-                (fe,               self.HEIGHT // 2 - 5),
-                (0,                self.HEIGHT // 2),
-                (fe,               self.HEIGHT // 2 + 5)
-            ])
-            thrust_images.append(large)
-        # Store base image and generated thrust frames
+        for fw in flicker_widths:
+            img = base.copy()
+            # Draw static outer gradient layers (continuous)
+            for i, sc in enumerate(static_colors):
+                lw_static = fe * (len(static_colors) - i) / len(static_colors)
+                points = [
+                    (lw_static, center_y - height_offset),
+                    (0,         center_y),
+                    (lw_static, center_y + height_offset)
+                ]
+                pygame.draw.polygon(img, sc, points)
+            # Draw dynamic inner tip (end animation)
+            points_tip = [
+                (fw, center_y - height_offset),
+                (0,  center_y),
+                (fw, center_y + height_offset)
+            ]
+            pygame.draw.polygon(img, dynamic_color, points_tip)
+            thrust_images.append(img)
+
         self.base_image = base
         self.thrust_images = thrust_images
-        # Update frame count for animation
         self.animation_frames = len(self.thrust_images)
     
     def update_image(self):
