@@ -388,7 +388,7 @@ class Game:
         # Track if space is held for continuous thrust
         self.space_held = False
         # Current control mode: flappy or hold
-        self.control_mode = CONTROL_MODE_FLAPPY
+        self.control_mode = CONTROL_MODE_HOLD # Changed default to HOLD
 
     def _generate_stars(self, count):
         """Generate stars for the background"""
