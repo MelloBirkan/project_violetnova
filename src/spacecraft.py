@@ -2,8 +2,8 @@ import pygame
 import os
 
 class Spacecraft:
-    WIDTH = 50
-    HEIGHT = 30
+    WIDTH = 98
+    HEIGHT = 38
     
     # Spacecraft color options
     COLORS = {
@@ -54,7 +54,7 @@ class Spacecraft:
         self.animation_speed = 0.1
         self.animation_counter = 0
         # Load spacecraft sprite
-        self.sprite_path = os.path.join("assets", "images", "nova.png")
+        self.sprite_path = os.path.join("assets", "images", "nova_2x.png")
         self.sprite = pygame.image.load(self.sprite_path)
         self.sprite = pygame.transform.scale(self.sprite, (self.WIDTH, self.HEIGHT))
         # Create spacecraft base and thrust frames

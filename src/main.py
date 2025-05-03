@@ -36,10 +36,9 @@ pygame.init()
 pygame.mixer.init()
 
 # Game constants
-# Get the display info to set fullscreen resolution
-display_info = pygame.display.Info()
-SCREEN_WIDTH = display_info.current_w
-SCREEN_HEIGHT = display_info.current_h
+# Set fixed HD resolution (1280x720)
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
 FLOOR_HEIGHT = 100
 GAME_FONT = pygame.font.Font(None, 36)
 SMALL_FONT = pygame.font.Font(None, 24)
@@ -57,7 +56,7 @@ CONTROL_MODE_FLAPPY = 0  # Tap only, Flappy Bird style
 CONTROL_MODE_HOLD = 1    # Hold space for continuous thrust
 
 # Screen setup
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.NOFRAME)
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Project Blue Nova: Solar System Explorer")
 clock = pygame.time.Clock()
 
