@@ -135,3 +135,5 @@ src/__pycache__/main.cpython-313.pyc
 src/__pycache__/nova_ai.cpython-313.pyc
 src/__pycache__/planet.cpython-313.pyc
 src/__pycache__/quiz.cpython-313.pyc
+
+**/.claude/settings.local.json

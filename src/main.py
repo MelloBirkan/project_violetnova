@@ -837,12 +837,27 @@ class Game:
             # Draw star with current brightness
             color = (star["brightness"], star["brightness"], star["brightness"])
             pygame.draw.circle(screen, color, (int(star["x"]), int(star["y"])), star["size"])
-
-        # Apply planet's background color as a transparent overlay
-        bg_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        bg_color = (*self.current_planet.background_color, 100)  # Add alpha
-        bg_overlay.fill(bg_color)
-        screen.blit(bg_overlay, (0, 0))
+            
+        # If the planet has a background image, use it
+        if self.current_planet.background_image:
+            # Get the size of the original background image
+            bg_width, bg_height = self.current_planet.background_image.get_size()
+            
+            # Determine how many tiles we need horizontally and vertically
+            tiles_x = SCREEN_WIDTH // bg_width + 1  # +1 to cover any remaining space
+            tiles_y = SCREEN_HEIGHT // bg_height + 1
+            
+            # Tile the background instead of stretching
+            for y in range(tiles_y):
+                for x in range(tiles_x):
+                    screen.blit(self.current_planet.background_image, 
+                               (x * bg_width, y * bg_height))
+        else:
+            # Apply planet's background color as a transparent overlay
+            bg_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            bg_color = (*self.current_planet.background_color, 100)  # Add alpha
+            bg_overlay.fill(bg_color)
+            screen.blit(bg_overlay, (0, 0))
 
         # Draw different screens based on game state
         if self.state == PLAYING or self.state == MENU or self.state == GAME_OVER or self.state == QUIZ_FAILURE:

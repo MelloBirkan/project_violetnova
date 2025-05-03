@@ -1,4 +1,5 @@
 import pygame
+import os
 
 class Spacecraft:
     WIDTH = 50
@@ -52,6 +53,10 @@ class Spacecraft:
         self.current_frame = 0
         self.animation_speed = 0.1
         self.animation_counter = 0
+        # Load spacecraft sprite
+        self.sprite_path = os.path.join("assets", "images", "nova.png")
+        self.sprite = pygame.image.load(self.sprite_path)
+        self.sprite = pygame.transform.scale(self.sprite, (self.WIDTH, self.HEIGHT))
         # Create spacecraft base and thrust frames
         self.create_animation_frames()
     
@@ -95,14 +100,12 @@ class Spacecraft:
         # Base image surface (spacecraft without flame)
         base = pygame.Surface((total_w, self.HEIGHT), pygame.SRCALPHA)
         base.fill((0, 0, 0, 0))
-        # Draw spacecraft body offset by flame extent
-        pygame.draw.ellipse(base, color_values["body"], (fe, 5, self.WIDTH - 10, self.HEIGHT - 10))
-        pygame.draw.polygon(base, color_values["body"], [
-            (fe + self.WIDTH - 10, self.HEIGHT // 2),
-            (fe + self.WIDTH,      self.HEIGHT // 2 - 5),
-            (fe + self.WIDTH,      self.HEIGHT // 2 + 5)
-        ])
-        pygame.draw.ellipse(base, color_values["window"], (fe + self.WIDTH - 30, self.HEIGHT // 2 - 5, 10, 10))
+        
+        # Create base image with sprite instead of drawn shapes
+        # Position sprite on the surface with offset for flame
+        sprite_rect = pygame.Rect(fe, 0, self.WIDTH, self.HEIGHT)
+        base.blit(self.sprite, sprite_rect)
+        
         # Determine engine colors: use flame_colors for gradient, else default engine color
         engine_colors = self.flame_colors if self.flame_colors else [color_values["engine"]]
         # Build thrust frames for each engine color
@@ -138,6 +141,7 @@ class Spacecraft:
         """Change spacecraft color"""
         if color in self.COLORS:
             self.color = color
+            # With sprite implementation, we just need to update the flame colors
             self.update_image()
             
     def draw(self, screen):

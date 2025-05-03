@@ -9,6 +9,7 @@ class Planet:
         self.obstacle_count = obstacle_count  # Number of obstacles based on planet size
         self.quiz_questions = quiz_questions  # List of dict with 'question', 'options', and 'answer'
         self.completed = False
+        self.background_image = None  # Will store the background image if available
 
         # Calculate actual gravity value (Earth gravity * factor)
         self.gravity = 0.25 * (self.gravity_factor / 100.0) 
@@ -23,6 +24,14 @@ class Planet:
 
         # Different ground styling based on planet
         if self.name == "Earth":
+            # Load background image for Earth
+            bg_path = os.path.join("assets", "images", "ceu_terra.png")
+            try:
+                self.background_image = pygame.image.load(bg_path).convert_alpha()
+            except pygame.error:
+                print("Failed to load Earth background image, using fallback")
+                self.background_image = None
+                
             # Load ground texture image for Earth and tile it to avoid stretching
             img_path = os.path.join("assets", "images", "earth_ground.png")
             try:
