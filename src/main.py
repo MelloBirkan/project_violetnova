@@ -541,10 +541,13 @@ class Game:
         target_obstacle = None
         min_distance = float('inf')
 
+        # Define a posição x do corpo da nave espacial
+        spacecraft_body_x = self.spacecraft.x + self.spacecraft.flame_extent
+
         for obstacle in self.obstacles:
-            # Mira apenas em obstáculos à frente da nave
-            if obstacle.x > self.spacecraft.x:
-                distance = obstacle.x - self.spacecraft.x
+            # Mira apenas em obstáculos à frente do corpo da nave
+            if obstacle.x > spacecraft_body_x: # Modificado aqui
+                distance = obstacle.x - spacecraft_body_x # Modificado aqui
                 if distance < min_distance:
                     min_distance = distance
                     target_obstacle = obstacle
@@ -857,6 +860,9 @@ class Game:
         if self.spacecraft.y <= 0 or self.spacecraft.y + self.spacecraft.HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
             return True
 
+        # Define a posição x do corpo da nave espacial para verificação de colisão
+        spacecraft_body_x = self.spacecraft.x + self.spacecraft.flame_extent
+
         # Verifica colisão com obstáculos
         for obstacle in self.obstacles:
             # Determina se estamos usando sprites e obtém a largura
@@ -864,8 +870,9 @@ class Game:
             obstacle_width = obstacle.top_width if using_sprites else obstacle.WIDTH
             
             # Verifica se há sobreposição horizontal (independente do tipo de obstáculo)
-            horizontal_overlap = (self.spacecraft.x + self.spacecraft.WIDTH > obstacle.x and 
-                                  self.spacecraft.x < obstacle.x + obstacle_width)
+            # Usa spacecraft_body_x para a borda esquerda da nave
+            horizontal_overlap = (spacecraft_body_x + self.spacecraft.WIDTH > obstacle.x and 
+                                  spacecraft_body_x < obstacle.x + obstacle_width)
             
             if horizontal_overlap:
                 # Limite superior da abertura
