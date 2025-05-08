@@ -857,11 +857,13 @@ class Game:
 
     def check_collision(self):
         # Verifica colisão com chão e teto
-        if self.spacecraft.y <= 0 or self.spacecraft.y + self.spacecraft.HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
+        if self.spacecraft.y <= 0 or self.spacecraft.y + self.spacecraft.HITBOX_HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
             return True
 
         # Define a posição x do corpo da nave espacial para verificação de colisão
-        spacecraft_body_x = self.spacecraft.x + self.spacecraft.flame_extent
+        # Adjust x to center the hitbox within the visual sprite if necessary
+        spacecraft_body_x = self.spacecraft.x + self.spacecraft.flame_extent + (self.spacecraft.WIDTH - self.spacecraft.HITBOX_WIDTH) / 2
+        spacecraft_body_y = self.spacecraft.y + (self.spacecraft.HEIGHT - self.spacecraft.HITBOX_HEIGHT) / 2
 
         # Verifica colisão com obstáculos
         for obstacle in self.obstacles:
@@ -870,8 +872,8 @@ class Game:
             obstacle_width = obstacle.top_width if using_sprites else obstacle.WIDTH
             
             # Verifica se há sobreposição horizontal (independente do tipo de obstáculo)
-            # Usa spacecraft_body_x para a borda esquerda da nave
-            horizontal_overlap = (spacecraft_body_x + self.spacecraft.WIDTH > obstacle.x and 
+            # Usa spacecraft_body_x para a borda esquerda da nave e HITBOX_WIDTH
+            horizontal_overlap = (spacecraft_body_x + self.spacecraft.HITBOX_WIDTH > obstacle.x and 
                                   spacecraft_body_x < obstacle.x + obstacle_width)
             
             if horizontal_overlap:
@@ -882,11 +884,11 @@ class Game:
                 lower_gap_limit = obstacle.gap_y + obstacle.GAP // 2
                 
                 # Verifica colisão com obstáculo superior - a nave precisa estar totalmente abaixo do limite
-                if self.spacecraft.y < upper_gap_limit:
+                if spacecraft_body_y < upper_gap_limit:
                     return True
 
                 # Verifica colisão com obstáculo inferior - a nave precisa estar totalmente acima do limite
-                if self.spacecraft.y + self.spacecraft.HEIGHT > lower_gap_limit:
+                if spacecraft_body_y + self.spacecraft.HITBOX_HEIGHT > lower_gap_limit:
                     return True
 
         return False

@@ -110,7 +110,11 @@ class Collectible:
             return False
             
         # Colisão simples de retângulo
-        spacecraft_rect = pygame.Rect(spacecraft.x, spacecraft.y, spacecraft.WIDTH, spacecraft.HEIGHT)
+        # Ajusta x para centralizar a hitbox dentro do sprite visual, se necessário
+        spacecraft_hitbox_x = spacecraft.x + spacecraft.flame_extent + (spacecraft.WIDTH - spacecraft.HITBOX_WIDTH) / 2
+        spacecraft_hitbox_y = spacecraft.y + (spacecraft.HEIGHT - spacecraft.HITBOX_HEIGHT) / 2
+
+        spacecraft_rect = pygame.Rect(spacecraft_hitbox_x, spacecraft_hitbox_y, spacecraft.HITBOX_WIDTH, spacecraft.HITBOX_HEIGHT)
         collectible_rect = pygame.Rect(self.x, self.y, self.WIDTH, self.HEIGHT)
         
         if spacecraft_rect.colliderect(collectible_rect):
