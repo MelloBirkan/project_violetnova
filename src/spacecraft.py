@@ -2,8 +2,8 @@ import pygame
 import os
 
 class Spacecraft:
-    WIDTH = 98
-    HEIGHT = 38
+    WIDTH = 100
+    HEIGHT = 40
     
     # Opções de cor da espaçonave
     COLORS = {

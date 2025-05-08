@@ -589,7 +589,52 @@ class Game:
             # Gera obstáculos
             current_time = pygame.time.get_ticks()
             if current_time - self.last_obstacle_time > self.obstacle_spawn_rate:
-                gap_y = random.randint(200, SCREEN_HEIGHT - FLOOR_HEIGHT - 150)
+                # Definimos a abertura (gap) fixa entre os obstáculos
+                # O gap precisa ser grande o suficiente para a nave passar
+                gap_size = Obstacle.GAP
+                
+                # Variação de posição para tornar mais desafiador
+                # Escolhe entre vários padrões de obstáculos para maior aleatoriedade
+                obstacle_pattern = random.randint(1, 5)
+                
+                if obstacle_pattern == 1:
+                    # Padrão 1: Passagem muito baixa (próxima ao solo)
+                    min_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 200
+                    max_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 120
+                    # Garantir que o range é válido
+                    min_gap_y = max(min_gap_y, gap_size // 2 + 50)
+                elif obstacle_pattern == 2:
+                    # Padrão 2: Passagem muito alta (próxima ao topo)
+                    min_gap_y = 120
+                    max_gap_y = 200
+                elif obstacle_pattern == 3:
+                    # Padrão 3: Obstáculo apenas em cima (sem obstáculo embaixo)
+                    # Colocamos o gap perto do chão para que o obstáculo inferior fique fora da tela
+                    min_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 100
+                    max_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 20
+                elif obstacle_pattern == 4:
+                    # Padrão 4: Obstáculo apenas embaixo (sem obstáculo em cima)
+                    # Colocamos o gap perto do topo para que o obstáculo superior fique fora da tela
+                    min_gap_y = 20
+                    max_gap_y = 100
+                else:
+                    # Padrão 5: Passagem no meio (padrão mais comum)
+                    min_gap_y = 200
+                    max_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 200
+                
+                # Garantir que max_gap_y é sempre maior que min_gap_y
+                if max_gap_y <= min_gap_y:
+                    # Caso os valores estejam invertidos, troca-os
+                    min_gap_y, max_gap_y = max_gap_y, min_gap_y
+                
+                # Garantimos um range mínimo para evitar erro
+                if max_gap_y - min_gap_y < 10:
+                    max_gap_y = min_gap_y + 10
+                
+                # Posição central da abertura
+                gap_y = random.randint(min_gap_y, max_gap_y)
+                
+                # Selecionamos aleatoriamente o tipo de obstáculo
                 obstacle_type = random.choice(list(Obstacle.TYPES.keys()))
 
                 # Cria um novo obstáculo
@@ -814,17 +859,28 @@ class Game:
 
         # Verifica colisão com obstáculos
         for obstacle in self.obstacles:
-            # Colisão com obstáculo superior
-            if (self.spacecraft.x + self.spacecraft.WIDTH > obstacle.x and 
-                self.spacecraft.x < obstacle.x + obstacle.WIDTH and 
-                self.spacecraft.y < obstacle.gap_y - obstacle.GAP // 2):
-                return True
+            # Determina se estamos usando sprites e obtém a largura
+            using_sprites = hasattr(obstacle, 'using_sprites') and obstacle.using_sprites
+            obstacle_width = obstacle.top_width if using_sprites else obstacle.WIDTH
+            
+            # Verifica se há sobreposição horizontal (independente do tipo de obstáculo)
+            horizontal_overlap = (self.spacecraft.x + self.spacecraft.WIDTH > obstacle.x and 
+                                  self.spacecraft.x < obstacle.x + obstacle_width)
+            
+            if horizontal_overlap:
+                # Limite superior da abertura
+                upper_gap_limit = obstacle.gap_y - obstacle.GAP // 2
+                
+                # Limite inferior da abertura
+                lower_gap_limit = obstacle.gap_y + obstacle.GAP // 2
+                
+                # Verifica colisão com obstáculo superior - a nave precisa estar totalmente abaixo do limite
+                if self.spacecraft.y < upper_gap_limit:
+                    return True
 
-            # Colisão com obstáculo inferior
-            if (self.spacecraft.x + self.spacecraft.WIDTH > obstacle.x and 
-                self.spacecraft.x < obstacle.x + obstacle.WIDTH and 
-                self.spacecraft.y + self.spacecraft.HEIGHT > obstacle.gap_y + obstacle.GAP // 2):
-                return True
+                # Verifica colisão com obstáculo inferior - a nave precisa estar totalmente acima do limite
+                if self.spacecraft.y + self.spacecraft.HEIGHT > lower_gap_limit:
+                    return True
 
         return False
 
