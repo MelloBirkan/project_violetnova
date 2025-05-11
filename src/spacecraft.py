@@ -69,23 +69,39 @@ class Spacecraft:
         # Cria a base da espaçonave e os quadros de empuxo
         self.create_animation_frames()
     
-    def update(self, gravity):
+    def update(self, gravity, screen_height=720, floor_height=100):
         # Aplica a gravidade e atualiza a posição
         self.velocity += gravity
-        
+
         # Adapta a potência do empuxo com base na gravidade do planeta
         self.thrust_multiplier = max(1.0, gravity * 4)
-        
+
         # Aplica o impulso de empuxo
         if self.thrusting:
             self.velocity -= self.thrust_power * self.thrust_multiplier
             self.thrusting = False
-        
-        self.y += self.velocity
-        
+
+        # Calcula nova posição
+        new_y = self.y + self.velocity
+
+        # Impede que a nave ultrapasse o limite superior da tela
+        if new_y < 0:
+            new_y = 0
+            self.velocity = 0  # Zera a velocidade para evitar oscilação
+
+        # Impede que a nave ultrapasse o chão, mas permite que colida com ele
+        ground_limit = screen_height - floor_height - self.HITBOX_HEIGHT
+        if new_y > ground_limit:
+            new_y = ground_limit
+            # Mantém a verificação de colisão no método check_collision,
+            # mas impede que a nave vá abaixo do chão visualmente
+
+        # Aplica a nova posição
+        self.y = new_y
+
         # Atualiza o ângulo da espaçonave com base na velocidade
         self.angle = min(max(-30, -self.velocity * 2), 60)
-        
+
         # Anima os quadros da chama de empuxo (sempre ciclando)
         self.animation_counter += self.animation_speed
         if self.animation_counter >= 1:

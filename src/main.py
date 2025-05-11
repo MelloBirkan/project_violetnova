@@ -315,7 +315,7 @@ class Game:
     # Constantes para o sistema de vidas
     MAX_LIVES = 3
     INVULNERABILITY_TIME = 90  # frames (1.5s at 60fps)
-    KNOCKBACK_VELOCITY = -5
+    KNOCKBACK_VELOCITY = -3.5  # Reduzido o valor do recoil de -5 para -3.5
 
     def __init__(self):
         self.state = MENU
@@ -437,12 +437,15 @@ class Game:
             self.score = 0
             # Atualiza a dificuldade com base no índice do planeta
             self.difficulty_multiplier = 1.0 + (self.current_planet_index * 0.1)
+            # Não redefine as vidas ao mudar de planeta
         else:
             # Começo do zero
             self.score = 0
             self.current_planet_index = 0
             self.current_planet = self.planets[self.current_planet_index]
             self.difficulty_multiplier = 1.0
+            # Reinicia vidas para o máximo quando começa um novo jogo após game over
+            self.reset_lives()
 
         # Reinicia a posição da nave espacial
         self.spacecraft = Spacecraft(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.spacecraft_color)
@@ -464,7 +467,7 @@ class Game:
         # NOVA AI deve alertar sobre a gravidade
         if new_planet:
             self.nova.alert_gravity_change(
-                self.current_planet.name, 
+                self.current_planet.name,
                 self.current_planet.gravity_factor
             )
 
@@ -585,13 +588,22 @@ class Game:
         if not self.invulnerable:
             self.lives -= 1
 
+            # Contagem de hit mais intuitiva (começa com 3 vidas, 4º hit = game over)
+            hit_count = self.MAX_LIVES - self.lives
+
             # Verifica se já perdeu todas as vidas
-            if self.lives <= 0:
+            if hit_count >= 4:  # 4 hits = game over
                 self.lives = 0  # Garante que não fique negativo
-                return False  # Sem vidas restantes
-            elif self.lives == 1:
-                # Alerta quando apenas uma vida restar
-                self.nova.show_message("Warning: Only one life remaining!", "alert")
+                self.nova.show_message("Critical damage! Game over!", "alert")
+                self.state = GAME_OVER  # Muda imediatamente para o estado de game over
+                if self.score > self.high_score_manager.get():
+                    self.high_score = self.score
+                    self.high_score_manager.save(self.score)
+                return False  # Quarta colisão causa game over
+            elif hit_count == 3:  # 3 hits = última vida
+                self.nova.show_message("Warning: Final hit remaining!", "alert")
+            elif hit_count == 2:  # 2 hits = penúltima vida
+                self.nova.show_message("Warning: Two hits remaining!", "alert")
 
             return True  # Ainda tem vidas
         return True  # Não perdeu vida por estar invulnerável
@@ -639,8 +651,8 @@ class Game:
                 self.nova.show_message("Shield systems restored", "normal")
 
         if self.state == PLAYING:
-            # Atualiza a nave com a gravidade do planeta atual
-            self.spacecraft.update(self.current_planet.gravity)
+            # Atualiza a nave com a gravidade do planeta atual e os limites da tela
+            self.spacecraft.update(self.current_planet.gravity, SCREEN_HEIGHT, FLOOR_HEIGHT)
             # Impulso contínuo enquanto o espaço está pressionado no modo hold
             if self.control_mode == CONTROL_MODE_HOLD and self.space_held:
                 # Aplica pequeno impulso contínuo (20% da potência de impulso)
@@ -820,15 +832,11 @@ class Game:
             self.obstacles = [obs for obs in self.obstacles if obs.x > -obs.WIDTH]
             self.collectibles = [col for col in self.collectibles if col.x > -col.WIDTH]
 
-            # Verifica colisões
-            if self.check_collision():
+            # Verifica colisões - check_collision retorna True se houve colisão e ainda há vidas, False se não houve colisão ou game over
+            collision_result = self.check_collision()
+            if collision_result is not False:  # Se houve colisão (pode ser True se ainda tem vidas ou já foi para GAME_OVER)
                 hit_sound.play()
-                # Verifica se ainda tem vidas
-                if self.lives <= 0:
-                    self.state = GAME_OVER
-                    if self.score > self.high_score_manager.get():
-                        self.high_score = self.score
-                        self.high_score_manager.save(self.score)
+                # Game over já é tratado dentro de lose_life
 
             # Move o chão
             self.floor_x = (self.floor_x - self.obstacle_speed) % 800
@@ -847,8 +855,7 @@ class Game:
             # Verifica se o quiz está completo
             if self.quiz.is_complete():
                 if self.quiz.is_correct():
-                    # Bônus: adicionar uma vida pelo acerto perfeito do quiz
-                    self.add_life()
+                    # Removido o bônus de vida para evitar aumento de vidas durante transição de planetas
                     # Procede para o próximo planeta
                     self._start_transition()
                 else:
@@ -927,10 +934,9 @@ class Game:
         if self.invulnerable:
             return False
 
-        # Verifica colisão com chão e teto
+        # Verifica colisão com teto ou chão
         if self.spacecraft.y <= 0 or self.spacecraft.y + self.spacecraft.HITBOX_HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
-            self.handle_collision("boundary")
-            return True
+            return self.handle_collision("boundary")
 
         # Define a posição x do corpo da nave espacial para verificação de colisão
         # Adjust x to center the hitbox within the visual sprite if necessary
@@ -957,39 +963,51 @@ class Game:
 
                 # Verifica colisão com obstáculo superior - a nave precisa estar totalmente abaixo do limite
                 if spacecraft_body_y < upper_gap_limit:
-                    self.handle_collision("obstacle", obstacle, "upper")
-                    return True
+                    return self.handle_collision("obstacle", obstacle, "upper")
 
                 # Verifica colisão com obstáculo inferior - a nave precisa estar totalmente acima do limite
                 if spacecraft_body_y + self.spacecraft.HITBOX_HEIGHT > lower_gap_limit:
-                    self.handle_collision("obstacle", obstacle, "lower")
-                    return True
+                    return self.handle_collision("obstacle", obstacle, "lower")
 
         return False
 
     def handle_collision(self, collision_type, obstacle=None, obstacle_part=None):
         """Gerencia colisões, aplicando perda de vida e efeitos visuais"""
-        # Perde uma vida
-        self.lose_life()
+        # Perde uma vida e verifica se ainda há vidas
+        has_lives_left = self.lose_life()
 
-        # Aplica efeito de knockback (empurrão)
-        self.spacecraft.velocity = self.KNOCKBACK_VELOCITY
-
-        # Adiciona movimento horizontal para afastar da colisão
-        if collision_type == "obstacle" and obstacle is not None:
-            # Move a nave um pouco para trás do obstáculo
-            if self.spacecraft.x > obstacle.x:
-                self.spacecraft.x += 20  # Afasta para a direita
+        # Verifica se a colisão foi com o chão para aplicar knockback apropriado
+        if collision_type == "boundary":
+            # Se a nave está no chão (colisão com o solo)
+            if self.spacecraft.y + self.spacecraft.HITBOX_HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
+                # Aplica efeito de knockback para cima se bateu no chão
+                self.spacecraft.velocity = self.KNOCKBACK_VELOCITY * 0.8  # Força para cima reduzida
+                # Garante que a nave não fique abaixo do chão
+                self.spacecraft.y = SCREEN_HEIGHT - FLOOR_HEIGHT - self.spacecraft.HITBOX_HEIGHT
             else:
-                self.spacecraft.x -= 20  # Afasta para a esquerda
+                # Se bateu no teto, aplica knockback para baixo
+                self.spacecraft.velocity = abs(self.KNOCKBACK_VELOCITY) * 0.8  # Força para baixo reduzida
+                # Garante que a nave não fique acima do teto
+                self.spacecraft.y = 0
+        else:
+            # Padrão para outros tipos de colisão
+            self.spacecraft.velocity = self.KNOCKBACK_VELOCITY
+
+        # Adiciona movimento horizontal para afastar da colisão com obstáculos
+        if collision_type == "obstacle" and obstacle is not None:
+            # Move a nave um pouco para trás do obstáculo (reduzido de 20 para 15)
+            if self.spacecraft.x > obstacle.x:
+                self.spacecraft.x += 15  # Afasta para a direita
+            else:
+                self.spacecraft.x -= 15  # Afasta para a esquerda
 
             # Direção para esquivar baseada na parte do obstáculo atingida
             if obstacle_part == "upper":
                 # Colisão com obstáculo superior, empurra para baixo
-                self.spacecraft.velocity = abs(self.KNOCKBACK_VELOCITY)  # Força positiva (para baixo)
+                self.spacecraft.velocity = abs(self.KNOCKBACK_VELOCITY) * 0.8  # Força positiva reduzida (para baixo)
             elif obstacle_part == "lower":
                 # Colisão com obstáculo inferior, empurra para cima
-                self.spacecraft.velocity = self.KNOCKBACK_VELOCITY  # Força negativa (para cima)
+                self.spacecraft.velocity = self.KNOCKBACK_VELOCITY * 0.8  # Força negativa reduzida (para cima)
 
         # Define estado de invulnerabilidade
         self.invulnerable = True
@@ -1003,6 +1021,9 @@ class Game:
         self.nova.show_message("Hull integrity compromised!", "alert")
 
         # Som de colisão (já está sendo tocado na função de update)
+
+        # Retorna se ainda há vidas
+        return has_lives_left
 
     def draw(self):
         # Variáveis para controlar o efeito de screen shake
