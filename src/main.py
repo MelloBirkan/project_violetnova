@@ -312,19 +312,31 @@ def create_planet_data():
     return planet_data
 
 class Game:
+    # Constantes para o sistema de vidas
+    MAX_LIVES = 3
+    INVULNERABILITY_TIME = 90  # frames (1.5s at 60fps)
+    KNOCKBACK_VELOCITY = -5
+
     def __init__(self):
         self.state = MENU
         self.score = 0
         self.high_score_manager = HighScore()
         self.high_score = self.high_score_manager.get()
 
+        # Sistema de vidas
+        self.lives = self.MAX_LIVES
+        self.invulnerable = False
+        self.invulnerable_timer = 0
+        self.screen_shake = 0  # Para efeito visual de dano
+        self.flash_effect = 0  # Para efeito visual de dano
+
         # Cria dados dos planetas
         self.planet_data = create_planet_data()
-        self.planets = [Planet(data["name"], 
-                              data["gravity_factor"], 
-                              data["background_color"], 
-                              data["obstacle_count"], 
-                              data["quiz_questions"]) 
+        self.planets = [Planet(data["name"],
+                              data["gravity_factor"],
+                              data["background_color"],
+                              data["obstacle_count"],
+                              data["quiz_questions"])
                        for data in self.planet_data]
 
         # Começa na Terra
@@ -568,6 +580,40 @@ class Game:
                 # Inicia o quiz para avanço de planeta
                 self._start_quiz()
 
+    def lose_life(self):
+        """Reduz o número de vidas e verifica game over"""
+        if not self.invulnerable:
+            self.lives -= 1
+
+            # Verifica se já perdeu todas as vidas
+            if self.lives <= 0:
+                self.lives = 0  # Garante que não fique negativo
+                return False  # Sem vidas restantes
+            elif self.lives == 1:
+                # Alerta quando apenas uma vida restar
+                self.nova.show_message("Warning: Only one life remaining!", "alert")
+
+            return True  # Ainda tem vidas
+        return True  # Não perdeu vida por estar invulnerável
+
+    def add_life(self):
+        """Adiciona uma vida, até o máximo permitido"""
+        if self.lives < self.MAX_LIVES:
+            self.lives += 1
+            self.nova.show_message("Extra life acquired!", "excited")
+            return True
+        return False  # Já está com o máximo de vidas
+
+    def reset_lives(self):
+        """Reinicia as vidas para o valor máximo"""
+        self.lives = self.MAX_LIVES
+        self.invulnerable = False
+        self.invulnerable_timer = 0
+
+    def is_invulnerable(self):
+        """Retorna o estado de invulnerabilidade atual"""
+        return self.invulnerable
+
     def update(self):
         # Atualiza estrelas (efeito de cintilação)
         for star in self.stars:
@@ -577,6 +623,20 @@ class Game:
 
         # Atualiza NOVA AI
         self.nova.update()
+
+        # Atualiza efeitos visuais
+        if self.screen_shake > 0:
+            self.screen_shake -= 1
+
+        if self.flash_effect > 0:
+            self.flash_effect -= 1
+
+        # Atualiza temporizador de invulnerabilidade
+        if self.invulnerable:
+            self.invulnerable_timer -= 1
+            if self.invulnerable_timer <= 0:
+                self.invulnerable = False
+                self.nova.show_message("Shield systems restored", "normal")
 
         if self.state == PLAYING:
             # Atualiza a nave com a gravidade do planeta atual
@@ -595,48 +655,44 @@ class Game:
                 # Definimos a abertura (gap) fixa entre os obstáculos
                 # O gap precisa ser grande o suficiente para a nave passar
                 gap_size = Obstacle.GAP
-                
-                # Variação de posição para tornar mais desafiador
-                # Escolhe entre vários padrões de obstáculos para maior aleatoriedade
-                obstacle_pattern = random.randint(1, 5)
-                
-                if obstacle_pattern == 1:
-                    # Padrão 1: Passagem muito baixa (próxima ao solo)
-                    min_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 200
-                    max_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 120
-                    # Garantir que o range é válido
-                    min_gap_y = max(min_gap_y, gap_size // 2 + 50)
-                elif obstacle_pattern == 2:
-                    # Padrão 2: Passagem muito alta (próxima ao topo)
-                    min_gap_y = 120
-                    max_gap_y = 200
-                elif obstacle_pattern == 3:
-                    # Padrão 3: Obstáculo apenas em cima (sem obstáculo embaixo)
-                    # Colocamos o gap perto do chão para que o obstáculo inferior fique fora da tela
-                    min_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 100
-                    max_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 20
-                elif obstacle_pattern == 4:
-                    # Padrão 4: Obstáculo apenas embaixo (sem obstáculo em cima)
-                    # Colocamos o gap perto do topo para que o obstáculo superior fique fora da tela
-                    min_gap_y = 20
-                    max_gap_y = 100
-                else:
-                    # Padrão 5: Passagem no meio (padrão mais comum)
-                    min_gap_y = 200
-                    max_gap_y = SCREEN_HEIGHT - FLOOR_HEIGHT - 200
-                
-                # Garantir que max_gap_y é sempre maior que min_gap_y
-                if max_gap_y <= min_gap_y:
-                    # Caso os valores estejam invertidos, troca-os
-                    min_gap_y, max_gap_y = max_gap_y, min_gap_y
-                
-                # Garantimos um range mínimo para evitar erro
-                if max_gap_y - min_gap_y < 10:
-                    max_gap_y = min_gap_y + 10
-                
-                # Posição central da abertura
-                gap_y = random.randint(min_gap_y, max_gap_y)
-                
+
+                # Calculate the y-coordinate for the center of the gap.
+                # This allows for a wider, more random vertical placement of the gap,
+                # including positions where one of the pipes might be very small (effectively a single pipe scenario).
+
+                # Minimum y for the center of the gap: (gap_size / 2)
+                # This ensures the top of the gap (gap_y - gap_size / 2) can be at y = 0.
+                min_gap_center_y = gap_size // 2
+
+                # Maximum y for the center of the gap: (SCREEN_HEIGHT - FLOOR_HEIGHT - gap_size / 2)
+                # This ensures the bottom of the gap (gap_y + gap_size / 2) can be at the top of the floor.
+                max_gap_center_y = SCREEN_HEIGHT - FLOOR_HEIGHT - (gap_size // 2)
+
+                # Ensure that min_gap_center_y is not greater than max_gap_center_y,
+                # which could happen with extreme constants (e.g., very small screen or very large gap).
+                if min_gap_center_y > max_gap_center_y:
+                    # Fallback: If the calculated range is invalid, set gap_y to the center of the
+                    # theoretical valid space for a gap center. This makes it a fixed point.
+                    # This scenario is unlikely with current game constants but ensures robustness.
+                    target_y = ( (gap_size // 2) + (SCREEN_HEIGHT - FLOOR_HEIGHT - (gap_size // 2)) ) // 2
+
+                    # Define absolute boundaries for clamping in truly extreme cases
+                    abs_min_y = gap_size // 2
+                    abs_max_y = SCREEN_HEIGHT - FLOOR_HEIGHT - (gap_size // 2)
+
+                    if abs_min_y > abs_max_y: # e.g. gap_size > playable height
+                        # If even absolute bounds are inverted, just use middle of screen's playable height
+                        target_y = (SCREEN_HEIGHT - FLOOR_HEIGHT) // 2
+                    else:
+                        # Clamp target_y to be within what's physically possible for a gap center
+                        target_y = max(abs_min_y, min(target_y, abs_max_y))
+
+                    min_gap_center_y = target_y
+                    max_gap_center_y = target_y
+
+                # Generate the random y position for the center of the gap
+                gap_y = random.randint(min_gap_center_y, max_gap_center_y)
+
                 # Selecionamos aleatoriamente o tipo de obstáculo
                 obstacle_type = random.choice(list(Obstacle.TYPES.keys()))
 
@@ -654,11 +710,15 @@ class Game:
                 # Coloca o colecionável em um local seguro
                 x = SCREEN_WIDTH
                 y = random.randint(100, SCREEN_HEIGHT - FLOOR_HEIGHT - 50)
-                # Determina o tipo de colecionável (90% dados, 10% arma)
-                if self.weapon_active or random.random() < 0.9:
-                    collectible_type = "data"
-                else:
+
+                # Determina o tipo de colecionável (1% chance para vida, 10% arma, resto dados)
+                collectible_type = "data"
+                rand_val = random.random()
+                if rand_val < 0.01:  # 1% chance para vida
+                    collectible_type = "life"
+                elif rand_val < 0.11 and not self.weapon_active:  # 10% chance para arma
                     collectible_type = "weapon"
+
                 self.collectibles.append(Collectible(x, y, collectible_type))
                 self.last_collectible_time = current_time
 
@@ -674,7 +734,7 @@ class Game:
 
                     # Obtém o limiar para o planeta atual ou usa o padrão
                     current_threshold = self.level_progression_thresholds.get(
-                        self.current_planet.name, 
+                        self.current_planet.name,
                         10  # Limiar padrão para planetas não especificados
                     )
 
@@ -704,7 +764,7 @@ class Game:
 
                         # Verifica se adicionar pontos acionou a progressão de nível
                         current_threshold = self.level_progression_thresholds.get(
-                            self.current_planet.name, 
+                            self.current_planet.name,
                             10  # Limiar padrão para planetas não especificados
                         )
 
@@ -724,7 +784,7 @@ class Game:
 
                         # Verifica se adicionar pontos acionou a progressão de nível
                         current_threshold = self.level_progression_thresholds.get(
-                            self.current_planet.name, 
+                            self.current_planet.name,
                             10  # Limiar padrão para planetas não especificados
                         )
 
@@ -742,6 +802,9 @@ class Game:
                         self.weapon_active = True
                         self.weapon_timer = 600  # 10 segundos a 60fps
                         self.nova.react_to_discovery("weapon")
+                    elif effect["effect"] == "life":
+                        # Adiciona uma vida
+                        self.add_life()
 
                     # Remove item coletado
                     self.collectibles.remove(collectible)
@@ -760,10 +823,12 @@ class Game:
             # Verifica colisões
             if self.check_collision():
                 hit_sound.play()
-                self.state = GAME_OVER
-                if self.score > self.high_score_manager.get():
-                    self.high_score = self.score
-                    self.high_score_manager.save(self.score)
+                # Verifica se ainda tem vidas
+                if self.lives <= 0:
+                    self.state = GAME_OVER
+                    if self.score > self.high_score_manager.get():
+                        self.high_score = self.score
+                        self.high_score_manager.save(self.score)
 
             # Move o chão
             self.floor_x = (self.floor_x - self.obstacle_speed) % 800
@@ -782,6 +847,8 @@ class Game:
             # Verifica se o quiz está completo
             if self.quiz.is_complete():
                 if self.quiz.is_correct():
+                    # Bônus: adicionar uma vida pelo acerto perfeito do quiz
+                    self.add_life()
                     # Procede para o próximo planeta
                     self._start_transition()
                 else:
@@ -856,8 +923,13 @@ class Game:
         self.nova.show_message(f"Entrando na órbita de {self.current_planet.name}!", "excited")
 
     def check_collision(self):
+        # Se a nave está invulnerável, ignora colisões
+        if self.invulnerable:
+            return False
+
         # Verifica colisão com chão e teto
         if self.spacecraft.y <= 0 or self.spacecraft.y + self.spacecraft.HITBOX_HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
+            self.handle_collision("boundary")
             return True
 
         # Define a posição x do corpo da nave espacial para verificação de colisão
@@ -870,30 +942,79 @@ class Game:
             # Determina se estamos usando sprites e obtém a largura
             using_sprites = hasattr(obstacle, 'using_sprites') and obstacle.using_sprites
             obstacle_width = obstacle.top_width if using_sprites else obstacle.WIDTH
-            
+
             # Verifica se há sobreposição horizontal (independente do tipo de obstáculo)
             # Usa spacecraft_body_x para a borda esquerda da nave e HITBOX_WIDTH
-            horizontal_overlap = (spacecraft_body_x + self.spacecraft.HITBOX_WIDTH > obstacle.x and 
+            horizontal_overlap = (spacecraft_body_x + self.spacecraft.HITBOX_WIDTH > obstacle.x and
                                   spacecraft_body_x < obstacle.x + obstacle_width)
-            
+
             if horizontal_overlap:
                 # Limite superior da abertura
                 upper_gap_limit = obstacle.gap_y - obstacle.GAP // 2
-                
+
                 # Limite inferior da abertura
                 lower_gap_limit = obstacle.gap_y + obstacle.GAP // 2
-                
+
                 # Verifica colisão com obstáculo superior - a nave precisa estar totalmente abaixo do limite
                 if spacecraft_body_y < upper_gap_limit:
+                    self.handle_collision("obstacle", obstacle, "upper")
                     return True
 
                 # Verifica colisão com obstáculo inferior - a nave precisa estar totalmente acima do limite
                 if spacecraft_body_y + self.spacecraft.HITBOX_HEIGHT > lower_gap_limit:
+                    self.handle_collision("obstacle", obstacle, "lower")
                     return True
 
         return False
 
+    def handle_collision(self, collision_type, obstacle=None, obstacle_part=None):
+        """Gerencia colisões, aplicando perda de vida e efeitos visuais"""
+        # Perde uma vida
+        self.lose_life()
+
+        # Aplica efeito de knockback (empurrão)
+        self.spacecraft.velocity = self.KNOCKBACK_VELOCITY
+
+        # Adiciona movimento horizontal para afastar da colisão
+        if collision_type == "obstacle" and obstacle is not None:
+            # Move a nave um pouco para trás do obstáculo
+            if self.spacecraft.x > obstacle.x:
+                self.spacecraft.x += 20  # Afasta para a direita
+            else:
+                self.spacecraft.x -= 20  # Afasta para a esquerda
+
+            # Direção para esquivar baseada na parte do obstáculo atingida
+            if obstacle_part == "upper":
+                # Colisão com obstáculo superior, empurra para baixo
+                self.spacecraft.velocity = abs(self.KNOCKBACK_VELOCITY)  # Força positiva (para baixo)
+            elif obstacle_part == "lower":
+                # Colisão com obstáculo inferior, empurra para cima
+                self.spacecraft.velocity = self.KNOCKBACK_VELOCITY  # Força negativa (para cima)
+
+        # Define estado de invulnerabilidade
+        self.invulnerable = True
+        self.invulnerable_timer = self.INVULNERABILITY_TIME
+
+        # Ativa efeitos visuais
+        self.screen_shake = 18  # Frames de tremor de tela
+        self.flash_effect = 5   # Frames de flash da tela
+
+        # Notificação de NOVA AI sobre dano
+        self.nova.show_message("Hull integrity compromised!", "alert")
+
+        # Som de colisão (já está sendo tocado na função de update)
+
     def draw(self):
+        # Variáveis para controlar o efeito de screen shake
+        use_shake_effect = self.screen_shake > 0
+        offset_x, offset_y = 0, 0
+
+        # Calcula a intensidade do tremor se necessário
+        if use_shake_effect:
+            shake_intensity = min(8, self.screen_shake / 2)  # Intensidade diminui com o tempo
+            offset_x = random.randint(-int(shake_intensity), int(shake_intensity))
+            offset_y = random.randint(-int(shake_intensity), int(shake_intensity))
+
         # Cria um fundo escuro base para o espaço
         screen.fill((0, 0, 20))
 
@@ -901,28 +1022,38 @@ class Game:
         for star in self.stars:
             # Desenha estrela com brilho atual
             color = (star["brightness"], star["brightness"], star["brightness"])
-            pygame.draw.circle(screen, color, (int(star["x"]), int(star["y"])), star["size"])
-            
+            x_pos = int(star["x"]) + offset_x
+            y_pos = int(star["y"]) + offset_y
+            pygame.draw.circle(screen, color, (x_pos, y_pos), star["size"])
+
         # Se o planeta tiver uma imagem de fundo, usa ela
         if self.current_planet.background_image:
             # Obtém o tamanho da imagem de fundo original
             bg_width, bg_height = self.current_planet.background_image.get_size()
-            
+
             # Determina quantos tiles precisamos horizontalmente e verticalmente
             tiles_x = SCREEN_WIDTH // bg_width + 1  # +1 para cobrir qualquer espaço restante
             tiles_y = SCREEN_HEIGHT // bg_height + 1
-            
+
             # Ladrilha o fundo em vez de esticar
             for y in range(tiles_y):
                 for x in range(tiles_x):
-                    screen.blit(self.current_planet.background_image, 
-                               (x * bg_width, y * bg_height))
+                    screen.blit(self.current_planet.background_image,
+                               (x * bg_width + offset_x, y * bg_height + offset_y))
         else:
             # Aplica a cor de fundo do planeta como uma sobreposição transparente
             bg_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             bg_color = (*self.current_planet.background_color, 100)  # Adiciona alfa
             bg_overlay.fill(bg_color)
-            screen.blit(bg_overlay, (0, 0))
+            screen.blit(bg_overlay, (offset_x, offset_y))
+
+        # Aplica efeito de flash quando sofre dano
+        if self.flash_effect > 0:
+            # Intensidade do flash diminui com o tempo
+            flash_alpha = min(180, self.flash_effect * 40)
+            flash_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            flash_overlay.fill((255, 0, 0, flash_alpha))  # Flash vermelho
+            screen.blit(flash_overlay, (0, 0))
 
         # Draw different screens based on game state
         if self.state == PLAYING or self.state == MENU or self.state == GAME_OVER or self.state == QUIZ_FAILURE:
@@ -937,8 +1068,8 @@ class Game:
             # Desenha chão/solo
             self.current_planet.draw_ground(screen, self.floor_x, SCREEN_HEIGHT)
 
-            # Desenha nave espacial
-            self.spacecraft.draw(screen)
+            # Desenha nave espacial (com efeito visual de invulnerabilidade se aplicável)
+            self.spacecraft.draw(screen, self.invulnerable)
 
             # Desenha o nome do planeta atual e a pontuação do jogador
             if self.state != MENU:
@@ -949,7 +1080,7 @@ class Game:
 
                 # Obtém limiar para o planeta atual
                 current_threshold = self.level_progression_thresholds.get(
-                    self.current_planet.name, 
+                    self.current_planet.name,
                     10  # Limiar padrão
                 )
 
@@ -958,6 +1089,66 @@ class Game:
 
                 high_score_text = SMALL_FONT.render(f"Maior Pontuação: {self.high_score_manager.get()}", True, (255, 255, 255))
                 screen.blit(high_score_text, (20, 80))
+
+                # Desenha o indicador de vidas
+                lives_text = SMALL_FONT.render(f"Vidas:", True, (255, 255, 255))
+                screen.blit(lives_text, (20, 110))
+
+                # Desenha ícones para as vidas (mini-naves)
+                life_icon_width = 30
+                life_icon_height = 15
+                life_icon_padding = 5
+                life_base_x = 80
+                life_y = 112
+
+                for i in range(self.MAX_LIVES):
+                    # Determina a cor baseada em se esta vida está disponível
+                    if i < self.lives:
+                        # Vida disponível - usa a cor atual da nave
+                        color = Spacecraft.COLORS[self.spacecraft_color]["body"]
+                        alpha = 255
+                    else:
+                        # Vida perdida - versão cinza e semitransparente
+                        color = (100, 100, 100)
+                        alpha = 128
+
+                    # Cria o ícone da mini-nave
+                    life_icon = pygame.Surface((life_icon_width, life_icon_height), pygame.SRCALPHA)
+                    life_icon.fill((0, 0, 0, 0))  # Transparente
+
+                    # Desenha uma forma simples da nave
+                    pygame.draw.ellipse(life_icon, (*color, alpha),
+                                      (0, 0, life_icon_width, life_icon_height))
+
+                    # Adiciona uma pequena janela/cabine
+                    window_color = Spacecraft.COLORS[self.spacecraft_color]["window"]
+                    pygame.draw.ellipse(life_icon, (*window_color, alpha),
+                                      (life_icon_width // 2, life_icon_height // 4,
+                                       life_icon_width // 4, life_icon_height // 2))
+
+                    # Posiciona o ícone
+                    icon_x = life_base_x + (life_icon_width + life_icon_padding) * i
+
+                    # Efeito de pulsação para a última vida
+                    if i == 0 and self.lives == 1:  # Última vida
+                        # Pulsa em vermelho
+                        pulse = abs(math.sin(pygame.time.get_ticks() * 0.01)) * 255
+                        pulse_overlay = pygame.Surface((life_icon_width, life_icon_height), pygame.SRCALPHA)
+                        pulse_overlay.fill((255, 0, 0, int(pulse * 0.5)))  # Vermelho pulsante
+                        life_icon.blit(pulse_overlay, (0, 0))
+
+                    # Efeito de invulnerabilidade
+                    if self.invulnerable and i < self.lives:
+                        # Faz o ícone piscar
+                        blink = (pygame.time.get_ticks() // 200) % 2  # Alterna 0/1 a cada 200ms
+                        if blink:
+                            # Sobreposição azulada para indicar invulnerabilidade
+                            shield_overlay = pygame.Surface((life_icon_width, life_icon_height), pygame.SRCALPHA)
+                            shield_overlay.fill((100, 100, 255, 100))  # Azul claro translúcido
+                            life_icon.blit(shield_overlay, (0, 0))
+
+                    # Desenha o ícone no ecrã
+                    screen.blit(life_icon, (icon_x, life_y))
 
                 # Desenha status da arma no centro superior se ativa (movido do lado direito)
                 if self.weapon_active:

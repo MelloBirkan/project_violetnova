@@ -189,7 +189,7 @@ class Spacecraft:
             # Com a implementação do sprite, só precisamos atualizar as cores da chama
             self.update_image()
             
-    def draw(self, screen):
+    def draw(self, screen, invulnerable=False):
         """Desenha a espaçonave, mostrando a chama de empuxo se o empuxo foi acionado recentemente"""
         # Determina se devemos exibir a chama de empuxo
         now = pygame.time.get_ticks()
@@ -199,6 +199,18 @@ class Spacecraft:
         else:
             # Imagem base sem exaustão
             current = self.base_image
+
+        # Efeito de piscar quando invulnerável
+        if invulnerable:
+            # Faz a nave piscar a cada 200ms
+            if (now // 200) % 2 == 0:
+                # Cria uma cópia da imagem para modificar
+                current = current.copy()
+                # Adiciona uma sobreposição azulada semitransparente
+                overlay = pygame.Surface(current.get_size(), pygame.SRCALPHA)
+                overlay.fill((100, 100, 255, 100))  # Azul translúcido
+                current.blit(overlay, (0, 0))
+
         # Rotaciona a imagem do quadro atual (ângulo positivo inclina o nariz para cima)
         rotated = pygame.transform.rotate(current, self.angle)
         # Calcula a posição central considerando a extensão da chama
