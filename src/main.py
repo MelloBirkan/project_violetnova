@@ -413,7 +413,8 @@ class Game:
         }
 
         # Assistente NOVA AI
-        self.nova = NovaAI(SCREEN_WIDTH, SCREEN_HEIGHT)
+        # Passa o dicionário de tradução para a NovaAI
+        self.nova = NovaAI(SCREEN_WIDTH, SCREEN_HEIGHT, PLANET_NAME_PT)
 
         # Sistema de quiz
         self.quiz = Quiz(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -658,8 +659,9 @@ class Game:
                 10  # Limiar padrão para planetas não especificados
             )
             if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
-                next_planet = self.planets[self.current_planet_index + 1]
-                self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet.name}!", "excited")
+                next_planet_en = self.planets[self.current_planet_index + 1].name
+                next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en) # Traduz o nome do planeta
+                self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
                 # Inicia o quiz para avanço de planeta
                 self._start_quiz()
 
@@ -674,7 +676,7 @@ class Game:
             # Verifica se já perdeu todas as vidas
             if hit_count >= 4:  # 4 hits = game over
                 self.lives = 0  # Garante que não fique negativo
-                self.nova.show_message("Critical damage! Game over!", "alert")
+                self.nova.show_message("Dano crítico! Fim de jogo!", "alert") # Traduzido
                 self.state = GAME_OVER  # Muda imediatamente para o estado de game over
                 # Toca o som de explosão quando ocorre game over
                 engine_thrust_sound.fadeout(100)  # Garante que o som de impulso pare rapidamente
@@ -685,9 +687,9 @@ class Game:
                     self.high_score_manager.save(self.score)
                 return False  # Quarta colisão causa game over
             elif hit_count == 3:  # 3 hits = última vida
-                self.nova.show_message("Warning: Final hit remaining!", "alert")
+                self.nova.show_message("Atenção: Última vida restante!", "alert") # Traduzido
             elif hit_count == 2:  # 2 hits = penúltima vida
-                self.nova.show_message("Warning: Two hits remaining!", "alert")
+                self.nova.show_message("Atenção: Duas vidas restantes!", "alert") # Traduzido
 
             return True  # Ainda tem vidas
         return True  # Não perdeu vida por estar invulnerável
@@ -696,7 +698,7 @@ class Game:
         """Adiciona uma vida, até o máximo permitido"""
         if self.lives < self.MAX_LIVES:
             self.lives += 1
-            self.nova.show_message("Extra life acquired!", "excited")
+            self.nova.show_message("Vida extra adquirida!", "excited") # Traduzido
             return True
         return False  # Já está com o máximo de vidas
 
@@ -744,7 +746,7 @@ class Game:
             self.invulnerable_timer -= 1
             if self.invulnerable_timer <= 0:
                 self.invulnerable = False
-                self.nova.show_message("Shield systems restored", "normal")
+                self.nova.show_message("Sistemas de escudo restaurados", "normal") # Traduzido
 
         if self.state == PLAYING:
             # Atualiza a nave com a gravidade do planeta atual e os limites da tela
@@ -853,8 +855,9 @@ class Game:
                     # Verifica se atingiu ou excedeu o limiar de pontuação para progredir automaticamente
                     if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
                         # NOVA anuncia progressão automática
-                        next_planet = self.planets[self.current_planet_index + 1]
-                        self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet.name}!", "excited")
+                        next_planet_en = self.planets[self.current_planet_index + 1].name
+                        next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en) # Traduz o nome do planeta
+                        self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
 
                         # Inicia o quiz sem incrementar o índice do planeta ainda - deixa o quiz lidar com a progressão
                         self._start_quiz()
@@ -883,8 +886,9 @@ class Game:
                         # Verifica progressão automática após coletar pontos
                         if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
                             # NOVA anuncia progressão automática
-                            next_planet = self.planets[self.current_planet_index + 1]
-                            self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet.name}!", "excited")
+                            next_planet_en = self.planets[self.current_planet_index + 1].name
+                            next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en) # Traduz o nome do planeta
+                            self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
 
                             # Inicia o quiz sem incrementar o índice do planeta ainda - deixa o quiz lidar com a progressão
                             self._start_quiz()
@@ -903,8 +907,9 @@ class Game:
                         # Verifica progressão automática após coletar pontos
                         if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
                             # NOVA anuncia progressão automática
-                            next_planet = self.planets[self.current_planet_index + 1]
-                            self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet.name}!", "excited")
+                            next_planet_en = self.planets[self.current_planet_index + 1].name
+                            next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en) # Traduz o nome do planeta
+                            self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
 
                             # Inicia o quiz sem incrementar o índice do planeta ainda - deixa o quiz lidar com a progressão
                             self._start_quiz()
@@ -926,7 +931,7 @@ class Game:
                 self.weapon_timer -= 1
                 if self.weapon_timer <= 0:
                     self.weapon_active = False
-                    self.nova.show_message("Sistemas defensivos offline", "normal")
+                    self.nova.show_message("Sistemas defensivos offline", "normal") # Traduzido
 
             # Remove obstáculos e colecionáveis fora da tela
             self.obstacles = [obs for obs in self.obstacles if obs.x > -obs.WIDTH]
@@ -991,7 +996,7 @@ class Game:
             if self.quiz_failure_timer <= 0:
                 # Atraso completo, retorna ao jogo
                 self.state = PLAYING
-                self.nova.show_message("De volta ao voo orbital! Continue explorando.", "info")
+                self.nova.show_message("De volta ao voo orbital! Continue explorando.", "info") # Traduzido
                 self.last_countdown_number = 0  # Reinicia para a próxima vez
 
     def _start_quiz(self):
@@ -1041,6 +1046,10 @@ class Game:
         # Garante que estamos usando o planeta correto após o quiz
         self.current_planet = self.planets[self.current_planet_index]
 
+        # Traduz o nome do planeta para a mensagem de transição
+        planet_name_en = self.current_planet.name
+        planet_name_pt = PLANET_NAME_PT.get(planet_name_en, planet_name_en)
+
         # Toca som de boas-vindas para o novo planeta
         if self.current_planet.name in welcome_sounds:
             # Armazena referência ao som atual para garantir que ele não seja interrompido
@@ -1050,7 +1059,7 @@ class Game:
             self.welcome_sound_timer = int(self.current_welcome_sound.get_length() * 1000)
 
         # NOVA mostra empolgação sobre o novo planeta
-        self.nova.show_message(f"Entrando na órbita de {self.current_planet.name}!", "excited")
+        self.nova.show_message(f"Entrando na órbita de {planet_name_pt}!", "excited")
 
     def check_collision(self):
         # Se a nave está invulnerável, ignora colisões

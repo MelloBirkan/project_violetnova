@@ -109,16 +109,16 @@ class Planet:
     def get_info_text(self):
         """Retorna informações sobre o planeta para a tela de transição"""
         info_texts = {
-            "Earth": "Planeta natal com 100% de gravidade (g = 1,0). Nosso planeta azul é o único corpo celeste conhecido a abrigar vida.",
-            "Mercury": "Planeta mais próximo do Sol com 40% de gravidade (g = 0,4). Mercúrio praticamente não tem atmosfera.",
-            "Venus": "Segundo planeta a partir do Sol com 90% de gravidade (g = 0,9). Vênus tem uma atmosfera espessa e tóxica cheia de dióxido de carbono.",
-            "Moon": "Satélite da Terra com 16% de gravidade (g = 0,16). A Lua tem cerca de 1/4 do diâmetro da Terra.",
-            "Mars": "O Planeta Vermelho com 40% de gravidade (g = 0,4). Marte tem as maiores tempestades de poeira do sistema solar.",
-            "Jupiter": "Maior planeta com 240% de gravidade (g = 2,4). Júpiter é um gigante gasoso e tem a Grande Mancha Vermelha, uma tempestade que dura há centenas de anos.",
-            "Saturn": "Conhecido por seus anéis com 110% de gravidade (g = 1,1). Saturno é um gigante gasoso composto principalmente de hidrogênio e hélio.",
-            "Uranus": "Gigante de gelo com 90% de gravidade (g = 0,9). Urano gira de lado com uma inclinação axial de cerca de 98 graus.",
-            "Neptune": "Planeta mais distante com 110% de gravidade (g = 1,1). Netuno tem os ventos mais fortes do Sistema Solar, atingindo até 2.100 km/h.",
-            "Pluto": "Planeta anão com 6% de gravidade (g = 0,06). Plutão faz parte do Cinturão de Kuiper, uma região de corpos gelados além de Netuno."
+            "Terra": "Planeta natal com 100% de gravidade (g = 1,0). Nosso planeta azul é o único corpo celeste conhecido a abrigar vida.",
+            "Mercúrio": "Planeta mais próximo do Sol com 40% de gravidade (g = 0,4). Mercúrio praticamente não tem atmosfera.",
+            "Vênus": "Segundo planeta a partir do Sol com 90% de gravidade (g = 0,9). Vênus tem uma atmosfera espessa e tóxica cheia de dióxido de carbono.",
+            "Lua": "Satélite da Terra com 16% de gravidade (g = 0,16). A Lua tem cerca de 1/4 do diâmetro da Terra.",
+            "Marte": "O Planeta Vermelho com 40% de gravidade (g = 0,4). Marte tem as maiores tempestades de poeira do sistema solar.",
+            "Júpiter": "Maior planeta com 240% de gravidade (g = 2,4). Júpiter é um gigante gasoso e tem a Grande Mancha Vermelha, uma tempestade que dura há centenas de anos.",
+            "Saturno": "Conhecido por seus anéis com 110% de gravidade (g = 1,1). Saturno é um gigante gasoso composto principalmente de hidrogênio e hélio.",
+            "Urano": "Gigante de gelo com 90% de gravidade (g = 0,9). Urano gira de lado com uma inclinação axial de cerca de 98 graus.",
+            "Netuno": "Planeta mais distante com 110% de gravidade (g = 1,1). Netuno tem os ventos mais fortes do Sistema Solar, atingindo até 2.100 km/h.",
+            "Plutão": "Planeta anão com 6% de gravidade (g = 0,06). Plutão faz parte do Cinturão de Kuiper, uma região de corpos gelados além de Netuno."
         }
         return info_texts.get(self.name, "Planeta desconhecido")
 
