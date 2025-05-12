@@ -814,7 +814,7 @@ class Game:
 
                 # Ocasionalmente, faz a NOVA alertar sobre obstáculos
                 if random.random() < 0.3:  # 30% de chance
-                    self.nova.react_to_obstacle(obstacle_type)
+                    pass
 
             # Gera colecionáveis (dados ou arma)
             if current_time - self.last_collectible_time > self.collectible_spawn_rate:

@@ -4,24 +4,24 @@ import math
 import os
 import sys
 
-# Add the assets directory to the Python path
+# Adiciona o diretório de assets ao caminho do Python
 assets_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets')
 if assets_dir not in sys.path:
     sys.path.insert(0, assets_dir)
 
-# Import custom expression drawing functions
+# Importa funções de desenho de expressões personalizadas
 try:
-    from images.nova_expressions import EXPRESSION_FUNCTIONS
+    from assets.images.nova_expressions import EXPRESSION_FUNCTIONS
     USE_CUSTOM_EXPRESSIONS = True
 except ImportError:
     USE_CUSTOM_EXPRESSIONS = False
-    print("Could not import custom expressions, falling back to emojis")
+    print("Não foi possível importar expressões personalizadas, usando emojis como fallback")
 
 class NovaAI:
     WIDTH = 80
     HEIGHT = 80
 
-    # Colors for different expression types
+    # Cores para diferentes tipos de expressão
     COLORS = {
         "normal": (70, 130, 180),  # Steel blue
         "excited": (65, 105, 225),  # Royal blue
@@ -32,14 +32,14 @@ class NovaAI:
         "alert": (220, 20, 60)      # Crimson
     }
 
-    # Expressões que a IA pode mostrar (serão substituídas por gráficos)
+    # Símbolos de alerta que a IA pode mostrar
     EXPRESSIONS = {
-        "normal": "😊",
-        "excited": "😃",
-        "curious": "🤔",
-        "surprised": "😲",
+        "normal": "",
+        "excited": "",
+        "curious": "",
+        "surprised": "",
         "warning": "⚠️",
-        "happy": "😄",
+        "happy": "",
         "alert": "🚨"
     }
     
@@ -124,13 +124,13 @@ class NovaAI:
         self.y = 10
         self.expression = "normal"
         self.previous_expression = "normal"
-        self.transition_progress = 1.0  # 1.0 means no transition
+        self.transition_progress = 1.0  # 1.0 significa sem transição
         self.message = ""
-        self.displayed_message = ""  # For typewriter effect
+        self.displayed_message = ""  # Para efeito de máquina de escrever
         self.message_timer = 0
         self.message_duration = 180  # Quadros (3 segundos a 60fps)
         self.char_timer = 0
-        self.char_delay = 2  # Frames between character additions
+        self.char_delay = 2  # Quadros entre a adição de caracteres
 
         # Animation variables
         self.pulse_factor = 1.0
@@ -142,7 +142,7 @@ class NovaAI:
         # Particle system
         self.particles = []
         self.particle_timer = 0
-        self.particle_spawn_delay = 5  # Frames between particle spawns
+        self.particle_spawn_delay = 5  # Quadros entre a geração de partículas
 
         # Tails for speech bubble animation
         self.tail_offset = 0
@@ -162,7 +162,7 @@ class NovaAI:
 
         # Determine the color based on expression or transition
         if self.transition_progress < 1.0:
-            # During transition, blend colors
+            # Durante a transição, mescla as cores
             curr_color = self.COLORS[self.expression]
             prev_color = self.COLORS[self.previous_expression]
             blend_color = [
@@ -172,7 +172,7 @@ class NovaAI:
             ]
             color = (blend_color[0], blend_color[1], blend_color[2], 230)
         else:
-            # No transition, use current expression color
+            # Sem transição, usa a cor da expressão atual
             color = (*self.COLORS[self.expression], 230)
 
         # Draw the outer and inner circles
@@ -181,7 +181,7 @@ class NovaAI:
         pygame.draw.circle(self.surface, color,
                           (scaled_width // 2, scaled_height // 2), scaled_width // 2 - 3)
 
-        # Use custom expressions or fall back to emojis
+        # Usa expressões personalizadas ou recorre a emojis
         if globals().get('USE_CUSTOM_EXPRESSIONS', False):
             # Get the appropriate drawing function for the current expression
             draw_func = EXPRESSION_FUNCTIONS.get(self.expression)
@@ -203,33 +203,34 @@ class NovaAI:
             self._draw_emoji_expression(scaled_width, scaled_height)
 
     def _draw_emoji_expression(self, width, height):
-        """Fallback method to draw emoji-based expressions"""
-        font = pygame.font.Font(None, int(50 * self.pulse_factor))  # Scale font with pulse
-        expression_text = font.render(self.EXPRESSIONS[self.expression], True, (255, 255, 255))
-        expression_rect = expression_text.get_rect(center=(width // 2, height // 2))
-
-        self.surface.blit(expression_text, expression_rect)
+        """Método de fallback para desenhar símbolos de alerta"""
+        # Apenas mostra símbolos para expressões de alerta
+        if self.expression in ["warning", "alert"]:
+            font = pygame.font.Font(None, int(50 * self.pulse_factor))  # Escala a fonte com a pulsação
+            expression_text = font.render(self.EXPRESSIONS[self.expression], True, (255, 255, 255))
+            expression_rect = expression_text.get_rect(center=(width // 2, height // 2))
+            self.surface.blit(expression_text, expression_rect)
     
     def set_expression(self, expression):
         """Muda a expressão da IA com transição suave"""
         if expression in self.EXPRESSIONS and expression != self.expression:
             self.previous_expression = self.expression
             self.expression = expression
-            self.transition_progress = 0.0  # Start transition
+            self.transition_progress = 0.0  # Inicia a transição
             self.update_surface()
     
     def show_message(self, message, expression="normal"):
         """Exibe uma mensagem da IA com efeito de digitação"""
         self.message = message
-        self.displayed_message = ""  # Reset displayed message for typewriter effect
+        self.displayed_message = ""  # Reseta a mensagem exibida para o efeito de máquina de escrever
         self.set_expression(expression)
         self.message_timer = self.message_duration
         self.char_timer = 0
 
-        # Reset particle system when showing important messages
+        # Reseta o sistema de partículas ao mostrar mensagens importantes
         if expression in ["warning", "alert", "excited"]:
-            self.particles = []  # Clear existing particles
-            self.particle_timer = 0  # Reset timer to spawn particles immediately
+            self.particles = []  # Limpa partículas existentes
+            self.particle_timer = 0  # Reseta o temporizador para gerar partículas imediatamente
     
     def alert_gravity_change(self, planet_name, gravity_factor):
         """Alerta o jogador sobre a mudança de gravidade em um novo planeta"""
@@ -252,18 +253,9 @@ class NovaAI:
         elif collectible_type == "weapon":
             self.show_message("Sistemas defensivos online!", "alert")
     
-    def react_to_obstacle(self, obstacle_type):
-        """Reage a um obstáculo se aproximando"""
-        if obstacle_type == "asteroid":
-            self.show_message("Campo de asteroides à frente!", "warning")
-        elif obstacle_type == "debris":
-            self.show_message("Detritos espaciais detectados!", "warning")
-        elif obstacle_type == "storm":
-            self.show_message("Tempestade solar se aproximando!", "warning")
-    
     def update(self):
         """Atualiza o assistente AI"""
-        # Update pulsing animation
+        # Atualiza a animação de pulsação
         self.pulse_factor += self.pulse_direction * self.pulse_speed
         if self.pulse_factor >= self.pulse_max:
             self.pulse_factor = self.pulse_max
@@ -272,31 +264,31 @@ class NovaAI:
             self.pulse_factor = self.pulse_min
             self.pulse_direction = 1
 
-        # Update expression transition
+        # Atualiza a transição de expressão
         if self.transition_progress < 1.0:
-            self.transition_progress += 0.05  # Transition speed
+            self.transition_progress += 0.05  # Velocidade da transição
             if self.transition_progress >= 1.0:
                 self.transition_progress = 1.0
             self.update_surface()
 
-        # Animate speech bubble tail
+        # Anima a cauda do balão de fala
         self.tail_offset += self.tail_direction * self.tail_speed
         if abs(self.tail_offset) > 3:
             self.tail_direction *= -1
 
-        # Update typewriter effect for message
+        # Atualiza o efeito de máquina de escrever para a mensagem
         if self.message and len(self.displayed_message) < len(self.message):
             self.char_timer += 1
             if self.char_timer >= self.char_delay:
                 self.char_timer = 0
                 self.displayed_message += self.message[len(self.displayed_message)]
 
-        # Update particle system
+        # Atualiza o sistema de partículas
         if len(self.message) > 0 and self.message_timer > 0 and self.expression in ["warning", "alert", "excited"]:
             self.particle_timer += 1
             if self.particle_timer >= self.particle_spawn_delay:
                 self.particle_timer = 0
-                # Add new particle
+                # Adiciona nova partícula
                 center_x = self.x + self.WIDTH // 2
                 center_y = self.y + self.HEIGHT // 2
                 angle = random.uniform(0, math.pi * 2)
@@ -304,7 +296,7 @@ class NovaAI:
                 size = random.uniform(2, 5)
 
                 color = self.COLORS[self.expression]
-                # Add alpha channel
+                # Adiciona canal alfa
                 color_with_alpha = (*color, 200)
 
                 self.particles.append({
@@ -314,10 +306,10 @@ class NovaAI:
                     'dy': math.sin(angle) * speed,
                     'size': size,
                     'color': color_with_alpha,
-                    'life': 30  # Frames until particle disappears
+                    'life': 30  # Quadros até a partícula desaparecer
                 })
 
-        # Update existing particles
+        # Atualiza partículas existentes
         i = 0
         while i < len(self.particles):
             particle = self.particles[i]
@@ -340,15 +332,15 @@ class NovaAI:
                 self.displayed_message = ""
                 self.set_expression("normal")
 
-        # Always update surface for pulsing animation
+        # Sempre atualiza a superfície para a animação de pulsação
         if self.message_timer > 0 or self.transition_progress < 1.0:
             self.update_surface()
     
     def draw(self, screen):
         """Desenha o assistente AI e quaisquer mensagens ativas"""
-        # Draw particles behind the AI
+        # Desenha partículas atrás da IA
         for particle in self.particles:
-            # Calculate alpha based on remaining life
+            # Calcula o alfa com base na vida restante
             alpha = int(255 * (particle['life'] / 30))
             color = (particle['color'][0], particle['color'][1], particle['color'][2], alpha)
 
@@ -359,7 +351,7 @@ class NovaAI:
                 int(particle['size'])
             )
 
-        # Desenha o círculo da IA (centered on the original position)
+        # Desenha o círculo da IA (centralizado na posição original)
         center_x = self.x + (self.WIDTH // 2)
         center_y = self.y + (self.HEIGHT // 2)
         offset_x = center_x - (self.surface.get_width() // 2)
@@ -368,45 +360,45 @@ class NovaAI:
 
         # Desenha qualquer mensagem ativa
         if self.message and self.message_timer > 0:
-            # Calculate bubble dimensions
+            # Calcula as dimensões do balão
             font = pygame.font.Font(None, 24)
             message_surf = font.render(self.displayed_message, True, (255, 255, 255))
-            message_width = message_surf.get_width() + 20  # Padding
-            message_height = message_surf.get_height() + 15  # Padding
+            message_width = message_surf.get_width() + 20  # Preenchimento
+            message_height = message_surf.get_height() + 15  # Preenchimento
 
-            # Calculate position (centered on top part of screen)
+            # Calcula a posição (centralizada na parte superior da tela)
             bubble_x = (self.screen_width - message_width) // 2
             bubble_y = 10
 
-            # Draw speech bubble with rounded corners
+            # Desenha o balão de fala com cantos arredondados
             bubble_rect = pygame.Rect(bubble_x, bubble_y, message_width, message_height)
 
-            # Determine bubble color based on expression type
+            # Determina a cor do balão com base no tipo de expressão
             bubble_color = self.COLORS[self.expression]
             border_color = (50, 50, 50)
 
-            # Draw bubble outline
+            # Desenha o contorno do balão
             pygame.draw.rect(screen, border_color, bubble_rect, border_radius=10)
-            # Draw bubble fill with transparency
+            # Desenha o preenchimento do balão com transparência
             inner_rect = bubble_rect.inflate(-4, -4)
             pygame.draw.rect(screen, (*bubble_color, 180), inner_rect, border_radius=8)
 
-            # Draw animated tail pointing to NOVA
+            # Desenha a cauda animada apontando para NOVA
             tail_height = 15
             tail_width = 20
             tail_top_x = self.screen_width // 2 + self.tail_offset
 
-            # Points for the speech bubble tail (triangle)
+            # Pontos para a cauda do balão de fala (triângulo)
             tail_points = [
                 (tail_top_x - tail_width//2, bubble_y + message_height),  # Bottom left
                 (tail_top_x + tail_width//2, bubble_y + message_height),  # Bottom right
                 (self.x + self.WIDTH//2, self.y)                         # Point to AI
             ]
 
-            # Draw tail
+            # Desenha a cauda
             pygame.draw.polygon(screen, border_color, tail_points)
 
-            # Draw slightly smaller inner tail with the same color as the bubble
+            # Desenha uma cauda interna ligeiramente menor com a mesma cor do balão
             inner_tail_points = [
                 (tail_top_x - tail_width//2 + 2, bubble_y + message_height - 2),
                 (tail_top_x + tail_width//2 - 2, bubble_y + message_height - 2),
@@ -414,7 +406,7 @@ class NovaAI:
             ]
             pygame.draw.polygon(screen, (*bubble_color, 180), inner_tail_points)
 
-            # Position and draw the message text
-            text_x = bubble_x + 10  # Left padding
-            text_y = bubble_y + 8   # Top padding
+            # Posiciona e desenha o texto da mensagem
+            text_x = bubble_x + 10  # Preenchimento esquerdo
+            text_y = bubble_y + 8   # Preenchimento superior
             screen.blit(message_surf, (text_x, text_y))
