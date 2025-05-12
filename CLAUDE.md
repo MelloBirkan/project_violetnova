@@ -90,3 +90,7 @@ Players progress through the solar system by:
 ## Translation Support
 
 The game supports Brazilian Portuguese with translation dictionaries for planet names and other text elements. Translation mappings are defined in `src/main.py` and passed to various components.
+
+## Development Directives
+
+- Leave all the UI and comments in the code in Brazilian Portuguese.
