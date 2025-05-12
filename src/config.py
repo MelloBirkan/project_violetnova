@@ -1,11 +1,11 @@
 import pygame
 
-# Screen configuration
+# Configuração da tela
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 FLOOR_HEIGHT = 100
 
-# Game states
+# Estados do jogo
 MENU = 0
 PLAYING = 1
 GAME_OVER = 2
@@ -13,21 +13,21 @@ TRANSITION = 3
 QUIZ = 4
 QUIZ_FAILURE = 5
 
-# Control modes
-CONTROL_MODE_FLAPPY = 0  # Tap for thrust, Flappy Bird style
-CONTROL_MODE_HOLD = 1    # Hold space for continuous thrust
+# Modos de controle
+CONTROL_MODE_FLAPPY = 0  # Toque para empuxo, estilo Flappy Bird
+CONTROL_MODE_HOLD = 1    # Segure o espaço para empuxo contínuo
 
-# Font settings - these will be initialized later
+# Configurações de fonte - serão inicializadas depois
 GAME_FONT = None
 SMALL_FONT = None
 COUNTDOWN_FONT = None
 
-# Font sizes
+# Tamanhos de fonte
 GAME_FONT_SIZE = 36
 SMALL_FONT_SIZE = 24
 COUNTDOWN_FONT_SIZE = 180
 
-# Translation dictionaries
+# Dicionários de tradução
 COLOR_NAME_PT = {
     "silver": "Prateado",
     "gold": "Dourado",
@@ -48,16 +48,16 @@ PLANET_NAME_PT = {
     "Pluto": "Plutão"
 }
 
-# Game parameters
+# Parâmetros do jogo
 DEFAULT_SOUND_VOLUME = 0.5
 SOUND_FADEOUT_TIME = 500  # ms
 
-# Spacecraft parameters
+# Parâmetros da espaçonave
 SPACECRAFT_MAX_LIVES = 3
-SPACECRAFT_INVULNERABILITY_TIME = 90  # frames (1.5s at 60fps)
+SPACECRAFT_INVULNERABILITY_TIME = 90  # quadros (1.5s a 60fps)
 SPACECRAFT_KNOCKBACK = -3.5
 
-# Level progression thresholds - points needed to advance to next planet
+# Limiares de progressão de nível - pontos necessários para avançar para o próximo planeta
 LEVEL_PROGRESSION_THRESHOLDS = {
     "Earth": 6,
     "Mercury": 2,
@@ -71,12 +71,12 @@ LEVEL_PROGRESSION_THRESHOLDS = {
     "Pluto": 1,
 }
 
-# Obstacle and collectible timing
+# Temporização de obstáculos e colecionáveis
 DEFAULT_OBSTACLE_SPAWN_RATE = 2500  # ms
 DEFAULT_COLLECTIBLE_SPAWN_RATE = 3000  # ms
 
-# Transition duration
-TRANSITION_DURATION = 180  # frames (3s at 60fps)
+# Duração da transição
+TRANSITION_DURATION = 180  # quadros (3s a 60fps)
 
-# Weapon duration
-WEAPON_DURATION = 600  # frames (10s at 60fps)
+# Duração da arma
+WEAPON_DURATION = 600  # quadros (10s a 60fps)

@@ -13,72 +13,72 @@ class StateManager:
         self.last_countdown_number = 0
         
     def change_state(self, new_state):
-        """Change the game state and perform necessary setup"""
+        """Muda o estado do jogo e realiza a configuração necessária"""
         self.current_state = new_state
-        # Update game's internal state to match
+        # Atualiza o estado interno do jogo para corresponder
         self.game._state = new_state
 
-        # Reset state-specific timers
+        # Reseta temporizadores específicos do estado
         if new_state == TRANSITION:
             self.transition_time = 0
         elif new_state == QUIZ_FAILURE:
-            self.quiz_failure_timer = 180  # 3 seconds at 60fps
+            self.quiz_failure_timer = 180  # 3 segundos a 60fps
             self.last_countdown_number = 3
             
     def is_state(self, state):
-        """Check if the current state matches the given state"""
+        """Verifica se o estado atual corresponde ao estado fornecido"""
         return self.current_state == state
         
     def update(self):
-        """Update timers and state transitions"""
-        # Update welcome sound timer
+        """Atualiza temporizadores e transições de estado"""
+        # Atualiza o temporizador do som de boas-vindas
         if self.welcome_sound_timer > 0:
-            self.welcome_sound_timer -= 16  # Approximately 16ms per frame at 60fps
+            self.welcome_sound_timer -= 16  # Aproximadamente 16ms por quadro a 60fps
 
         try:
-            # Handle state-specific timers and transitions
+            # Lida com temporizadores e transições específicos do estado
             if self.current_state == TRANSITION:
                 self.transition_time += 1
 
-                # Check if transition is complete
+                # Verifica se a transição está completa
                 if self.transition_time >= TRANSITION_DURATION and self.welcome_sound_timer <= 0:
                     self.game.reset(new_planet=True)
 
             elif self.current_state == QUIZ:
-                # Update the quiz
+                # Atualiza o quiz
                 if hasattr(self.game, 'quiz'):
                     self.game.quiz.update()
 
-                    # Check if the quiz is complete
+                    # Verifica se o quiz está completo
                     if self.game.quiz.is_complete():
                         if self.game.quiz.is_correct():
-                            # Proceed to the next planet
+                            # Prossegue para o próximo planeta
                             self.start_transition()
                         else:
-                            # Failed quiz, set delay before returning to game
+                            # Quiz falhou, define atraso antes de retornar ao jogo
                             self.change_state(QUIZ_FAILURE)
-                            self.quiz_failure_timer = 180  # 3 seconds at 60fps
+                            self.quiz_failure_timer = 180  # 3 segundos a 60fps
                             self.last_countdown_number = 3
-                            # Add a NOVA message about quiz failure
+                            # Adiciona uma mensagem da NOVA sobre a falha no quiz
                             if hasattr(self.game, 'nova'):
                                 self.game.nova.show_message("Quiz falhou! Retornando à órbita em...", "alert")
 
             elif self.current_state == QUIZ_FAILURE:
                 self.quiz_failure_timer -= 1
 
-                # Update countdown number if needed
+                # Atualiza o número da contagem regressiva, se necessário
                 current_countdown = self.quiz_failure_timer // 60 + 1
                 if current_countdown < self.last_countdown_number and current_countdown >= 0:
                     self.last_countdown_number = current_countdown
 
-                    # Show NOVA message about countdown
+                    # Mostra mensagem da NOVA sobre a contagem regressiva
                     if current_countdown > 0 and hasattr(self.game, 'nova'):
                         self.game.nova.show_message(
                             f"Retornando à órbita em {current_countdown}...",
                             "alert"
                         )
 
-                # Check if failure timer is complete
+                # Verifica se o temporizador de falha está completo
                 if self.quiz_failure_timer <= 0:
                     self.change_state(PLAYING)
                     if hasattr(self.game, 'nova'):
@@ -88,70 +88,70 @@ class StateManager:
                         )
                     self.last_countdown_number = 0
         except AttributeError:
-            # If any attribute is missing during initialization, just skip the update
+            # Se algum atributo estiver faltando durante a inicialização, apenas pula a atualização
             pass
                 
     def start_quiz(self):
-        """Start the quiz state with a random question"""
+        """Inicia o estado do quiz com uma pergunta aleatória"""
         self.change_state(QUIZ)
         self.last_countdown_number = 2
 
         try:
-            # Make sure the game has the necessary attributes
+            # Certifica-se de que o jogo tem os atributos necessários
             if hasattr(self.game, 'current_planet') and hasattr(self.game, 'quiz'):
-                # Select a random quiz question for the current planet
+                # Seleciona uma pergunta aleatória do quiz para o planeta atual
                 import random
                 question_data = random.choice(self.game.current_planet.quiz_questions)
 
-                # Start the quiz with the selected question
+                # Inicia o quiz com a pergunta selecionada
                 self.game.quiz.start_quiz(
                     question_data["question"],
                     question_data["options"],
                     question_data["answer"]
                 )
         except (AttributeError, IndexError) as e:
-            # Log error and continue
-            print(f"Error starting quiz: {e}")
+            # Registra o erro e continua
+            print(f"Erro ao iniciar o quiz: {e}")
         
     def start_transition(self):
-        """Start transition to the next planet"""
+        """Inicia a transição para o próximo planeta"""
         self.change_state(TRANSITION)
 
         try:
-            # Stop all sounds
+            # Para todos os sons
             if hasattr(self.game, 'sound_manager'):
                 self.game.sound_manager.stop_all_sounds()
 
-            # Increment planet index
+            # Incrementa o índice do planeta
             if hasattr(self.game, 'current_planet_index') and hasattr(self.game, 'planets'):
                 self.game.current_planet_index += 1
 
-                # Check if we've reached the end of all planets
+                # Verifica se chegamos ao fim de todos os planetas
                 if self.game.current_planet_index >= len(self.game.planets):
                     self.change_state(GAME_OVER)
                     if hasattr(self.game, 'sound_manager'):
                         self.game.sound_manager.play_explosion()
 
-                    # Update high score if needed
+                    # Atualiza o high score, se necessário
                     if hasattr(self.game, 'score') and hasattr(self.game, 'high_score_manager'):
                         if self.game.score > self.game.high_score_manager.get():
                             self.game.high_score = self.game.score
                             self.game.high_score_manager.save(self.game.score)
                     return
 
-                # Update current planet
+                # Atualiza o planeta atual
                 self.game.current_planet = self.game.planets[self.game.current_planet_index]
 
-                # Play welcome sound for new planet
+                # Toca o som de boas-vindas para o novo planeta
                 from src.config import PLANET_NAME_PT
                 planet_name_en = self.game.current_planet.name
                 planet_name_pt = PLANET_NAME_PT.get(planet_name_en, planet_name_en)
 
-                # Play welcome sound and set timer
+                # Toca o som de boas-vindas e define o temporizador
                 if hasattr(self.game, 'sound_manager'):
                     self.welcome_sound_timer = self.game.sound_manager.play_welcome(planet_name_en)
 
-                # NOVA announces the new planet
+                # NOVA anuncia o novo planeta
                 if hasattr(self.game, 'nova'):
                     self.game.nova.show_message(
                         f"Entrando na órbita de {planet_name_pt}!",
@@ -159,5 +159,5 @@ class StateManager:
                     )
 
         except (AttributeError, IndexError) as e:
-            # Log error and continue
-            print(f"Error starting transition: {e}")
+            # Registra o erro e continua
+            print(f"Erro ao iniciar a transição: {e}")

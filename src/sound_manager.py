@@ -3,23 +3,23 @@ from src.config import DEFAULT_SOUND_VOLUME
 
 class SoundManager:
     def __init__(self):
-        # Initialize sound system
+        # Inicializa o sistema de som
         self.engine_thrust_sound = None
         self.explosion_sound = None
         self.hitting_obstacle_sound = None
         self.welcome_sounds = {}
         
-        # Load all sounds
+        # Carrega todos os sons
         self.load_sounds()
         
     def load_sounds(self):
         try:
-            # Load game sounds
+            # Carrega os sons do jogo
             self.engine_thrust_sound = pygame.mixer.Sound("assets/sounds/thrust.mp3")
             self.explosion_sound = pygame.mixer.Sound("assets/sounds/exploding.mp3")
             self.hitting_obstacle_sound = pygame.mixer.Sound("assets/sounds/hitting_obstacle.mp3")
             
-            # Load welcome sounds for each planet
+            # Carrega os sons de boas-vindas para cada planeta
             self.welcome_sounds = {
                 "Earth": pygame.mixer.Sound("assets/sounds/welcome/terra.mp3"),
                 "Mercury": pygame.mixer.Sound("assets/sounds/welcome/mercurio.mp3"),
@@ -32,12 +32,12 @@ class SoundManager:
                 "Neptune": pygame.mixer.Sound("assets/sounds/welcome/Netuno.mp3")
             }
             
-            # Set default volume for game sounds
+            # Define o volume padrão para os sons do jogo
             self.engine_thrust_sound.set_volume(DEFAULT_SOUND_VOLUME)
             self.explosion_sound.set_volume(DEFAULT_SOUND_VOLUME)
             self.hitting_obstacle_sound.set_volume(DEFAULT_SOUND_VOLUME)
             
-            # Set maximum volume for welcome sounds (narration)
+            # Define o volume máximo para os sons de boas-vindas (narração)
             for sound in self.welcome_sounds.values():
                 sound.set_volume(1.0)
                 
@@ -48,54 +48,54 @@ class SoundManager:
             return False
     
     def play_thrust(self, loop=True):
-        """Play the engine thrust sound with optional looping"""
+        """Reproduz o som de propulsão do motor com loop opcional"""
         if loop:
-            self.engine_thrust_sound.play(-1)  # Loop indefinitely
+            self.engine_thrust_sound.play(-1)  # Repete indefinidamente
         else:
             self.engine_thrust_sound.play()
     
     def stop_thrust(self, fadeout_time=None):
-        """Stop the thrust sound with optional fadeout"""
+        """Para o som de propulsão com fadeout opcional"""
         if fadeout_time:
             self.engine_thrust_sound.fadeout(fadeout_time)
         else:
             self.engine_thrust_sound.stop()
     
     def play_explosion(self):
-        """Play the explosion sound (game over)"""
+        """Reproduz o som de explosão (fim de jogo)"""
         self.explosion_sound.play()
     
     def play_collision(self):
-        """Play the collision sound (hitting obstacles)"""
+        """Reproduz o som de colisão (atingindo obstáculos)"""
         self.hitting_obstacle_sound.play()
     
     def play_welcome(self, planet_name):
-        """Play welcome sound for a specific planet"""
+        """Reproduz o som de boas-vindas para um planeta específico"""
         if planet_name in self.welcome_sounds:
-            # Ensure all other welcome sounds are stopped
+            # Garante que todos os outros sons de boas-vindas sejam parados
             for sound in self.welcome_sounds.values():
                 sound.fadeout(100)
             
-            # Play the welcome sound for this planet
+            # Reproduz o som de boas-vindas para este planeta
             self.welcome_sounds[planet_name].play()
             
-            # Return the sound length in milliseconds
+            # Retorna a duração do som em milissegundos
             return int(self.welcome_sounds[planet_name].get_length() * 1000)
         
         return 0
     
     def stop_all_sounds(self, fadeout_time=200):
-        """Stop all sounds with a fadeout"""
-        # Stop game sounds
+        """Para todos os sons com fadeout"""
+        # Para os sons do jogo
         self.engine_thrust_sound.fadeout(fadeout_time)
         self.hitting_obstacle_sound.fadeout(fadeout_time)
         self.explosion_sound.fadeout(fadeout_time)
         
-        # Stop all welcome sounds
+        # Para todos os sons de boas-vindas
         for sound in self.welcome_sounds.values():
             sound.fadeout(fadeout_time)
             
     def adjust_welcome_volume(self, planet_name, volume=0.3):
-        """Adjust volume of a specific welcome sound"""
+        """Ajusta o volume de um som de boas-vindas específico"""
         if planet_name in self.welcome_sounds:
             self.welcome_sounds[planet_name].set_volume(volume)

@@ -10,36 +10,36 @@ from src.highscore import HighScore
 from src.nova_ai import NovaAI
 from src.quiz import Quiz
 
-# Import refactored modules
+# Importa módulos refatorados
 from src.config import *
 from src.sound_manager import SoundManager
 from src.state_manager import StateManager
 from src.collision_manager import CollisionManager
 from src.visual_effects import VisualEffectsManager
 
-# Initialize pygame
+# Inicializa o pygame
 pygame.init()
 pygame.mixer.init()
 
-# Configure screen
+# Configura a tela
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Project Blue Nova: Explorador do Sistema Solar")
 clock = pygame.time.Clock()
 
-# Initialize fonts after pygame is initialized
+# Inicializa as fontes após o pygame ser inicializado
 import src.config as config
 config.GAME_FONT = pygame.font.Font(None, config.GAME_FONT_SIZE)
 config.SMALL_FONT = pygame.font.Font(None, config.SMALL_FONT_SIZE)
 config.COUNTDOWN_FONT = pygame.font.Font(None, config.COUNTDOWN_FONT_SIZE)
 
-# Define planet data for game progression
+# Define os dados dos planetas para a progressão do jogo
 def create_planet_data():
-    """Create data for all planets in the game"""
+    """Cria dados para todos os planetas no jogo"""
     planet_data = [
         {
             "name": "Earth",
-            "gravity_factor": 100,  # Base gravity (g = 1.0)
-            "background_color": (25, 25, 112),  # Midnight blue
+            "gravity_factor": 100,  # Gravidade base (g = 1.0)
+            "background_color": (25, 25, 112),  # Azul meia-noite
             "obstacle_count": 6,
             "quiz_questions": [
                 {
@@ -62,7 +62,7 @@ def create_planet_data():
         {
             "name": "Mercury",
             "gravity_factor": 40,  # g = 0.4
-            "background_color": (70, 50, 40),  # Brown
+            "background_color": (70, 50, 40),  # Marrom
             "obstacle_count": 2,
             "quiz_questions": [
                 {
@@ -85,41 +85,41 @@ def create_planet_data():
         {
             "name": "Venus",
             "gravity_factor": 90,  # g = 0.9
-            "background_color": (140, 90, 40),  # Amber
+            "background_color": (140, 90, 40),  # Âmbar
             "obstacle_count": 4,
             "quiz_questions": [
                 {
                     "question": "Vênus gira em qual direção?",
                     "options": ["Igual à Terra", "Oposta à Terra", "Não gira", "Muda aleatoriamente"],
-                    "answer": 1  # Opposite to Earth (retrograde)
+                    "answer": 1  # Oposta à Terra (retrógrado)
                 },
                 {
                     "question": "A atmosfera de Vênus é composta principalmente por:",
                     "options": ["Nitrogênio", "Dióxido de Carbono", "Ácido Sulfúrico", "Metano"],
-                    "answer": 1  # Carbon Dioxide
+                    "answer": 1  # Dióxido de Carbono
                 },
                 {
                     "question": "Vênus é frequentemente chamado de planeta irmão da Terra porque:",
                     "options": ["Tem oceanos", "Tamanho e massa similares", "Tem vida", "Mesmo tempo de órbita"],
-                    "answer": 1  # Similar size and mass
+                    "answer": 1  # Tamanho e massa similares
                 }
             ]
         },
         {
             "name": "Mars",
             "gravity_factor": 40,  # g = 0.4
-            "background_color": (150, 70, 40),  # Rust red
+            "background_color": (150, 70, 40),  # Vermelho ferrugem
             "obstacle_count": 3,
             "quiz_questions": [
                 {
                     "question": "O que dá a Marte sua cor vermelha distintiva?",
                     "options": ["Vida vegetal", "Óxido de ferro (ferrugem)", "Dióxido de carbono", "Luz solar refletida"],
-                    "answer": 1  # Iron oxide
+                    "answer": 1  # Óxido de ferro
                 },
                 {
                     "question": "Quantas luas Marte possui?",
                     "options": ["Nenhuma", "Uma", "Duas", "Três"],
-                    "answer": 2  # Two (Phobos and Deimos)
+                    "answer": 2  # Duas (Fobos e Deimos)
                 },
                 {
                     "question": "Qual é o nome do maior vulcão em Marte?",
@@ -131,59 +131,59 @@ def create_planet_data():
         {
             "name": "Jupiter",
             "gravity_factor": 240,  # g = 2.4
-            "background_color": (210, 140, 70),  # Tan
+            "background_color": (210, 140, 70),  # Bronzeado
             "obstacle_count": 20,
             "quiz_questions": [
                 {
                     "question": "Do que Júpiter é composto principalmente?",
                     "options": ["Rocha e metal", "Água e gelo", "Hidrogênio e hélio", "Dióxido de carbono"],
-                    "answer": 2  # Hydrogen and helium
+                    "answer": 2  # Hidrogênio e hélio
                 },
                 {
                     "question": "O que é a Grande Mancha Vermelha em Júpiter?",
                     "options": ["Um vulcão", "Uma tempestade de poeira", "Uma tempestade tipo furacão", "Uma cratera de impacto"],
-                    "answer": 2  # A hurricane-like storm
+                    "answer": 2  # Uma tempestade tipo furacão
                 },
                 {
                     "question": "Júpiter tem o dia mais curto de qualquer planeta. Quanto tempo dura?",
                     "options": ["6 horas", "10 horas", "14 horas", "18 horas"],
-                    "answer": 1  # ~10 hours
+                    "answer": 1  # ~10 horas
                 }
             ]
         },
         {
             "name": "Saturn",
             "gravity_factor": 110,  # g = 1.1
-            "background_color": (180, 150, 100),  # Light tan
+            "background_color": (180, 150, 100),  # Bronzeado claro
             "obstacle_count": 15,
             "quiz_questions": [
                 {
                     "question": "Do que são feitos os anéis de Saturno principalmente?",
                     "options": ["Gás", "Poeira", "Rocha e metal", "Partículas de gelo"],
-                    "answer": 3  # Ice particles
+                    "answer": 3  # Partículas de gelo
                 },
                 {
                     "question": "Quantos anéis principais Saturno possui?",
                     "options": ["3", "5", "7", "9"],
-                    "answer": 2  # 7 main rings
+                    "answer": 2  # 7 anéis principais
                 },
                 {
                     "question": "Saturno é o único planeta que poderia flutuar na água porque:",
                     "options": ["É oco", "É muito pequeno", "Sua densidade é menor que a da água", "Tem hélio"],
-                    "answer": 2  # Low density
+                    "answer": 2  # Baixa densidade
                 }
             ]
         },
         {
             "name": "Moon",
             "gravity_factor": 16,  # g = 0.16
-            "background_color": (20, 20, 20),  # Very dark gray
+            "background_color": (20, 20, 20),  # Cinza muito escuro
             "obstacle_count": 2,
             "quiz_questions": [
                 {
                     "question": "Qual é a distância média da Lua à Terra?",
                     "options": ["184.000 km", "238.000 km", "384.000 km", "584.000 km"],
-                    "answer": 2  # 384,000 km
+                    "answer": 2  # 384.000 km
                 },
                 {
                     "question": "O primeiro humano a caminhar na Lua foi:",
@@ -193,37 +193,37 @@ def create_planet_data():
                 {
                     "question": "O que causa as fases da Lua?",
                     "options": ["Sombra da Terra", "Posição do Sol", "Rotação da Lua", "Nuvens na Lua"],
-                    "answer": 1  # Sun position
+                    "answer": 1  # Posição do Sol
                 }
             ]
         },
         {
             "name": "Uranus",
             "gravity_factor": 90,  # g = 0.9
-            "background_color": (140, 210, 210),  # Cyan
+            "background_color": (140, 210, 210),  # Ciano
             "obstacle_count": 12,
             "quiz_questions": [
                 {
                     "question": "Urano gira de lado com uma inclinação axial de aproximadamente:",
                     "options": ["23 graus", "45 graus", "72 graus", "98 graus"],
-                    "answer": 3  # 98 degrees
+                    "answer": 3  # 98 graus
                 },
                 {
                     "question": "O que dá a Urano sua cor azul-esverdeada?",
                     "options": ["Água", "Metano", "Amônia", "Nitrogênio"],
-                    "answer": 1  # Methane
+                    "answer": 1  # Metano
                 },
                 {
                     "question": "Urano foi o primeiro planeta descoberto usando um:",
                     "options": ["Olho nu", "Telescópio", "Sonda espacial", "Radiotelescópio"],
-                    "answer": 1  # Telescope
+                    "answer": 1  # Telescópio
                 }
             ]
         },
         {
             "name": "Neptune",
             "gravity_factor": 110,  # g = 1.1
-            "background_color": (30, 50, 180),  # Deep blue
+            "background_color": (30, 50, 180),  # Azul profundo
             "obstacle_count": 11,
             "quiz_questions": [
                 {
@@ -234,41 +234,41 @@ def create_planet_data():
                 {
                     "question": "O que é a Grande Mancha Escura em Netuno?",
                     "options": ["Um oceano", "Um sistema de tempestade", "Uma cratera", "Uma sombra"],
-                    "answer": 1  # A storm system
+                    "answer": 1  # Um sistema de tempestade
                 },
                 {
                     "question": "A maior lua de Netuno é:",
                     "options": ["Tritão", "Nereida", "Proteus", "Larissa"],
-                    "answer": 0  # Triton
+                    "answer": 0  # Tritão
                 }
             ]
         }
-        # Pluto removed from main progression
+        # Plutão removido da progressão principal
     ]
 
     return planet_data
 
 class Game:
     def __init__(self):
-        # Game state
+        # Estado do jogo
         self.score = 0
         self.high_score_manager = HighScore()
         self.high_score = self.high_score_manager.get()
 
-        # Life system
+        # Sistema de vidas
         self.lives = SPACECRAFT_MAX_LIVES
         self.invulnerable = False
         self.invulnerable_timer = 0
 
-        # Initialize internal state before property is used
+        # Inicializa o estado interno antes da propriedade ser usada
         self._state = MENU
 
-        # Welcome sound control
+        # Controle do som de boas-vindas
         self.welcome_sound_played = False
         self.current_welcome_sound = None
         self.welcome_sound_timer = 0
 
-        # Planet setup
+        # Configuração dos planetas
         self.planet_data = create_planet_data()
         self.planets = [Planet(data["name"],
                              data["gravity_factor"],
@@ -277,137 +277,137 @@ class Game:
                              data["quiz_questions"])
                       for data in self.planet_data]
 
-        # Start on Earth
+        # Começa na Terra
         self.current_planet_index = 0
         self.current_planet = self.planets[self.current_planet_index]
 
-        # Spacecraft setup
-        self.spacecraft_color = "silver"  # Default color
+        # Configuração da espaçonave
+        self.spacecraft_color = "silver"  # Cor padrão
         self.spacecraft = Spacecraft(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.spacecraft_color)
         self.available_colors = list(Spacecraft.COLORS.keys())
         self.current_color_index = 0
 
-        # Game elements
+        # Elementos do jogo
         self.obstacles = []
         self.collectibles = []
-        # Initialize time tracking
+        # Inicializa o rastreamento de tempo
         self.last_obstacle_time = pygame.time.get_ticks() - 2000
         self.last_collectible_time = pygame.time.get_ticks()
         self.floor_x = 0
 
-        # Obstacle and collectible timing
+        # Temporização de obstáculos e colecionáveis
         self.obstacle_spawn_rate = DEFAULT_OBSTACLE_SPAWN_RATE
         self.collectible_spawn_rate = DEFAULT_COLLECTIBLE_SPAWN_RATE
 
-        # Game progression
+        # Progressão do jogo
         self.obstacle_speed = 3
         self.weapon_active = False
         self.weapon_timer = 0
 
-        # Initialize NOVA AI assistant
+        # Inicializa o assistente NOVA AI
         self.nova = NovaAI(SCREEN_WIDTH, SCREEN_HEIGHT, PLANET_NAME_PT)
 
-        # Initialize quiz system
+        # Inicializa o sistema de quiz
         self.quiz = Quiz(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-        # Game progression settings
+        # Configurações de progressão do jogo
         self.difficulty_multiplier = 1.0
 
-        # Initialize managers
+        # Inicializa os gerenciadores
         self.sound_manager = SoundManager()
         self.visual_effects = VisualEffectsManager(self)
         self.collision_manager = CollisionManager(self)
 
-        # Initialize state manager last to avoid circular dependencies
+        # Inicializa o gerenciador de estado por último para evitar dependências circulares
         self.state_manager = StateManager(self)
 
-        # Initialize game state (uses existing _state value)
+        # Inicializa o estado do jogo (usa o valor _state existente)
         self.state_manager.change_state(MENU)
 
-        # Control settings
+        # Configurações de controle
         self.space_held = False
-        self.control_mode = CONTROL_MODE_HOLD  # Default changed to HOLD
+        self.control_mode = CONTROL_MODE_HOLD  # Padrão alterado para HOLD
 
     @property
     def state(self):
-        """Get the current game state"""
+        """Obtém o estado atual do jogo"""
         return self._state
 
     @state.setter
     def state(self, new_state):
-        """Set the game state and update state manager"""
+        """Define o estado do jogo e atualiza o gerenciador de estado"""
         self._state = new_state
-        # We don't call state_manager.change_state here to avoid infinite recursion
-        # when state_manager changes the state
+        # Não chamamos state_manager.change_state aqui para evitar recursão infinita
+        # quando o state_manager altera o estado
 
     def reset(self, new_planet=False):
-        """Reset the game, optionally changing to a new planet"""
+        """Reseta o jogo, opcionalmente mudando para um novo planeta"""
         self.state_manager.change_state(PLAYING)
-        self.state = PLAYING  # Keep synchronized with state manager
+        self.state = PLAYING  # Mantém sincronizado com o gerenciador de estado
         self.weapon_active = False
         self.weapon_timer = 0
 
-        # Stop all sounds with smooth fadeout
+        # Para todos os sons com fadeout suave
         self.sound_manager.stop_thrust(SOUND_FADEOUT_TIME)
         self.sound_manager.hitting_obstacle_sound.fadeout(SOUND_FADEOUT_TIME)
 
-        # Handle welcome sounds based on reset type
+        # Lida com os sons de boas-vindas com base no tipo de reset
         if not new_planet:
-            # Stop all welcome sounds on complete reset
+            # Para todos os sons de boas-vindas no reset completo
             for sound in self.sound_manager.welcome_sounds.values():
                 sound.fadeout(200)
             self.current_welcome_sound = None
             self.welcome_sound_timer = 0
 
         if new_planet:
-            # Reset score for new planet
+            # Reseta a pontuação para o novo planeta
             self.score = 0
-            # Update difficulty based on planet index
+            # Atualiza a dificuldade com base no índice do planeta
             self.difficulty_multiplier = 1.0 + (self.current_planet_index * 0.1)
-            # Don't reset lives when changing planets
+            # Não reseta as vidas ao mudar de planeta
         else:
-            # Start from scratch
+            # Começa do zero
             self.score = 0
             self.current_planet_index = 0
             self.current_planet = self.planets[self.current_planet_index]
             self.difficulty_multiplier = 1.0
-            # Reset lives to maximum when starting new game
+            # Reseta as vidas para o máximo ao iniciar um novo jogo
             self.reset_lives()
 
-            # Play Earth's welcome sound when starting/restarting
+            # Toca o som de boas-vindas da Terra ao iniciar/reiniciar
             if self.current_planet.name in self.sound_manager.welcome_sounds:
-                # Stop any playing sounds first
+                # Para quaisquer sons tocando primeiro
                 for sound in self.sound_manager.welcome_sounds.values():
                     sound.fadeout(100)
 
-                # Small delay before playing Earth welcome sound
+                # Pequeno atraso antes de tocar o som de boas-vindas da Terra
                 pygame.time.delay(200)
 
-                # Store reference to current sound
+                # Armazena referência ao som atual
                 self.current_welcome_sound = self.sound_manager.welcome_sounds[self.current_planet.name]
                 self.current_welcome_sound.play()
-                # Set timer based on sound duration (in milliseconds)
+                # Define o temporizador com base na duração do som (em milissegundos)
                 self.welcome_sound_timer = int(self.current_welcome_sound.get_length() * 1000)
                 self.welcome_sound_played = True
 
-        # Reset spacecraft position
+        # Reseta a posição da espaçonave
         self.spacecraft = Spacecraft(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.spacecraft_color)
 
-        # Clear all obstacles and collectibles
+        # Limpa todos os obstáculos e colecionáveis
         self.obstacles = []
         self.collectibles = []
-        # Initialize time tracking for immediate obstacle generation
+        # Inicializa o rastreamento de tempo para geração imediata de obstáculos
         self.last_obstacle_time = pygame.time.get_ticks() - 2000
         self.last_collectible_time = pygame.time.get_ticks()
-        # Reset floor position
+        # Reseta a posição do chão
         self.floor_x = 0
 
-        # Base difficulty adjusted by planet and progression
+        # Dificuldade base ajustada pelo planeta e progressão
         self.obstacle_speed = 3 * self.difficulty_multiplier
         self.obstacle_spawn_rate = int(DEFAULT_OBSTACLE_SPAWN_RATE / self.difficulty_multiplier)
         self.collectible_spawn_rate = int(DEFAULT_COLLECTIBLE_SPAWN_RATE / self.difficulty_multiplier)
 
-        # NOVA should alert about gravity
+        # NOVA deve alertar sobre a gravidade
         if new_planet:
             self.nova.alert_gravity_change(
                 self.current_planet.name,
@@ -426,7 +426,7 @@ class Game:
                     sys.exit()
 
                 if self.state == QUIZ or self.state == QUIZ_FAILURE:
-                    # Pass events to quiz system only if in QUIZ state
+                    # Passa eventos para o sistema de quiz apenas se estiver no estado QUIZ
                     if self.state == QUIZ:
                         self.quiz.handle_event(event)
                 else:
@@ -434,57 +434,57 @@ class Game:
                         if self.state == MENU:
                             self.reset()
                         elif self.state == PLAYING:
-                            # Single thrust on press
+                            # Empuxo único ao pressionar
                             self.spacecraft.thrust()
-                            # Play engine thrust sound
+                            # Toca o som de empuxo do motor
                             self.sound_manager.play_thrust()
-                            # Enable continuous thrust if in hold mode
+                            # Habilita empuxo contínuo se estiver no modo de segurar
                             if self.control_mode == CONTROL_MODE_HOLD:
                                 self.space_held = True
                         elif self.state == GAME_OVER:
-                            # Reset welcome_sound_played flag
+                            # Reseta a flag welcome_sound_played
                             self.welcome_sound_played = False
                             self.reset()
                         elif self.state == TRANSITION:
-                            # Skip transition and force start on new planet
+                            # Pula a transição e força o início no novo planeta
                             self.reset(new_planet=True)
                     
-                    # Change spacecraft color with C in menu, toggle control mode in game
+                    # Muda a cor da espaçonave com C no menu, alterna o modo de controle no jogo
                     if event.key == pygame.K_c:
                         if self.state == MENU:
                             self.current_color_index = (self.current_color_index + 1) % len(self.available_colors)
                             self.spacecraft_color = self.available_colors[self.current_color_index]
                             self.spacecraft.change_color(self.spacecraft_color)
                         elif self.state == PLAYING:
-                            # Toggle control mode between flappy and hold
+                            # Alterna o modo de controle entre flappy e segurar
                             self.control_mode = CONTROL_MODE_HOLD if self.control_mode == CONTROL_MODE_FLAPPY else CONTROL_MODE_FLAPPY
                             mode_name = "Hold" if self.control_mode == CONTROL_MODE_HOLD else "Flappy"
                             
-                            # Update spacecraft flame colors for thrust effect
+                            # Atualiza as cores da chama da espaçonave para o efeito de empuxo
                             if self.control_mode == CONTROL_MODE_HOLD:
-                                # Yellow to orange to red gradient
+                                # Gradiente de amarelo para laranja para vermelho
                                 self.spacecraft.flame_colors = [(255, 255, 0), (255, 165, 0), (255, 69, 0)]
                             else:
-                                # Single color flame
+                                # Chama de cor única
                                 self.spacecraft.flame_colors = []
                             self.spacecraft.update_image()
                             self.nova.show_message(f"Modo de controle: {mode_name}", "info")
                     
-                    # Activate weapon with W if available
+                    # Ativa a arma com W se disponível
                     if event.key == pygame.K_w and self.state == PLAYING and self.weapon_active:
                         self._use_weapon()
             
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
-                    # Stop continuous thrust on release
+                    # Para o empuxo contínuo ao soltar
                     self.space_held = False
-                    # Fade out engine thrust sound
+                    # Diminui o som de empuxo do motor
                     self.sound_manager.stop_thrust(SOUND_FADEOUT_TIME)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left mouse button
+                if event.button == 1:  # Botão esquerdo do mouse
                     if self.state == QUIZ or self.state == QUIZ_FAILURE:
-                        # Pass events to quiz system only if in QUIZ state
+                        # Passa eventos para o sistema de quiz apenas se estiver no estado QUIZ
                         if self.state == QUIZ:
                             self.quiz.handle_event(event)
                     else:
@@ -494,33 +494,33 @@ class Game:
                             self.spacecraft.thrust()
                             self.sound_manager.play_thrust()
                         elif self.state == GAME_OVER:
-                            # Reset welcome_sound_played flag
+                            # Reseta a flag welcome_sound_played
                             self.welcome_sound_played = False
                             self.reset()
                         elif self.state == TRANSITION:
-                            # If in transition and sound is playing, allow skipping but continue sound at reduced volume
+                            # Se estiver em transição e o som estiver tocando, permite pular mas continua o som com volume reduzido
                             if self.welcome_sound_timer > 0 and self.current_welcome_sound:
                                 self.sound_manager.adjust_welcome_volume(self.current_planet.name, 0.3)
-                            # Force sound timer completion to allow proceeding
+                            # Força a conclusão do temporizador de som para permitir prosseguir
                             self.welcome_sound_timer = 0
-                            # Skip transition and force start on new planet
-                            if self.state_manager.transition_time >= TRANSITION_DURATION // 2:  # Only allow skipping after half the transition
+                            # Pula a transição e força o início no novo planeta
+                            if self.state_manager.transition_time >= TRANSITION_DURATION // 2:  # Permite pular apenas após metade da transição
                                 self.reset(new_planet=True)
 
     def _use_weapon(self):
-        """Use weapon to destroy obstacles"""
+        """Usa a arma para destruir obstáculos"""
         if not self.weapon_active:
             return
 
-        # Find closest obstacle ahead of spacecraft
+        # Encontra o obstáculo mais próximo à frente da espaçonave
         target_obstacle = None
         min_distance = float('inf')
 
-        # Define spacecraft body x position
+        # Define a posição x do corpo da espaçonave
         spacecraft_body_x = self.spacecraft.x + self.spacecraft.flame_extent
 
         for obstacle in self.obstacles:
-            # Only target obstacles ahead of spacecraft body
+            # Mira apenas em obstáculos à frente do corpo da espaçonave
             if obstacle.x > spacecraft_body_x:
                 distance = obstacle.x - spacecraft_body_x
                 if distance < min_distance:
@@ -528,94 +528,94 @@ class Game:
                     target_obstacle = obstacle
 
         if target_obstacle:
-            # Remove obstacle and grant points
+            # Remove o obstáculo e concede pontos
             self.obstacles.remove(target_obstacle)
             self.score += 2
             self.nova.show_message("Obstáculo destruído!", "alert")
             
-            # Check for progression to next planet based on new score
+            # Verifica a progressão para o próximo planeta com base na nova pontuação
             current_threshold = LEVEL_PROGRESSION_THRESHOLDS.get(
                 self.current_planet.name,
-                10  # Default threshold for unspecified planets
+                10  # Limite padrão para planetas não especificados
             )
             if self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
                 next_planet_en = self.planets[self.current_planet_index + 1].name
                 next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en)
                 self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
-                # Start quiz for planet advancement
+                # Inicia o quiz para avanço do planeta
                 self.state_manager.start_quiz()
 
     def lose_life(self):
-        """Reduce number of lives and check for game over"""
+        """Reduz o número de vidas e verifica se o jogo acabou"""
         if not self.invulnerable:
             self.lives -= 1
 
-            # More intuitive hit counting (start with 3 lives, 4th hit = game over)
+            # Contagem de acertos mais intuitiva (começa com 3 vidas, 4º acerto = fim de jogo)
             hit_count = SPACECRAFT_MAX_LIVES - self.lives
 
-            # Check if all lives are lost
-            if hit_count >= 4:  # 4 hits = game over
-                self.lives = 0  # Ensure it doesn't go negative
+            # Verifica se todas as vidas foram perdidas
+            if hit_count >= 4:  # 4 acertos = fim de jogo
+                self.lives = 0  # Garante que não fique negativo
                 self.nova.show_message("Dano crítico! Fim de jogo!", "alert")
                 self.state_manager.change_state(GAME_OVER)
-                self.state = GAME_OVER  # Keep synchronized with state manager
-                # Play explosion sound on game over
-                self.sound_manager.stop_thrust(100)  # Ensure thrust sound stops quickly
-                self.sound_manager.hitting_obstacle_sound.fadeout(100)  # Stop collision sound if playing
+                self.state = GAME_OVER  # Mantém sincronizado com o gerenciador de estado
+                # Toca o som de explosão no fim de jogo
+                self.sound_manager.stop_thrust(100)  # Garante que o som de empuxo pare rapidamente
+                self.sound_manager.hitting_obstacle_sound.fadeout(100)  # Para o som de colisão se estiver tocando
                 self.sound_manager.play_explosion()
                 if self.score > self.high_score_manager.get():
                     self.high_score = self.score
                     self.high_score_manager.save(self.score)
-                return False  # Fourth collision causes game over
-            elif hit_count == 3:  # 3 hits = last life
+                return False  # Quarta colisão causa fim de jogo
+            elif hit_count == 3:  # 3 acertos = última vida
                 self.nova.show_message("Atenção: Última vida restante!", "alert")
-            elif hit_count == 2:  # 2 hits = second-to-last life
+            elif hit_count == 2:  # 2 acertos = penúltima vida
                 self.nova.show_message("Atenção: Duas vidas restantes!", "alert")
 
-            return True  # Still has lives
-        return True  # Didn't lose a life due to invulnerability
+            return True  # Ainda tem vidas
+        return True  # Não perdeu vida devido à invulnerabilidade
 
     def add_life(self):
-        """Add a life, up to the maximum allowed"""
+        """Adiciona uma vida, até o máximo permitido"""
         if self.lives < SPACECRAFT_MAX_LIVES:
             self.lives += 1
             self.nova.show_message("Vida extra adquirida!", "excited")
             return True
-        return False  # Already at maximum lives
+        return False  # Já está no máximo de vidas
 
     def reset_lives(self):
-        """Reset lives to maximum value"""
+        """Reseta as vidas para o valor máximo"""
         self.lives = SPACECRAFT_MAX_LIVES
         self.invulnerable = False
         self.invulnerable_timer = 0
 
     def is_invulnerable(self):
-        """Return current invulnerability state"""
+        """Retorna o estado atual de invulnerabilidade"""
         return self.invulnerable
 
     def update(self):
         try:
-            # Update visual effects if available
+            # Atualiza os efeitos visuais se disponíveis
             if hasattr(self, 'visual_effects'):
                 self.visual_effects.update()
 
-            # Update NOVA AI if available
+            # Atualiza a NOVA AI se disponível
             if hasattr(self, 'nova'):
                 self.nova.update()
 
-            # Update welcome sound timer
+            # Atualiza o temporizador do som de boas-vindas
             if hasattr(self, 'welcome_sound_timer') and self.welcome_sound_timer > 0:
-                self.welcome_sound_timer -= 16  # Approximately 16ms per frame at 60fps
+                self.welcome_sound_timer -= 16  # Aproximadamente 16ms por quadro a 60fps
 
-                # Check if user tries to skip introduction (by pressing space)
+                # Verifica se o usuário tenta pular a introdução (pressionando espaço)
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_SPACE] and self.state == TRANSITION:
-                    # Don't completely stop welcome sound, just reduce volume
+                    # Não para completamente o som de boas-vindas, apenas reduz o volume
                     if hasattr(self, 'current_welcome_sound') and self.current_welcome_sound and hasattr(self, 'sound_manager'):
                         self.sound_manager.adjust_welcome_volume(self.current_planet.name, 0.3)
-                    self.welcome_sound_timer = 0  # Allow proceeding with game
+                    self.welcome_sound_timer = 0  # Permite prosseguir com o jogo
 
-            # Update invulnerability timer
+            # Atualiza o temporizador de invulnerabilidade
             if hasattr(self, 'invulnerable') and self.invulnerable:
                 self.invulnerable_timer -= 1
                 if self.invulnerable_timer <= 0:
@@ -623,88 +623,88 @@ class Game:
                     if hasattr(self, 'nova'):
                         self.nova.show_message("Sistemas de escudo restaurados", "normal")
 
-            # Update state manager
+            # Atualiza o gerenciador de estado
             if hasattr(self, 'state_manager'):
                 self.state_manager.update()
         except AttributeError as e:
-            # Print error for debugging purposes
-            print(f"Error in update: {e}")
-            # Continue game loop
+            # Imprime o erro para fins de depuração
+            print(f"Erro na atualização: {e}")
+            # Continua o loop do jogo
 
         if self.state == PLAYING:
             try:
                 if hasattr(self, 'spacecraft') and hasattr(self, 'current_planet'):
-                    # Update spacecraft with current planet's gravity and screen limits
+                    # Atualiza a espaçonave com a gravidade do planeta atual e os limites da tela
                     self.spacecraft.update(self.current_planet.gravity, SCREEN_HEIGHT, FLOOR_HEIGHT)
 
-                    # Continuous thrust while space is held in hold mode
+                    # Empuxo contínuo enquanto o espaço é segurado no modo de segurar
                     if hasattr(self, 'control_mode') and hasattr(self, 'space_held') and self.control_mode == CONTROL_MODE_HOLD and self.space_held:
-                        # Apply small continuous thrust (20% of thrust power)
+                        # Aplica pequeno empuxo contínuo (20% da potência de empuxo)
                         cont = self.spacecraft.thrust_power * self.spacecraft.thrust_multiplier * 0.2
                         self.spacecraft.velocity -= cont
-                        # Maintain flame effect
+                        # Mantém o efeito de chama
                         self.spacecraft.last_thrust_time = pygame.time.get_ticks()
-                        # Ensure thrust sound continues playing
+                        # Garante que o som de empuxo continue tocando
                         if hasattr(self, 'sound_manager'):
                             if not pygame.mixer.get_busy() or not self.sound_manager.engine_thrust_sound.get_num_channels():
                                 self.sound_manager.play_thrust()
 
-                # Generate obstacles
+                # Gera obstáculos
                 if hasattr(self, 'last_obstacle_time') and hasattr(self, 'obstacle_spawn_rate'):
                     current_time = pygame.time.get_ticks()
                     if current_time - self.last_obstacle_time > self.obstacle_spawn_rate:
-                        # Generate obstacle
+                        # Gera obstáculo
                         self._generate_obstacle()
                         self.last_obstacle_time = current_time
 
-                # Generate collectibles
+                # Gera colecionáveis
                 if hasattr(self, 'last_collectible_time') and hasattr(self, 'collectible_spawn_rate'):
                     current_time = pygame.time.get_ticks()
                     if current_time - self.last_collectible_time > self.collectible_spawn_rate:
-                        # Generate collectible
+                        # Gera colecionável
                         self._generate_collectible()
                         self.last_collectible_time = current_time
 
-                # Update obstacles and check scoring
+                # Atualiza obstáculos e verifica pontuação
                 if hasattr(self, 'obstacles'):
                     for obstacle in self.obstacles:
                         obstacle.update()
 
-                        # Score when passing an obstacle
+                        # Pontua ao passar por um obstáculo
                         if hasattr(self, 'spacecraft') and not obstacle.scored and obstacle.x + obstacle.WIDTH < self.spacecraft.x:
                             self.score += 1
                             obstacle.scored = True
 
-                            # Check for automatic progression
+                            # Verifica a progressão automática
                             if hasattr(self, 'current_planet') and hasattr(self, 'state_manager'):
                                 current_threshold = LEVEL_PROGRESSION_THRESHOLDS.get(
                                     self.current_planet.name,
-                                    10  # Default threshold
+                                    10  # Limite padrão
                                 )
 
-                                # Check if score threshold reached for automatic progression
+                                # Verifica se o limite de pontuação foi atingido para progressão automática
                                 if hasattr(self, 'planets') and self.score >= current_threshold and self.current_planet_index < len(self.planets) - 1:
-                                    # NOVA announces automatic progression
+                                    # NOVA anuncia progressão automática
                                     if hasattr(self, 'nova'):
                                         next_planet_en = self.planets[self.current_planet_index + 1].name
                                         next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en)
                                         self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
 
-                                    # Start quiz without incrementing planet index yet - let quiz handle progression
+                                    # Inicia o quiz sem incrementar o índice do planeta ainda - deixa o quiz lidar com a progressão
                                     self.state_manager.start_quiz()
 
-                # Update collectibles and check collision
+                # Atualiza colecionáveis e verifica colisão
                 if hasattr(self, 'collision_manager') and hasattr(self, 'collectibles'):
-                    # Check collectible collisions
+                    # Verifica colisões com colecionáveis
                     self.collision_manager.check_collectible_collisions()
 
-                    # Update collectibles
+                    # Atualiza colecionáveis
                     for collectible in list(self.collectibles):
                         collectible.update()
                         if hasattr(self, 'obstacle_speed'):
-                            collectible.x -= self.obstacle_speed  # Move at same speed as obstacles
+                            collectible.x -= self.obstacle_speed  # Move na mesma velocidade dos obstáculos
 
-                # Update weapon timer
+                # Atualiza o temporizador da arma
                 if hasattr(self, 'weapon_active') and self.weapon_active:
                     self.weapon_timer -= 1
                     if self.weapon_timer <= 0:
@@ -712,115 +712,115 @@ class Game:
                         if hasattr(self, 'nova'):
                             self.nova.show_message("Sistemas defensivos offline", "normal")
 
-                # Remove off-screen obstacles and collectibles
+                # Remove obstáculos e colecionáveis fora da tela
                 if hasattr(self, 'obstacles'):
                     self.obstacles = [obs for obs in self.obstacles if obs.x > -obs.WIDTH]
                 if hasattr(self, 'collectibles'):
                     self.collectibles = [col for col in self.collectibles if col.x > -col.WIDTH]
 
-                # Check collisions
+                # Verifica colisões
                 if hasattr(self, 'collision_manager'):
                     collision_result = self.collision_manager.check_collisions()
-                    if collision_result is not False and hasattr(self, 'sound_manager'):  # If collision occurred
-                        # Play obstacle collision sound
+                    if collision_result is not False and hasattr(self, 'sound_manager'):  # Se ocorreu colisão
+                        # Toca o som de colisão com obstáculo
                         self.sound_manager.play_collision()
-                        # Game over is already handled within lose_life
+                        # Fim de jogo já é tratado em lose_life
 
-                # Move floor
+                # Move o chão
                 if hasattr(self, 'floor_x') and hasattr(self, 'obstacle_speed'):
                     self.floor_x = (self.floor_x - self.obstacle_speed) % 800
 
             except AttributeError as e:
-                print(f"Error in PLAYING state update: {e}")
+                print(f"Erro na atualização do estado PLAYING: {e}")
             
     def _generate_obstacle(self):
-        """Generate a new obstacle"""
-        # Define fixed gap between obstacles
+        """Gera um novo obstáculo"""
+        # Define o vão fixo entre os obstáculos
         gap_size = Obstacle.GAP
 
-        # Calculate min and max values for gap center
+        # Calcula os valores mínimo e máximo para o centro do vão
         min_gap_center_y = gap_size // 2
         max_gap_center_y = SCREEN_HEIGHT - FLOOR_HEIGHT - (gap_size // 2)
 
-        # Handle edge cases with extreme constants
+        # Lida com casos extremos com constantes extremas
         if min_gap_center_y > max_gap_center_y:
             target_y = ((gap_size // 2) + (SCREEN_HEIGHT - FLOOR_HEIGHT - (gap_size // 2))) // 2
 
-            # Define absolute boundaries for clamping
+            # Define limites absolutos para fixação
             abs_min_y = gap_size // 2
             abs_max_y = SCREEN_HEIGHT - FLOOR_HEIGHT - (gap_size // 2)
 
-            if abs_min_y > abs_max_y:  # e.g. gap_size > playable height
-                # Just use middle of screen's playable height
+            if abs_min_y > abs_max_y:  # ex: gap_size > altura jogável
+                # Apenas usa o meio da altura jogável da tela
                 target_y = (SCREEN_HEIGHT - FLOOR_HEIGHT) // 2
             else:
-                # Clamp target_y to physically possible range
+                # Fixa target_y ao intervalo fisicamente possível
                 target_y = max(abs_min_y, min(target_y, abs_max_y))
 
             min_gap_center_y = target_y
             max_gap_center_y = target_y
 
-        # Generate random y position for gap center
+        # Gera posição y aleatória para o centro do vão
         gap_y = random.randint(min_gap_center_y, max_gap_center_y)
 
-        # Randomly select obstacle type
+        # Seleciona aleatoriamente o tipo de obstáculo
         obstacle_type = random.choice(list(Obstacle.TYPES.keys()))
 
-        # Create new obstacle
+        # Cria novo obstáculo
         new_obstacle = Obstacle(SCREEN_WIDTH, gap_y, self.obstacle_speed, obstacle_type, SCREEN_HEIGHT)
         self.obstacles.append(new_obstacle)
 
-        # Occasionally have NOVA alert about obstacles
-        if random.random() < 0.3:  # 30% chance
+        # Ocasionalmente, faz a NOVA alertar sobre obstáculos
+        if random.random() < 0.3:  # 30% de chance
             pass
 
     def _generate_collectible(self):
-        """Generate a new collectible"""
-        # Place collectible in a safe location
+        """Gera um novo colecionável"""
+        # Coloca o colecionável em um local seguro
         x = SCREEN_WIDTH
         y = random.randint(100, SCREEN_HEIGHT - FLOOR_HEIGHT - 50)
 
-        # Determine collectible type (1% chance for life, 10% weapon, rest data)
+        # Determina o tipo de colecionável (1% de chance para vida, 10% para arma, resto dados)
         collectible_type = "data"
         rand_val = random.random()
-        if rand_val < 0.01:  # 1% chance for life
+        if rand_val < 0.01:  # 1% de chance para vida
             collectible_type = "life"
-        elif rand_val < 0.11 and not self.weapon_active:  # 10% chance for weapon
+        elif rand_val < 0.11 and not self.weapon_active:  # 10% de chance para arma
             collectible_type = "weapon"
 
         self.collectibles.append(Collectible(x, y, collectible_type))
 
     def draw(self):
-        # Draw background
+        # Desenha o fundo
         self.visual_effects.draw_background(screen, self.current_planet)
 
-        # Draw content based on game state
+        # Desenha o conteúdo com base no estado do jogo
         if self.state == PLAYING or self.state == MENU or self.state == GAME_OVER or self.state == QUIZ_FAILURE:
-            # Draw obstacles
+            # Desenha obstáculos
             for obstacle in self.obstacles:
                 obstacle.draw(screen)
 
-            # Draw collectibles
+            # Desenha colecionáveis
             for collectible in self.collectibles:
                 collectible.draw(screen)
 
-            # Draw floor/ground
+            # Desenha o chão/solo
             self.current_planet.draw_ground(screen, self.floor_x, SCREEN_HEIGHT)
 
-            # Draw spacecraft (with invulnerability effect if applicable)
+            # Desenha a espaçonave (com efeito de invulnerabilidade se aplicável)
             self.spacecraft.draw(screen, self.invulnerable)
 
-            # Draw current planet name and player score
+            # Desenha o nome do planeta atual e a pontuação do jogador
             if self.state != MENU:
-                # Left side information
+                # Informações do lado esquerdo
                 display_name = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
                 planet_text = config.SMALL_FONT.render(f"Planeta: {display_name}", True, (255, 255, 255))
                 screen.blit(planet_text, (20, 20))
 
-                # Get threshold for current planet
+                # Obtém o limite para o planeta atual
                 current_threshold = LEVEL_PROGRESSION_THRESHOLDS.get(
                     self.current_planet.name,
-                    10  # Default threshold
+                    10  # Limite padrão
                 )
 
                 score_text = config.SMALL_FONT.render(f"Pontuação: {self.score}/{current_threshold}", True, (255, 255, 255))
@@ -829,32 +829,32 @@ class Game:
                 high_score_text = config.SMALL_FONT.render(f"Maior Pontuação: {self.high_score_manager.get()}", True, (255, 255, 255))
                 screen.blit(high_score_text, (20, 80))
 
-                # Draw lives indicator
+                # Desenha o indicador de vidas
                 lives_text = config.SMALL_FONT.render(f"Vidas:", True, (255, 255, 255))
                 screen.blit(lives_text, (20, 110))
 
-                # Draw life icons
+                # Desenha os ícones de vida
                 self.visual_effects.draw_life_icons(screen, self.lives, SPACECRAFT_MAX_LIVES, self.spacecraft_color)
 
-                # Draw weapon status in top center if active
+                # Desenha o status da arma no centro superior se ativa
                 if self.weapon_active:
-                    weapon_time = self.weapon_timer // 60  # Convert to seconds
+                    weapon_time = self.weapon_timer // 60  # Converte para segundos
                     weapon_text = config.SMALL_FONT.render(f"Arma Ativa: {weapon_time}s", True, (255, 100, 100))
                     screen.blit(weapon_text, (SCREEN_WIDTH // 2 - weapon_text.get_width() // 2, 20))
 
-            # Draw NOVA AI assistant
+            # Desenha o assistente NOVA AI
             self.nova.draw(screen)
             
-            # If quiz failed, overlay large countdown before resuming
+            # Se o quiz falhou, sobrepõe uma contagem regressiva grande antes de retomar
             if self.state == QUIZ_FAILURE and self.state_manager.quiz_failure_timer > 0:
                 countdown = math.ceil(self.state_manager.quiz_failure_timer / 60)
                 self.visual_effects.draw_countdown(screen, countdown)
 
-            # Draw menu screen
+            # Desenha a tela de menu
             if self.state == MENU:
                 self._draw_menu_screen(screen)
 
-            # Draw game over screen
+            # Desenha a tela de fim de jogo
             if self.state == GAME_OVER:
                 self._draw_game_over_screen(screen)
 
@@ -862,21 +862,21 @@ class Game:
             self._draw_transition_screen(screen)
 
         elif self.state == QUIZ:
-            # Draw quiz
+            # Desenha o quiz
             self.quiz.draw(screen)
 
-            # Always draw NOVA AI assistant on top in quiz state as well
+            # Sempre desenha o assistente NOVA AI por cima também no estado de quiz
             self.nova.draw(screen)
 
         elif self.state == QUIZ_FAILURE:
             self._draw_quiz_failure_screen(screen)
 
-        # Always draw NOVA AI assistant on top
+        # Sempre desenha o assistente NOVA AI por cima
         self.nova.draw(screen)
 
     def _draw_menu_screen(self, screen):
-        """Draw the menu screen"""
-        # Semi-transparent overlay
+        """Desenha a tela de menu"""
+        # Sobreposição semitransparente
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
@@ -893,7 +893,7 @@ class Game:
         screen.blit(color_text, (SCREEN_WIDTH // 2 - color_text.get_width() // 2, 330))
         screen.blit(color_instruction, (SCREEN_WIDTH // 2 - color_instruction.get_width() // 2, 370))
 
-        # Show controls
+        # Mostra os controles
         controls_title = config.SMALL_FONT.render("Controles:", True, (255, 255, 255))
         controls_space = config.SMALL_FONT.render("ESPAÇO - Impulsionar", True, (200, 200, 200))
         controls_w = config.SMALL_FONT.render("W - Usar Arma (quando disponível)", True, (200, 200, 200))
@@ -904,8 +904,8 @@ class Game:
         screen.blit(controls_w, (SCREEN_WIDTH // 2 - controls_w.get_width() // 2, controls_y + 60))
 
     def _draw_game_over_screen(self, screen):
-        """Draw the game over screen"""
-        # Semi-transparent overlay
+        """Desenha a tela de fim de jogo"""
+        # Sobreposição semitransparente
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
@@ -915,7 +915,7 @@ class Game:
         high_score_text = config.GAME_FONT.render(f"Maior Pontuação: {self.high_score_manager.get()}", True, (255, 255, 255))
         restart_text = config.GAME_FONT.render("Pressione ESPAÇO para iniciar nova missão", True, (255, 255, 255))
 
-        # Calculate furthest planet reached
+        # Calcula o planeta mais distante alcançado
         furthest_planet = self.planets[min(self.current_planet_index, len(self.planets) - 1)].name
         planet_text = config.GAME_FONT.render(f"Planeta mais distante: {furthest_planet}", True, (255, 255, 255))
 
@@ -926,24 +926,24 @@ class Game:
         screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, 400))
 
     def _draw_transition_screen(self, screen):
-        """Draw the transition screen"""
-        # Semi-transparent overlay
+        """Desenha a tela de transição"""
+        # Sobreposição semitransparente
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 200))  # Darker overlay for text readability
+        overlay.fill((0, 0, 0, 200))  # Sobreposição mais escura para legibilidade do texto
         screen.blit(overlay, (0, 0))
 
-        # Draw destination planet name
+        # Desenha o nome do planeta de destino
         display_name = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
         planet_title = config.GAME_FONT.render(f"Bem-vindo a {display_name}", True, (255, 255, 255))
         screen.blit(planet_title, (SCREEN_WIDTH // 2 - planet_title.get_width() // 2, 100))
 
-        # Draw gravity information
+        # Desenha informações de gravidade
         gravity_text = config.GAME_FONT.render(f"Gravidade: {self.current_planet.gravity_factor}% da Terra", True, (255, 255, 255))
         screen.blit(gravity_text, (SCREEN_WIDTH // 2 - gravity_text.get_width() // 2, 150))
 
-        # Draw planet info text
+        # Desenha o texto informativo do planeta
         info_text = self.current_planet.get_info_text()
-        # Wrap text to fit screen
+        # Quebra o texto para caber na tela
         wrapped_lines = []
         words = info_text.split()
         line = ""
@@ -955,52 +955,52 @@ class Game:
             else:
                 wrapped_lines.append(line)
                 line = word + " "
-        wrapped_lines.append(line)  # Add last line
+        wrapped_lines.append(line)  # Adiciona a última linha
 
-        # Draw wrapped text
+        # Desenha o texto quebrado
         for i, line in enumerate(wrapped_lines):
             line_surface = config.SMALL_FONT.render(line, True, (200, 200, 255))
             screen.blit(line_surface, (SCREEN_WIDTH // 2 - line_surface.get_width() // 2, 220 + i * 30))
 
-        # Draw progress indicator
+        # Desenha o indicador de progresso
         progress_text = config.SMALL_FONT.render(f"Planeta {self.current_planet_index + 1} de {len(self.planets)}", True, (180, 180, 180))
         screen.blit(progress_text, (SCREEN_WIDTH // 2 - progress_text.get_width() // 2, 350))
 
-        # Draw continue prompt
-        if self.state_manager.transition_time > 60:  # Only show after 1 second
+        # Desenha o prompt para continuar
+        if self.state_manager.transition_time > 60:  # Mostra apenas após 1 segundo
             continue_text = config.SMALL_FONT.render("Pressione ESPAÇO para continuar", True, (255, 255, 255))
-            # Make it pulse
+            # Faz pulsar
             alpha = int(128 + 127 * math.sin(pygame.time.get_ticks() * 0.005))
             continue_text.set_alpha(alpha)
             screen.blit(continue_text, (SCREEN_WIDTH // 2 - continue_text.get_width() // 2, 450))
 
     def _draw_quiz_failure_screen(self, screen):
-        """Draw the quiz failure screen with countdown"""
-        # Add semi-transparent overlay
+        """Desenha a tela de falha no quiz com contagem regressiva"""
+        # Adiciona sobreposição semitransparente
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 180))  # More visible semi-transparent black
+        overlay.fill((0, 0, 0, 180))  # Preto semitransparente mais visível
         screen.blit(overlay, (0, 0))
 
-        # Calculate countdown number
+        # Calcula o número da contagem regressiva
         countdown_number = self.state_manager.quiz_failure_timer // 60 + 1
 
-        # Draw large countdown number
+        # Desenha o número grande da contagem regressiva
         self.visual_effects.draw_countdown(screen, countdown_number)
 
-        # Draw "Returning..." text with pulse effect
+        # Desenha o texto "Retornando..." com efeito de pulsação
         self.visual_effects.draw_pulsing_text(
             screen,
             "Retornando à órbita...",
-            pygame.font.Font(None, 42),  # Create a temporary font for the pulsing text
+            pygame.font.Font(None, 42),  # Cria uma fonte temporária para o texto pulsante
             (255, 255, 255),
             (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100)
         )
 
 def main():
-    # Create and start the game
+    # Cria e inicia o jogo
     game = Game()
 
-    # Game loop
+    # Loop do jogo
     while True:
         game.handle_events()
         game.update()

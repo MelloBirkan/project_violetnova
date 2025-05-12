@@ -23,13 +23,13 @@ class NovaAI:
 
     # Cores para diferentes tipos de expressão
     COLORS = {
-        "normal": (70, 130, 180),  # Steel blue
-        "excited": (65, 105, 225),  # Royal blue
-        "curious": (106, 90, 205),  # Slate blue
-        "surprised": (138, 43, 226),  # Blue violet
-        "warning": (255, 140, 0),   # Dark orange
-        "happy": (50, 205, 50),     # Lime green
-        "alert": (220, 20, 60)      # Crimson
+        "normal": (70, 130, 180),  # Azul aço
+        "excited": (65, 105, 225),  # Azul real
+        "curious": (106, 90, 205),  # Azul ardósia
+        "surprised": (138, 43, 226),  # Azul violeta
+        "warning": (255, 140, 0),   # Laranja escuro
+        "happy": (50, 205, 50),     # Verde limão
+        "alert": (220, 20, 60)      # Carmesim
     }
 
     # Símbolos de alerta que a IA pode mostrar
@@ -132,19 +132,19 @@ class NovaAI:
         self.char_timer = 0
         self.char_delay = 2  # Quadros entre a adição de caracteres
 
-        # Animation variables
+        # Variáveis de animação
         self.pulse_factor = 1.0
         self.pulse_direction = 1
         self.pulse_speed = 0.005
         self.pulse_min = 0.95
         self.pulse_max = 1.05
 
-        # Particle system
+        # Sistema de partículas
         self.particles = []
         self.particle_timer = 0
         self.particle_spawn_delay = 5  # Quadros entre a geração de partículas
 
-        # Tails for speech bubble animation
+        # Caudas para animação do balão de fala
         self.tail_offset = 0
         self.tail_direction = 1
         self.tail_speed = 0.5
@@ -161,7 +161,7 @@ class NovaAI:
         self.surface = pygame.Surface((scaled_width, scaled_height), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 0))  # Transparente
 
-        # Determine the color based on expression or transition
+        # Determina a cor com base na expressão ou transição
         if self.transition_progress < 1.0:
             # Durante a transição, mescla as cores
             curr_color = self.COLORS[self.expression]
@@ -176,7 +176,7 @@ class NovaAI:
             # Sem transição, usa a cor da expressão atual
             color = (*self.COLORS[self.expression], 230)
 
-        # Draw the outer and inner circles
+        # Desenha os círculos externo e interno
         pygame.draw.circle(self.surface, (50, 50, 50, 200),
                           (scaled_width // 2, scaled_height // 2), scaled_width // 2)
         pygame.draw.circle(self.surface, color,
@@ -184,23 +184,23 @@ class NovaAI:
 
         # Usa expressões personalizadas ou recorre a emojis
         if globals().get('USE_CUSTOM_EXPRESSIONS', False):
-            # Get the appropriate drawing function for the current expression
+            # Obtém a função de desenho apropriada para a expressão atual
             draw_func = EXPRESSION_FUNCTIONS.get(self.expression)
             if draw_func:
-                # Create a temporary surface for the expression and have the function draw on it
+                # Cria uma superfície temporária para a expressão e faz a função desenhar nela
                 expression_surface = pygame.Surface((scaled_width, scaled_height), pygame.SRCALPHA)
-                expression_surface.fill((0, 0, 0, 0))  # Start with transparency
+                expression_surface.fill((0, 0, 0, 0))  # Começa com transparência
 
-                # Call the drawing function
+                # Chama a função de desenho
                 draw_func(expression_surface, scaled_width, scaled_height)
 
-                # Blit the expression onto the main surface
+                # Blit a expressão na superfície principal
                 self.surface.blit(expression_surface, (0, 0))
             else:
-                # Fall back to emoji if drawing function not found
+                # Recorre a emoji se a função de desenho não for encontrada
                 self._draw_emoji_expression(scaled_width, scaled_height)
         else:
-            # Fall back to emoji representation
+            # Recorre à representação de emoji
             self._draw_emoji_expression(scaled_width, scaled_height)
 
     def _draw_emoji_expression(self, width, height):
@@ -390,9 +390,9 @@ class NovaAI:
 
             # Pontos para a cauda do balão de fala (triângulo)
             tail_points = [
-                (tail_top_x - tail_width//2, bubble_y + message_height),  # Bottom left
-                (tail_top_x + tail_width//2, bubble_y + message_height),  # Bottom right
-                (self.x + self.WIDTH//2, self.y)                         # Point to AI
+                (tail_top_x - tail_width//2, bubble_y + message_height),  # Canto inferior esquerdo
+                (tail_top_x + tail_width//2, bubble_y + message_height),  # Canto inferior direito
+                (self.x + self.WIDTH//2, self.y)                         # Aponta para a IA
             ]
 
             # Desenha a cauda

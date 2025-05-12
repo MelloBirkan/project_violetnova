@@ -5,23 +5,23 @@ class CollisionManager:
         self.game = game
         
     def check_collisions(self):
-        """Main collision detection method"""
-        # Skip collision detection if spacecraft is invulnerable
+        """Método principal de detecção de colisões"""
+        # Pula a detecção de colisão se a nave estiver invulnerável
         if self.game.invulnerable:
             return False
         
-        # Check for boundary collisions (ceiling and floor)
+        # Verifica colisões com os limites (teto e chão)
         if self._check_boundary_collision():
             return True
         
-        # Check for obstacle collisions
+        # Verifica colisões com obstáculos
         return self._check_obstacle_collisions()
     
     def _check_boundary_collision(self):
-        """Check if spacecraft has collided with screen boundaries"""
+        """Verifica se a nave colidiu com os limites da tela"""
         spacecraft = self.game.spacecraft
         
-        # Check if spacecraft has hit the ceiling or floor
+        # Verifica se a nave atingiu o teto ou o chão
         if (spacecraft.y <= 0 or 
             spacecraft.y + spacecraft.HITBOX_HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT):
             
@@ -30,167 +30,167 @@ class CollisionManager:
         return False
     
     def _check_obstacle_collisions(self):
-        """Check if spacecraft has collided with any obstacles"""
+        """Verifica se a nave colidiu com algum obstáculo"""
         spacecraft = self.game.spacecraft
         
-        # Calculate spacecraft hitbox position
+        # Calcula a posição da hitbox da nave
         spacecraft_body_x = spacecraft.x + spacecraft.flame_extent + (spacecraft.WIDTH - spacecraft.HITBOX_WIDTH) / 2
         spacecraft_body_y = spacecraft.y + (spacecraft.HEIGHT - spacecraft.HITBOX_HEIGHT) / 2
         
-        # Check each obstacle for collision
+        # Verifica cada obstáculo para colisão
         for obstacle in self.game.obstacles:
-            # Determine if using sprites and get the width
+            # Determina se está usando sprites e obtém a largura
             using_sprites = hasattr(obstacle, 'using_sprites') and obstacle.using_sprites
             obstacle_width = obstacle.top_width if using_sprites else obstacle.WIDTH
             
-            # Check for horizontal overlap
+            # Verifica sobreposição horizontal
             horizontal_overlap = (
                 spacecraft_body_x + spacecraft.HITBOX_WIDTH > obstacle.x and
                 spacecraft_body_x < obstacle.x + obstacle_width
             )
             
             if horizontal_overlap:
-                # Calculate gap boundaries
+                # Calcula os limites do gap
                 upper_gap_limit = obstacle.gap_y - obstacle.GAP // 2
                 lower_gap_limit = obstacle.gap_y + obstacle.GAP // 2
                 
-                # Check collision with upper obstacle
+                # Verifica colisão com o obstáculo superior
                 if spacecraft_body_y < upper_gap_limit:
                     return self.handle_collision("obstacle", obstacle, "upper")
                 
-                # Check collision with lower obstacle
+                # Verifica colisão com o obstáculo inferior
                 if spacecraft_body_y + spacecraft.HITBOX_HEIGHT > lower_gap_limit:
                     return self.handle_collision("obstacle", obstacle, "lower")
         
         return False
     
     def handle_collision(self, collision_type, obstacle=None, obstacle_part=None):
-        """Handle collision effects and consequences"""
-        # Reduce lives and check if game over
+        """Lida com os efeitos e consequências da colisão"""
+        # Reduz vidas e verifica se o jogo acabou
         has_lives_left = self.game.lose_life()
         
-        # Apply appropriate knockback based on collision type
+        # Aplica o knockback apropriado com base no tipo de colisão
         if collision_type == "boundary":
             self._handle_boundary_collision()
         else:
             self._handle_obstacle_collision(obstacle, obstacle_part)
         
-        # Set invulnerability
+        # Define invulnerabilidade
         self.game.invulnerable = True
         self.game.invulnerable_timer = SPACECRAFT_INVULNERABILITY_TIME
         
-        # Visual effects
+        # Efeitos visuais
         self.game.screen_shake = 18
         self.game.flash_effect = 5
         
-        # NOVA AI notification
-        self.game.nova.show_message("Hull integrity compromised!", "alert")
+        # Notificação da IA NOVA
+        self.game.nova.show_message("Integridade do casco comprometida!", "alerta")
         
-        # Return if still has lives
+        # Retorna se ainda tem vidas
         return has_lives_left
     
     def _handle_boundary_collision(self):
-        """Handle collision with screen boundaries"""
+        """Lida com a colisão com os limites da tela"""
         spacecraft = self.game.spacecraft
         
-        # If collision with floor
+        # Se colidir com o chão
         if spacecraft.y + spacecraft.HITBOX_HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
-            # Apply upward knockback
+            # Aplica knockback para cima
             spacecraft.velocity = SPACECRAFT_KNOCKBACK * 0.8
-            # Ensure spacecraft doesn't go below floor
+            # Garante que a nave não vá abaixo do chão
             spacecraft.y = SCREEN_HEIGHT - FLOOR_HEIGHT - spacecraft.HITBOX_HEIGHT
         else:
-            # If collision with ceiling, apply downward knockback
+            # Se colidir com o teto, aplica knockback para baixo
             spacecraft.velocity = abs(SPACECRAFT_KNOCKBACK) * 0.8
-            # Ensure spacecraft doesn't go above ceiling
+            # Garante que a nave não vá acima do teto
             spacecraft.y = 0
     
     def _handle_obstacle_collision(self, obstacle, obstacle_part):
-        """Handle collision with obstacles"""
+        """Lida com a colisão com obstáculos"""
         spacecraft = self.game.spacecraft
         
-        # Default knockback
+        # Knockback padrão
         spacecraft.velocity = SPACECRAFT_KNOCKBACK
         
-        # Add horizontal movement to move away from obstacle
+        # Adiciona movimento horizontal para se afastar do obstáculo
         if obstacle:
-            # Horizontal knockback
+            # Knockback horizontal
             if spacecraft.x > obstacle.x:
-                spacecraft.x += 15  # Push right
+                spacecraft.x += 15  # Empurra para a direita
             else:
-                spacecraft.x -= 15  # Push left
+                spacecraft.x -= 15  # Empurra para a esquerda
             
-            # Vertical knockback based on which part was hit
+            # Knockback vertical com base na parte que foi atingida
             if obstacle_part == "upper":
-                # Hit top obstacle, push down
+                # Atingiu o obstáculo superior, empurra para baixo
                 spacecraft.velocity = abs(SPACECRAFT_KNOCKBACK) * 0.8
             elif obstacle_part == "lower":
-                # Hit bottom obstacle, push up
+                # Atingiu o obstáculo inferior, empurra para cima
                 spacecraft.velocity = SPACECRAFT_KNOCKBACK * 0.8
     
     def check_collectible_collisions(self):
-        """Check and handle collectible collisions"""
+        """Verifica e lida com colisões com coletáveis"""
         spacecraft = self.game.spacecraft
         
         for collectible in list(self.game.collectibles):
-            # Check collision
+            # Verifica colisão
             if collectible.check_collision(spacecraft):
                 self._handle_collectible_effect(collectible)
                 
-                # Remove collected item
+                # Remove o item coletado
                 self.game.collectibles.remove(collectible)
     
     def _handle_collectible_effect(self, collectible):
-        """Apply the effect of a collected item"""
+        """Aplica o efeito de um item coletado"""
         effect = collectible.get_effect()
         
         if effect["effect"] == "info":
-            # Show planet information
+            # Mostra informações do planeta
             self.game.nova.give_random_fact(self.game.current_planet.name)
             self.game.score += effect["value"]
             self._check_level_progression()
             
         elif effect["effect"] == "time":
-            # Extend game time (add score)
+            # Estende o tempo de jogo (adiciona pontuação)
             self.game.score += effect["value"]
             self.game.nova.react_to_discovery("fuel")
             self._check_level_progression()
             
         elif effect["effect"] == "attack":
-            # Enable weapon temporarily
+            # Habilita a arma temporariamente
             self.game.weapon_active = True
-            self.game.weapon_timer = 600  # 10 seconds at 60fps
+            self.game.weapon_timer = 600  # 10 segundos a 60fps
             self.game.nova.react_to_discovery("weapon")
             
         elif effect["effect"] == "life":
-            # Add an extra life
+            # Adiciona uma vida extra
             self.game.add_life()
     
     def _check_level_progression(self):
-        """Check if score has reached the threshold for planet progression"""
+        """Verifica se a pontuação atingiu o limite para progressão de planeta"""
         from src.config import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
         
-        # Get threshold for current planet
+        # Obtém o limite para o planeta atual
         current_threshold = LEVEL_PROGRESSION_THRESHOLDS.get(
             self.game.current_planet.name,
-            10  # Default threshold
+            10  # Limite padrão
         )
         
-        # Check if score exceeds threshold and more planets are available
+        # Verifica se a pontuação excede o limite e se há mais planetas disponíveis
         if (self.game.score >= current_threshold and 
             self.game.current_planet_index < len(self.game.planets) - 1):
             
-            # Get next planet name
+            # Obtém o nome do próximo planeta
             next_planet_en = self.game.planets[self.game.current_planet_index + 1].name
             next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en)
             
-            # Show navigation message
+            # Mostra mensagem de navegação
             self.game.nova.show_message(
                 f"Navegação automática engajada! Indo para {next_planet_pt}!", 
                 "excited"
             )
             
-            # Start quiz for planet advancement
+            # Inicia o quiz para avanço de planeta
             self.game.state_manager.start_quiz()
             return True
         
