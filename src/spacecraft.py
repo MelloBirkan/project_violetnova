@@ -4,8 +4,8 @@ import os
 class Spacecraft:
     WIDTH = 100
     HEIGHT = 40
-    HITBOX_WIDTH = 70  
-    HITBOX_HEIGHT = 28 
+    HITBOX_WIDTH = 70  # Largura da caixa de colisão
+    HITBOX_HEIGHT = 28 # Altura da caixa de colisão
     
     # Opções de cor da espaçonave
     COLORS = {
@@ -64,7 +64,7 @@ class Spacecraft:
         # Carrega o sprite da espaçonave
         self.sprite_path = os.path.join("assets", "images", "nova_2x.png")
         self.sprite = pygame.image.load(self.sprite_path)
-        # Scale sprite to visual WIDTH and HEIGHT
+        # Dimensiona o sprite para a LARGURA e ALTURA visuais
         self.sprite = pygame.transform.scale(self.sprite, (self.WIDTH, self.HEIGHT))
         # Cria a base da espaçonave e os quadros de empuxo
         self.create_animation_frames()
