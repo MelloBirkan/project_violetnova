@@ -70,11 +70,28 @@ try:
     explosion_sound = pygame.mixer.Sound("assets/sounds/exploding.mp3")
     hitting_obstacle_sound = pygame.mixer.Sound("assets/sounds/hitting_obstacle.mp3")
 
+    # Carrega sons de boas-vindas para cada planeta
+    welcome_sounds = {
+        "Earth": pygame.mixer.Sound("assets/sounds/welcome/terra.mp3"),
+        "Mercury": pygame.mixer.Sound("assets/sounds/welcome/mercurio.mp3"),
+        "Venus": pygame.mixer.Sound("assets/sounds/welcome/venus.mp3"),
+        "Moon": pygame.mixer.Sound("assets/sounds/welcome/lua.mp3"),
+        "Mars": pygame.mixer.Sound("assets/sounds/welcome/marte.mp3"),
+        "Jupiter": pygame.mixer.Sound("assets/sounds/welcome/jupiter.mp3"),
+        "Saturn": pygame.mixer.Sound("assets/sounds/welcome/saturno.mp3"),
+        "Uranus": pygame.mixer.Sound("assets/sounds/welcome/urano.mp3"),
+        "Neptune": pygame.mixer.Sound("assets/sounds/welcome/Netuno.mp3")
+    }
+
     # Define o volume padrão para todos os sons
     sound_volume = 0.5
     engine_thrust_sound.set_volume(sound_volume)
     explosion_sound.set_volume(sound_volume)
     hitting_obstacle_sound.set_volume(sound_volume)
+
+    # Define volume para os sons de boas-vindas
+    for sound in welcome_sounds.values():
+        sound.set_volume(1.0)  # Volume máximo para garantir que a narração seja ouvida claramente
 
 except pygame.error as e:
     print(f"Não foi possível carregar o asset: {e}")
@@ -343,6 +360,11 @@ class Game:
         self.sound_volume = 0.5  # Volume padrão (50%)
         self.sound_fadeout_time = 500  # Tempo de fadeout em ms
 
+        # Variáveis de controle para sons de boas-vindas
+        self.welcome_sound_played = False
+        self.current_welcome_sound = None
+        self.welcome_sound_timer = 0
+
         # Cria dados dos planetas
         self.planet_data = create_planet_data()
         self.planets = [Planet(data["name"],
@@ -448,6 +470,14 @@ class Game:
         engine_thrust_sound.fadeout(self.sound_fadeout_time)
         hitting_obstacle_sound.fadeout(self.sound_fadeout_time)
 
+        # Não interrompe os sons de boas-vindas no reset a menos que seja um reset completo (não new_planet)
+        if not new_planet:
+            # Para os sons de boas-vindas que possam estar tocando apenas no reset completo
+            for sound in welcome_sounds.values():
+                sound.fadeout(200)
+            self.current_welcome_sound = None
+            self.welcome_sound_timer = 0
+
         if new_planet:
             # Lembra a pontuação para progressão
             previous_score = self.score
@@ -464,6 +494,22 @@ class Game:
             self.difficulty_multiplier = 1.0
             # Reinicia vidas para o máximo quando começa um novo jogo após game over
             self.reset_lives()
+
+            # Toca o som de boas-vindas da Terra sempre ao começar ou reiniciar o jogo
+            if self.current_planet.name in welcome_sounds:
+                # Garante que quaisquer sons em reprodução sejam parados primeiro
+                for sound in welcome_sounds.values():
+                    sound.fadeout(100)
+
+                # Pequeno atraso antes de reproduzir o som de boas-vindas da Terra
+                pygame.time.delay(200)
+
+                # Armazena referência ao som atual para garantir que ele não seja interrompido
+                self.current_welcome_sound = welcome_sounds[self.current_planet.name]
+                self.current_welcome_sound.play()
+                # Define o temporizador baseado na duração do som (em milissegundos)
+                self.welcome_sound_timer = int(self.current_welcome_sound.get_length() * 1000)
+                self.welcome_sound_played = True
 
         # Reinicia a posição da nave espacial
         self.spacecraft = Spacecraft(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, self.spacecraft_color)
@@ -519,6 +565,9 @@ class Game:
                             if self.control_mode == CONTROL_MODE_HOLD:
                                 self.space_held = True
                         elif self.state == GAME_OVER:
+                            # Redefine a flag de welcome_sound_played para false
+                            # para que o som da Terra seja reproduzido ao reiniciar
+                            self.welcome_sound_played = False
                             self.reset()
                         elif self.state == TRANSITION:
                             # Pula a transição e força o início do jogo no novo planeta
@@ -567,10 +616,19 @@ class Game:
                             # thrust_sound.play()
                             engine_thrust_sound.play(-1)
                         elif self.state == GAME_OVER:
+                            # Redefine a flag de welcome_sound_played para false
+                            # para que o som da Terra seja reproduzido ao reiniciar
+                            self.welcome_sound_played = False
                             self.reset()
                         elif self.state == TRANSITION:
+                            # Se estiver na transição e o som estiver tocando, permite pular mas continua o som em volume reduzido
+                            if self.welcome_sound_timer > 0 and self.current_welcome_sound:
+                                self.current_welcome_sound.set_volume(0.3)
+                            # Força conclusão do temporizador de som para permitir prosseguir
+                            self.welcome_sound_timer = 0
                             # Pula a transição e força o início do jogo no novo planeta
-                            self.reset(new_planet=True)
+                            if self.transition_time >= self.transition_duration // 2:  # Só permite pular depois de metade da transição
+                                self.reset(new_planet=True)
 
     def _use_weapon(self):
         """Usa a arma para destruir obstáculos"""
@@ -671,6 +729,18 @@ class Game:
 
         if self.flash_effect > 0:
             self.flash_effect -= 1
+
+        # Atualiza temporizador de som de boas-vindas
+        if self.welcome_sound_timer > 0:
+            self.welcome_sound_timer -= 16  # Aproximadamente 16ms por frame a 60fps
+
+            # Verifica se o usuário tenta pular a introdução (pressionando espaço)
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE] and self.state == TRANSITION:
+                # Não para completamente o som de boas-vindas, apenas diminui o volume
+                if self.current_welcome_sound:
+                    self.current_welcome_sound.set_volume(0.3)
+                self.welcome_sound_timer = 0  # Permite prosseguir com o jogo
 
         # Atualiza temporizador de invulnerabilidade
         if self.invulnerable:
@@ -878,7 +948,10 @@ class Game:
         elif self.state == TRANSITION:
             # Atualiza tela de transição
             self.transition_time += 1
-            if self.transition_time >= self.transition_duration:
+
+            # Só inicia o jogo quando o temporizador de transição acabar OU
+            # quando o som de boas-vindas terminar (o que for mais longo)
+            if self.transition_time >= self.transition_duration and self.welcome_sound_timer <= 0:
                 # Transição completa, inicia o jogo no novo planeta
                 self.reset(new_planet=True)
 
@@ -946,6 +1019,12 @@ class Game:
         self.state = TRANSITION
         self.transition_time = 0
 
+        # Para quaisquer sons anteriores
+        for sound in welcome_sounds.values():
+            sound.fadeout(200)
+        engine_thrust_sound.fadeout(200)
+        hitting_obstacle_sound.fadeout(200)
+
         # Incrementa o índice do planeta para avançar para o próximo (só acontece após passar no quiz)
         self.current_planet_index += 1
 
@@ -964,6 +1043,14 @@ class Game:
 
         # Garante que estamos usando o planeta correto após o quiz
         self.current_planet = self.planets[self.current_planet_index]
+
+        # Toca som de boas-vindas para o novo planeta
+        if self.current_planet.name in welcome_sounds:
+            # Armazena referência ao som atual para garantir que ele não seja interrompido
+            self.current_welcome_sound = welcome_sounds[self.current_planet.name]
+            self.current_welcome_sound.play()
+            # Define o temporizador baseado na duração do som (em milissegundos)
+            self.welcome_sound_timer = int(self.current_welcome_sound.get_length() * 1000)
 
         # NOVA mostra empolgação sobre o novo planeta
         self.nova.show_message(f"Entrando na órbita de {self.current_planet.name}!", "excited")
