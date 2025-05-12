@@ -66,6 +66,15 @@ try:
     thrust_sound = pygame.mixer.Sound("assets/sounds/flap.wav")
     score_sound = pygame.mixer.Sound("assets/sounds/score.wav")
     hit_sound = pygame.mixer.Sound("assets/sounds/hit.wav")
+    engine_thrust_sound = pygame.mixer.Sound("assets/sounds/thrust.mp3")
+    explosion_sound = pygame.mixer.Sound("assets/sounds/exploding.mp3")
+    hitting_obstacle_sound = pygame.mixer.Sound("assets/sounds/hitting_obstacle.mp3")
+
+    # Define o volume padrão para todos os sons
+    sound_volume = 0.5
+    engine_thrust_sound.set_volume(sound_volume)
+    explosion_sound.set_volume(sound_volume)
+    hitting_obstacle_sound.set_volume(sound_volume)
 
 except pygame.error as e:
     print(f"Não foi possível carregar o asset: {e}")
@@ -330,6 +339,10 @@ class Game:
         self.screen_shake = 0  # Para efeito visual de dano
         self.flash_effect = 0  # Para efeito visual de dano
 
+        # Definições de som
+        self.sound_volume = 0.5  # Volume padrão (50%)
+        self.sound_fadeout_time = 500  # Tempo de fadeout em ms
+
         # Cria dados dos planetas
         self.planet_data = create_planet_data()
         self.planets = [Planet(data["name"],
@@ -430,6 +443,11 @@ class Game:
         self.weapon_active = False
         self.weapon_timer = 0
 
+        # Certifica-se de que todos os sons não estão tocando ao resetar
+        # Usa fadeout para uma transição mais suave
+        engine_thrust_sound.fadeout(self.sound_fadeout_time)
+        hitting_obstacle_sound.fadeout(self.sound_fadeout_time)
+
         if new_planet:
             # Lembra a pontuação para progressão
             previous_score = self.score
@@ -493,7 +511,10 @@ class Game:
                         elif self.state == PLAYING:
                             # Impulso único ao pressionar
                             self.spacecraft.thrust()
-                            thrust_sound.play()
+                            # Remove o som de beep ao ativar o thrust
+                            # thrust_sound.play()
+                            # Toca o som do motor de impulso
+                            engine_thrust_sound.play(-1)  # -1 faz com que o som se repita indefinidamente
                             # Habilita impulso contínuo se estiver no modo hold
                             if self.control_mode == CONTROL_MODE_HOLD:
                                 self.space_held = True
@@ -528,6 +549,8 @@ class Game:
                 if event.key == pygame.K_SPACE:
                     # para o impulso contínuo ao soltar
                     self.space_held = False
+                    # Fade out do som do motor de impulso
+                    engine_thrust_sound.fadeout(self.sound_fadeout_time)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Botão esquerdo do mouse
@@ -540,7 +563,9 @@ class Game:
                             self.reset()
                         elif self.state == PLAYING:
                             self.spacecraft.thrust()
-                            thrust_sound.play()
+                            # Remove o som de beep ao ativar o thrust
+                            # thrust_sound.play()
+                            engine_thrust_sound.play(-1)
                         elif self.state == GAME_OVER:
                             self.reset()
                         elif self.state == TRANSITION:
@@ -596,6 +621,10 @@ class Game:
                 self.lives = 0  # Garante que não fique negativo
                 self.nova.show_message("Critical damage! Game over!", "alert")
                 self.state = GAME_OVER  # Muda imediatamente para o estado de game over
+                # Toca o som de explosão quando ocorre game over
+                engine_thrust_sound.fadeout(100)  # Garante que o som de impulso pare rapidamente
+                hitting_obstacle_sound.fadeout(100)  # Para o som de colisão se estiver tocando
+                explosion_sound.play()
                 if self.score > self.high_score_manager.get():
                     self.high_score = self.score
                     self.high_score_manager.save(self.score)
@@ -660,6 +689,9 @@ class Game:
                 self.spacecraft.velocity -= cont
                 # Mantém o efeito de chama
                 self.spacecraft.last_thrust_time = pygame.time.get_ticks()
+                # Garante que o som de impulso continue tocando
+                if not pygame.mixer.get_busy() or not engine_thrust_sound.get_num_channels():
+                    engine_thrust_sound.play(-1)
 
             # Gera obstáculos
             current_time = pygame.time.get_ticks()
@@ -742,7 +774,8 @@ class Game:
                 if not obstacle.scored and obstacle.x + obstacle.WIDTH < self.spacecraft.x:
                     self.score += 1
                     obstacle.scored = True
-                    score_sound.play()
+                    # Remove o som de beep ao pontuar
+                    # score_sound.play()
 
                     # Obtém o limiar para o planeta atual ou usa o padrão
                     current_threshold = self.level_progression_thresholds.get(
@@ -835,7 +868,8 @@ class Game:
             # Verifica colisões - check_collision retorna True se houve colisão e ainda há vidas, False se não houve colisão ou game over
             collision_result = self.check_collision()
             if collision_result is not False:  # Se houve colisão (pode ser True se ainda tem vidas ou já foi para GAME_OVER)
-                hit_sound.play()
+                # Toca o som de colisão com obstáculo
+                hitting_obstacle_sound.play()
                 # Game over já é tratado dentro de lose_life
 
             # Move o chão
@@ -877,7 +911,8 @@ class Game:
             # Se o número da contagem regressiva mudou, toca um efeito sonoro
             if current_countdown < self.last_countdown_number and current_countdown >= 0:
                 self.last_countdown_number = current_countdown
-                score_sound.play()  # Reutiliza o som de pontuação para a contagem regressiva
+                # Remove o som da contagem regressiva
+                # score_sound.play()  # Reutiliza o som de pontuação para a contagem regressiva
 
                 # Adiciona uma mensagem da NOVA sobre a contagem regressiva
                 if current_countdown > 0:
@@ -918,6 +953,10 @@ class Game:
         if self.current_planet_index >= len(self.planets):
             # Jogador chegou ao fim de todos os planetas, mostra game over
             self.state = GAME_OVER
+            # Toca o som de explosão quando o jogador termina todos os planetas
+            engine_thrust_sound.fadeout(100)  # Garante que o som de impulso pare rapidamente
+            hitting_obstacle_sound.fadeout(100)  # Para o som de colisão se estiver tocando
+            explosion_sound.play()
             if self.score > self.high_score_manager.get():
                 self.high_score = self.score
                 self.high_score_manager.save(self.score)
