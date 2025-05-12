@@ -63,9 +63,6 @@ clock = pygame.time.Clock()
 # Carrega assets
 try:
     # Carrega sons
-    thrust_sound = pygame.mixer.Sound("assets/sounds/flap.wav")
-    score_sound = pygame.mixer.Sound("assets/sounds/score.wav")
-    hit_sound = pygame.mixer.Sound("assets/sounds/hit.wav")
     engine_thrust_sound = pygame.mixer.Sound("assets/sounds/thrust.mp3")
     explosion_sound = pygame.mixer.Sound("assets/sounds/exploding.mp3")
     hitting_obstacle_sound = pygame.mixer.Sound("assets/sounds/hitting_obstacle.mp3")
