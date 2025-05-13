@@ -1,4 +1,5 @@
-from src.config import SCREEN_HEIGHT, FLOOR_HEIGHT, SPACECRAFT_KNOCKBACK, SPACECRAFT_INVULNERABILITY_TIME
+import src.config as config
+from src.planet_data import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
 
 class CollisionManager:
     def __init__(self, game):
@@ -23,7 +24,7 @@ class CollisionManager:
         
         # Verifica se a nave atingiu o teto ou o chão
         if (spacecraft.y <= 0 or 
-            spacecraft.y + spacecraft.HITBOX_HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT):
+            spacecraft.y + spacecraft.HITBOX_HEIGHT >= config.SCREEN_HEIGHT - config.FLOOR_HEIGHT):
             
             return self.handle_collision("boundary")
         
@@ -77,7 +78,7 @@ class CollisionManager:
         
         # Define invulnerabilidade
         self.game.invulnerable = True
-        self.game.invulnerable_timer = SPACECRAFT_INVULNERABILITY_TIME
+        self.game.invulnerable_timer = config.SPACECRAFT_INVULNERABILITY_TIME
         
         # Efeitos visuais
         self.game.screen_shake = 18
@@ -94,14 +95,14 @@ class CollisionManager:
         spacecraft = self.game.spacecraft
         
         # Se colidir com o chão
-        if spacecraft.y + spacecraft.HITBOX_HEIGHT >= SCREEN_HEIGHT - FLOOR_HEIGHT:
+        if spacecraft.y + spacecraft.HITBOX_HEIGHT >= config.SCREEN_HEIGHT - config.FLOOR_HEIGHT:
             # Aplica knockback para cima
-            spacecraft.velocity = SPACECRAFT_KNOCKBACK * 0.8
+            spacecraft.velocity = config.SPACECRAFT_KNOCKBACK * 0.8
             # Garante que a nave não vá abaixo do chão
-            spacecraft.y = SCREEN_HEIGHT - FLOOR_HEIGHT - spacecraft.HITBOX_HEIGHT
+            spacecraft.y = config.SCREEN_HEIGHT - config.FLOOR_HEIGHT - spacecraft.HITBOX_HEIGHT
         else:
             # Se colidir com o teto, aplica knockback para baixo
-            spacecraft.velocity = abs(SPACECRAFT_KNOCKBACK) * 0.8
+            spacecraft.velocity = abs(config.SPACECRAFT_KNOCKBACK) * 0.8
             # Garante que a nave não vá acima do teto
             spacecraft.y = 0
     
@@ -110,7 +111,7 @@ class CollisionManager:
         spacecraft = self.game.spacecraft
         
         # Knockback padrão
-        spacecraft.velocity = SPACECRAFT_KNOCKBACK
+        spacecraft.velocity = config.SPACECRAFT_KNOCKBACK
         
         # Adiciona movimento horizontal para se afastar do obstáculo
         if obstacle:
@@ -123,10 +124,10 @@ class CollisionManager:
             # Knockback vertical com base na parte que foi atingida
             if obstacle_part == "upper":
                 # Atingiu o obstáculo superior, empurra para baixo
-                spacecraft.velocity = abs(SPACECRAFT_KNOCKBACK) * 0.8
+                spacecraft.velocity = abs(config.SPACECRAFT_KNOCKBACK) * 0.8
             elif obstacle_part == "lower":
                 # Atingiu o obstáculo inferior, empurra para cima
-                spacecraft.velocity = SPACECRAFT_KNOCKBACK * 0.8
+                spacecraft.velocity = config.SPACECRAFT_KNOCKBACK * 0.8
     
     def check_collectible_collisions(self):
         """Verifica e lida com colisões com coletáveis"""
@@ -168,7 +169,7 @@ class CollisionManager:
     
     def _check_level_progression(self):
         """Verifica se a pontuação atingiu o limite para progressão de planeta"""
-        from src.config import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
+        # Level progression thresholds imported at the top
         
         # Obtém o limite para o planeta atual
         current_threshold = LEVEL_PROGRESSION_THRESHOLDS.get(

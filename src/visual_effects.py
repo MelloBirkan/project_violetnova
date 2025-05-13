@@ -2,7 +2,6 @@ import random
 import math
 import pygame
 import src.config as config
-from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, FLOOR_HEIGHT
 
 class VisualEffectsManager:
     def __init__(self, game):
@@ -35,8 +34,8 @@ class VisualEffectsManager:
         """Gera estrelas de fundo"""
         stars = []
         for _ in range(count):
-            x = random.randint(0, SCREEN_WIDTH)
-            y = random.randint(0, SCREEN_HEIGHT - FLOOR_HEIGHT)
+            x = random.randint(0, config.SCREEN_WIDTH)
+            y = random.randint(0, config.SCREEN_HEIGHT - config.FLOOR_HEIGHT)
             size = random.uniform(0.5, 2.0)
             brightness = random.randint(150, 255)
             twinkle_speed = random.uniform(0.02, 0.1)
@@ -101,8 +100,8 @@ class VisualEffectsManager:
             bg_width, bg_height = planet.background_image.get_size()
             
             # Calcula os ladrilhos necessários
-            tiles_x = SCREEN_WIDTH // bg_width + 1
-            tiles_y = SCREEN_HEIGHT // bg_height + 1
+            tiles_x = config.SCREEN_WIDTH // bg_width + 1
+            tiles_y = config.SCREEN_HEIGHT // bg_height + 1
             
             # Desenha os ladrilhos
             for y in range(tiles_y):
@@ -111,7 +110,7 @@ class VisualEffectsManager:
                               (x * bg_width + offset_x, y * bg_height + offset_y))
         else:
             # Usa sobreposição de cor
-            bg_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            bg_overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
             bg_color = (*planet.background_color, 100)  # Adiciona alfa
             bg_overlay.fill(bg_color)
             screen.blit(bg_overlay, (offset_x, offset_y))
@@ -120,7 +119,7 @@ class VisualEffectsManager:
         """Desenha o efeito de flash de dano"""
         if self.flash_effect > 0:
             flash_alpha = min(180, self.flash_effect * 40)
-            flash_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            flash_overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
             flash_overlay.fill((255, 0, 0, flash_alpha))  # Flash vermelho
             screen.blit(flash_overlay, (0, 0))
     
@@ -199,7 +198,7 @@ class VisualEffectsManager:
         color_pulse = int(255 * (0.7 + 0.3 * math.sin(pygame.time.get_ticks() * 0.015)))
         countdown_text = countdown_font.render(str(countdown_number), True,
                                               (255, color_pulse, color_pulse))
-        countdown_rect = countdown_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        countdown_rect = countdown_text.get_rect(center=(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2))
         
         # Desenha com efeito de brilho aprimorado
         glow_size = 12

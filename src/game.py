@@ -1,0 +1,336 @@
+import pygame
+import sys
+from src.spacecraft import Spacecraft
+from src.planet import Planet
+from src.highscore import PlanetTracker
+from src.nova_ai import NovaAI
+from src.quiz import Quiz
+
+# Import refactored modules
+import src.config as config
+from src.sound_manager import SoundManager
+from src.state_manager import StateManager
+from src.collision_manager import CollisionManager
+from src.visual_effects import VisualEffectsManager
+from src.ui_manager import UIManager
+from src.input_handler import InputHandler
+from src.game_mechanics import GameMechanics
+from src.weapon_system import WeaponSystem
+from src.planet_data import create_planet_data, PLANET_NAME_PT, COLOR_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
+
+class Game:
+    def __init__(self):
+        # Game state
+        self.score = 0
+        self.planet_tracker = PlanetTracker()
+        self.last_planet = self.planet_tracker.get_last_planet()
+        self.furthest_planet = self.planet_tracker.get_furthest_planet()
+        self.furthest_planet_index = 0  # Tracks the furthest planet reached
+
+        # Lives system
+        self.lives = config.SPACECRAFT_MAX_LIVES
+        self.invulnerable = False
+        self.invulnerable_timer = 0
+
+        # Initialize internal state before the property is used
+        self._state = config.MENU
+
+        # Welcome sound control
+        self.welcome_sound_played = False
+        self.current_welcome_sound = None
+        self.welcome_sound_timer = 0
+
+        # Planet setup
+        self.planet_data = create_planet_data()
+        self.planets = [Planet(data["name"],
+                             data["gravity_factor"],
+                             data["background_color"],
+                             data["obstacle_count"],
+                             data["quiz_questions"])
+                      for data in self.planet_data]
+
+        # Find the index of the saved planet and the furthest planet
+        self.current_planet_index = 0
+        for i, planet in enumerate(self.planets):
+            if planet.name.lower() == self.last_planet.lower():
+                self.current_planet_index = i
+                break
+                
+        # Find the index of the furthest planet
+        for i, planet in enumerate(self.planets):
+            if planet.name.lower() == self.furthest_planet.lower():
+                self.furthest_planet_index = i
+                break
+        
+        self.current_planet = self.planets[self.current_planet_index]
+
+        # Spacecraft setup
+        self.spacecraft_color = "silver"  # Default color
+        self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2, self.spacecraft_color)
+        self.available_colors = list(Spacecraft.COLORS.keys())
+        self.current_color_index = 0
+
+        # Game elements
+        self.obstacles = []
+        self.collectibles = []
+        # Initialize time tracking
+        self.last_obstacle_time = pygame.time.get_ticks() - 2000
+        self.last_collectible_time = pygame.time.get_ticks()
+        self.floor_x = 0
+
+        # Obstacle and collectible timing
+        self.obstacle_spawn_rate = config.DEFAULT_OBSTACLE_SPAWN_RATE
+        self.collectible_spawn_rate = config.DEFAULT_COLLECTIBLE_SPAWN_RATE
+
+        # Game progression
+        self.obstacle_speed = 3
+        self.weapon_active = False
+        self.weapon_timer = 0
+
+        # Initialize NOVA AI assistant
+        self.nova = NovaAI(config.SCREEN_WIDTH, config.SCREEN_HEIGHT, PLANET_NAME_PT)
+
+        # Initialize quiz system
+        self.quiz = Quiz(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
+
+        # Game progression settings
+        self.difficulty_multiplier = 1.0
+
+        # Initialize managers
+        self.sound_manager = SoundManager()
+        self.visual_effects = VisualEffectsManager(self)
+        self.collision_manager = CollisionManager(self)
+        self.ui_manager = UIManager(self)
+        self.input_handler = InputHandler(self)
+        self.game_mechanics = GameMechanics(self)
+        self.weapon_system = WeaponSystem(self)
+
+        # Initialize state manager last to avoid circular dependencies
+        self.state_manager = StateManager(self)
+
+        # Initialize game state (uses existing _state value)
+        self.state_manager.change_state(config.MENU)
+
+        # Control settings
+        self.space_held = False
+        self.control_mode = config.CONTROL_MODE_HOLD  # Default changed to HOLD
+
+    @property
+    def state(self):
+        """Gets the current game state"""
+        return self._state
+
+    @state.setter
+    def state(self, new_state):
+        """Sets the game state and updates the state manager"""
+        self._state = new_state
+        # Don't call state_manager.change_state here to avoid infinite recursion
+        # when the state_manager changes the state
+
+    def reset(self, new_planet=False):
+        """Resets the game, optionally changing to a new planet"""
+        self.state_manager.change_state(config.PLAYING)
+        self.state = config.PLAYING  # Keep in sync with state manager
+        self.weapon_active = False
+        self.weapon_timer = 0
+
+        # Stop all sounds with smooth fadeout
+        self.sound_manager.stop_thrust(config.SOUND_FADEOUT_TIME)
+        self.sound_manager.hitting_obstacle_sound.fadeout(config.SOUND_FADEOUT_TIME)
+
+        # Handle welcome sounds based on reset type
+        if not new_planet:
+            # Stop all welcome sounds in full reset
+            for sound in self.sound_manager.welcome_sounds.values():
+                sound.fadeout(200)
+            self.current_welcome_sound = None
+            self.welcome_sound_timer = 0
+
+        if new_planet:
+            # Reset score for new planet
+            self.score = 0
+            # Update difficulty based on planet index
+            self.difficulty_multiplier = 1.0 + (self.current_planet_index * 0.1)
+            # Don't reset lives when changing planets
+            
+            # Save current planet and update furthest planet if necessary
+            self.planet_tracker.save(self.current_planet.name.lower(), update_furthest=True)
+        else:
+            # Start from scratch
+            self.score = 0
+            self.current_planet_index = 0
+            self.current_planet = self.planets[self.current_planet_index]
+            self.difficulty_multiplier = 1.0
+            # Reset lives to maximum when starting a new game
+            self.reset_lives()
+            
+            # Save current planet (mercury) - don't update furthest planet when resetting
+            self.planet_tracker.save(self.current_planet.name.lower(), update_furthest=False)
+
+            # Play Earth welcome sound when starting/restarting
+            if self.current_planet.name in self.sound_manager.welcome_sounds:
+                # Stop any playing sounds first
+                for sound in self.sound_manager.welcome_sounds.values():
+                    sound.fadeout(100)
+
+                # Small delay before playing Earth welcome sound
+                pygame.time.delay(200)
+
+                # Store reference to current sound
+                self.current_welcome_sound = self.sound_manager.welcome_sounds[self.current_planet.name]
+                self.current_welcome_sound.play()
+                # Set timer based on sound duration (in milliseconds)
+                self.welcome_sound_timer = int(self.current_welcome_sound.get_length() * 1000)
+                self.welcome_sound_played = True
+
+        # Reset spacecraft position
+        self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2, self.spacecraft_color)
+
+        # Clear all obstacles and collectibles
+        self.obstacles = []
+        self.collectibles = []
+        # Initialize time tracking for immediate obstacle generation
+        self.last_obstacle_time = pygame.time.get_ticks() - 2000
+        self.last_collectible_time = pygame.time.get_ticks()
+        # Reset floor position
+        self.floor_x = 0
+
+        # Base difficulty adjusted by planet and progression
+        self.obstacle_speed = 3 * self.difficulty_multiplier
+        self.obstacle_spawn_rate = int(config.DEFAULT_OBSTACLE_SPAWN_RATE / self.difficulty_multiplier)
+        self.collectible_spawn_rate = int(config.DEFAULT_COLLECTIBLE_SPAWN_RATE / self.difficulty_multiplier)
+
+        # NOVA should alert about gravity
+        if new_planet:
+            self.nova.alert_gravity_change(
+                self.current_planet.name,
+                self.current_planet.gravity_factor
+            )
+
+    def lose_life(self):
+        """Reduces the number of lives and checks if the game is over"""
+        if not self.invulnerable:
+            self.lives -= 1
+
+            # More intuitive hit count (starts with 3 lives, 4th hit = game over)
+            hit_count = config.SPACECRAFT_MAX_LIVES - self.lives
+
+            # Check if all lives are lost
+            if hit_count >= 4:  # 4 hits = game over
+                self.lives = 0  # Ensure it doesn't go negative
+                self.nova.show_message("Dano crítico! Fim de jogo!", "alert")
+                self.state_manager.change_state(config.GAME_OVER)
+                self.state = config.GAME_OVER  # Keep in sync with state manager
+                # Play explosion sound at game over
+                self.sound_manager.stop_thrust(100)  # Ensure engine thrust sound stops quickly
+                self.sound_manager.hitting_obstacle_sound.fadeout(100)  # Stop collision sound if playing
+                self.sound_manager.play_explosion()
+                return False  # Fourth collision causes game over
+            elif hit_count == 3:  # 3 hits = last life
+                self.nova.show_message("Atenção: Última vida restante!", "alert")
+            elif hit_count == 2:  # 2 hits = penultimate life
+                self.nova.show_message("Atenção: Duas vidas restantes!", "alert")
+
+            return True  # Still has lives
+        return True  # Didn't lose life due to invulnerability
+
+    def add_life(self):
+        """Adds a life, up to the maximum allowed"""
+        if self.lives < config.SPACECRAFT_MAX_LIVES:
+            self.lives += 1
+            self.nova.show_message("Vida extra adquirida!", "excited")
+            return True
+        return False  # Already at maximum lives
+
+    def reset_lives(self):
+        """Resets lives to the maximum value"""
+        self.lives = config.SPACECRAFT_MAX_LIVES
+        self.invulnerable = False
+        self.invulnerable_timer = 0
+
+    def is_invulnerable(self):
+        """Returns the current invulnerability state"""
+        return self.invulnerable
+
+    def update(self):
+        try:
+            # Update visual effects if available
+            if hasattr(self, 'visual_effects'):
+                self.visual_effects.update()
+
+            # Update NOVA AI if available
+            if hasattr(self, 'nova'):
+                self.nova.update()
+
+            # Update welcome sound timer
+            if hasattr(self, 'welcome_sound_timer') and self.welcome_sound_timer > 0:
+                self.welcome_sound_timer -= 16  # Approximately 16ms per frame at 60fps
+
+                # Check if the user tries to skip the intro (by pressing space)
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_SPACE] and self.state == config.TRANSITION:
+                    # Don't completely stop welcome sound, just reduce volume
+                    if hasattr(self, 'current_welcome_sound') and self.current_welcome_sound and hasattr(self, 'sound_manager'):
+                        self.sound_manager.adjust_welcome_volume(self.current_planet.name, 0.3)
+                    self.welcome_sound_timer = 0  # Allow proceeding with game
+
+            # Update invulnerability timer
+            if hasattr(self, 'invulnerable') and self.invulnerable:
+                self.invulnerable_timer -= 1
+                if self.invulnerable_timer <= 0:
+                    self.invulnerable = False
+                    if hasattr(self, 'nova'):
+                        self.nova.show_message("Sistemas de escudo restaurados", "normal")
+
+            # Update state manager
+            if hasattr(self, 'state_manager'):
+                self.state_manager.update()
+                
+            # Update weapon system
+            if hasattr(self, 'weapon_system'):
+                self.weapon_system.update()
+                
+            # Update game mechanics if playing
+            if self.state == config.PLAYING and hasattr(self, 'game_mechanics'):
+                self.game_mechanics.update()
+                
+        except AttributeError as e:
+            # Print error for debugging
+            print(f"Error in update: {e}")
+            # Continue game loop
+
+    def draw(self):
+        """Draws the game"""
+        screen = pygame.display.get_surface()
+        self.ui_manager.draw(screen)
+
+def main():
+    # Create and start the game
+    game = Game()
+
+    # Game loop
+    clock = pygame.time.Clock()
+    while True:
+        game.input_handler.handle_events()
+        game.update()
+        game.draw()
+
+        pygame.display.flip()
+        clock.tick(60)
+
+if __name__ == "__main__":
+    # Initialize pygame
+    pygame.init()
+    pygame.mixer.init()
+    
+    # Setup screen
+    screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+    pygame.display.set_caption("Projeto Violeta Nova: Explorador do Sistema Solar")
+    
+    # Initialize fonts after pygame is initialized
+    import src.config as config
+    config.GAME_FONT = pygame.font.Font(None, config.GAME_FONT_SIZE)
+    config.SMALL_FONT = pygame.font.Font(None, config.SMALL_FONT_SIZE)
+    config.COUNTDOWN_FONT = pygame.font.Font(None, config.COUNTDOWN_FONT_SIZE)
+    
+    main()

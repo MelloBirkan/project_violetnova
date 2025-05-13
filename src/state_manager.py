@@ -1,12 +1,9 @@
-from src.config import (
-    MENU, PLAYING, GAME_OVER, TRANSITION, QUIZ, QUIZ_FAILURE,
-    TRANSITION_DURATION
-)
+import src.config as config
 
 class StateManager:
     def __init__(self, game):
         self.game = game
-        self.current_state = MENU
+        self.current_state = config.MENU
         self.transition_time = 0
         self.welcome_sound_timer = 0
         self.quiz_failure_timer = 0
@@ -19,9 +16,9 @@ class StateManager:
         self.game._state = new_state
 
         # Reseta temporizadores específicos do estado
-        if new_state == TRANSITION:
+        if new_state == config.TRANSITION:
             self.transition_time = 0
-        elif new_state == QUIZ_FAILURE:
+        elif new_state == config.QUIZ_FAILURE:
             self.quiz_failure_timer = 180  # 3 segundos a 60fps
             self.last_countdown_number = 3
             
@@ -37,14 +34,14 @@ class StateManager:
 
         try:
             # Lida com temporizadores e transições específicos do estado
-            if self.current_state == TRANSITION:
+            if self.current_state == config.TRANSITION:
                 self.transition_time += 1
 
                 # Verifica se a transição está completa
-                if self.transition_time >= TRANSITION_DURATION and self.welcome_sound_timer <= 0:
+                if self.transition_time >= config.TRANSITION_DURATION and self.welcome_sound_timer <= 0:
                     self.game.reset(new_planet=True)
 
-            elif self.current_state == QUIZ:
+            elif self.current_state == config.QUIZ:
                 # Atualiza o quiz
                 if hasattr(self.game, 'quiz'):
                     self.game.quiz.update()
@@ -56,14 +53,14 @@ class StateManager:
                             self.start_transition()
                         else:
                             # Quiz falhou, define atraso antes de retornar ao jogo
-                            self.change_state(QUIZ_FAILURE)
+                            self.change_state(config.QUIZ_FAILURE)
                             self.quiz_failure_timer = 180  # 3 segundos a 60fps
                             self.last_countdown_number = 3
                             # Adiciona uma mensagem da NOVA sobre a falha no quiz
                             if hasattr(self.game, 'nova'):
                                 self.game.nova.show_message("Quiz falhou! Retornando à órbita em...", "alert")
 
-            elif self.current_state == QUIZ_FAILURE:
+            elif self.current_state == config.QUIZ_FAILURE:
                 self.quiz_failure_timer -= 1
 
                 # Atualiza o número da contagem regressiva, se necessário
@@ -80,7 +77,7 @@ class StateManager:
 
                 # Verifica se o temporizador de falha está completo
                 if self.quiz_failure_timer <= 0:
-                    self.change_state(PLAYING)
+                    self.change_state(config.PLAYING)
                     if hasattr(self.game, 'nova'):
                         self.game.nova.show_message(
                             "De volta ao voo orbital! Continue explorando.",
@@ -93,7 +90,7 @@ class StateManager:
                 
     def start_quiz(self):
         """Inicia o estado do quiz com uma pergunta aleatória"""
-        self.change_state(QUIZ)
+        self.change_state(config.QUIZ)
         self.last_countdown_number = 2
 
         try:
@@ -115,7 +112,7 @@ class StateManager:
         
     def start_transition(self):
         """Inicia a transição para o próximo planeta"""
-        self.change_state(TRANSITION)
+        self.change_state(config.TRANSITION)
 
         try:
             # Para todos os sons
@@ -128,7 +125,7 @@ class StateManager:
 
                 # Verifica se chegamos ao fim de todos os planetas
                 if self.game.current_planet_index >= len(self.game.planets):
-                    self.change_state(GAME_OVER)
+                    self.change_state(config.GAME_OVER)
                     if hasattr(self.game, 'sound_manager'):
                         self.game.sound_manager.play_explosion()
 
@@ -143,7 +140,7 @@ class StateManager:
                 self.game.current_planet = self.game.planets[self.game.current_planet_index]
 
                 # Toca o som de boas-vindas para o novo planeta
-                from src.config import PLANET_NAME_PT
+                from src.planet_data import PLANET_NAME_PT
                 planet_name_en = self.game.current_planet.name
                 planet_name_pt = PLANET_NAME_PT.get(planet_name_en, planet_name_en)
 

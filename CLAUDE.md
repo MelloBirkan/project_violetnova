@@ -27,7 +27,8 @@ The main development files are located in the `/src` directory. There are no spe
 ### Core Game Loop
 
 - `main.py`: Entry point that checks dependencies and starts the game
-- `src/main.py`: Contains the main game loop and the `Game` class that manages game states, game mechanics, and rendering
+- `src/main.py`: Contains the main game loop initialization
+- `src/game.py`: Contains the `Game` class that manages game states, game mechanics, and rendering
 
 ### Game States
 
@@ -48,14 +49,25 @@ The game uses a state-based architecture with these primary states:
    - `obstacle.py`: Implements game obstacles with different themes (asteroid, debris, storm)
    - `collectible.py`: Items that give power-ups, points, or educational facts
    - `planet.py`: Defines planets with unique gravity, visuals, and educational content
+   - `planet_data.py`: Contains planet data constants and progression thresholds
 
 3. **Educational Elements**
    - `quiz.py`: Interactive quiz system about space facts
    - `nova_ai.py`: AI assistant character that provides educational information
 
-4. **Support Systems**
+4. **Game Management**
+   - `game.py`: Core game state management and orchestration
+   - `state_manager.py`: Handles game state transitions and state-specific logic
+   - `input_handler.py`: Processes user input for different game states
+   - `ui_manager.py`: Handles UI drawing responsibilities
+   - `game_mechanics.py`: Manages obstacles, collectibles, and game physics
+   - `weapon_system.py`: Handles weapon functionality and targeting
+
+5. **Support Systems**
    - `highscore.py`: Manages game score persistence
-   - `create_sounds.py`: Generates placeholder sound files
+   - `sound_manager.py`: Handles audio playback
+   - `visual_effects.py`: Manages visual effects and animations
+   - `collision_manager.py`: Manages collision detection and handling
 
 ### Physics and Mechanics
 
@@ -76,9 +88,11 @@ Players progress through the solar system by:
 
 - `/assets`: Contains images and sounds
 - `/src`: Main game code
-  - Core gameplay files (main.py, spacecraft.py, obstacle.py)
-  - Educational content (planet.py, quiz.py, nova_ai.py)
-  - Support systems (highscore.py, create_sounds.py)
+  - Core gameplay files (main.py, game.py, spacecraft.py, obstacle.py)
+  - Educational content (planet.py, planet_data.py, quiz.py, nova_ai.py)
+  - Game managers (state_manager.py, input_handler.py, ui_manager.py, game_mechanics.py, weapon_system.py)
+  - Support systems (highscore.py, sound_manager.py, visual_effects.py, collision_manager.py)
+  - Configuration (config.py)
 
 ## Game Controls
 
@@ -89,7 +103,7 @@ Players progress through the solar system by:
 
 ## Translation Support
 
-The game supports Brazilian Portuguese with translation dictionaries for planet names and other text elements. Translation mappings are defined in `src/main.py` and passed to various components.
+The game supports Brazilian Portuguese with translation dictionaries for planet names and other text elements. Translation mappings are defined in `src/planet_data.py` and `src/config.py`, and passed to various components.
 
 ## Development Directives
 
@@ -97,4 +111,25 @@ The game supports Brazilian Portuguese with translation dictionaries for planet 
 
 ## Memory Tracking
 
-- Please ask the user  to run the game so I can test the changes I made.
+- Please ask the user to run the game so I can test the changes I made.
+
+## Recent Refactoring
+
+The codebase was refactored following SOLID principles:
+
+1. **Single Responsibility Principle**: Each class now has a single responsibility
+   - Extracted UI rendering to `ui_manager.py`
+   - Created `input_handler.py` for processing user input
+   - Moved game mechanics to `game_mechanics.py`
+   - Created dedicated `weapon_system.py`
+
+2. **Open/Closed Principle**: Code is now more extensible 
+   - New features can be added by extending existing classes rather than modifying them
+
+3. **Dependency Inversion**: Components depend on abstractions rather than implementations
+   - Game components access configuration via the `config` module
+
+4. **Improved Code Organization**:
+   - Constant data moved to appropriate modules
+   - Planet data and progression thresholds defined in `planet_data.py`
+   - Game loop simplified in `main.py`

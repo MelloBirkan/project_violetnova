@@ -21,8 +21,8 @@ def main():
         sys.exit(1)
     
     # Inicia o jogo
-    from src.main import main
-    main()
+    import src.main 
+    src.main.main()
 
 if __name__ == "__main__":
     main()

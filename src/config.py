@@ -58,18 +58,7 @@ SPACECRAFT_INVULNERABILITY_TIME = 90  # quadros (1.5s a 60fps)
 SPACECRAFT_KNOCKBACK = -3.5
 
 # Limiares de progressão de nível - pontos necessários para avançar para o próximo planeta
-LEVEL_PROGRESSION_THRESHOLDS = {
-    "Earth": 6,
-    "Mercury": 2,
-    "Venus": 4,
-    "Moon": 2,
-    "Mars": 3,
-    "Jupiter": 20,
-    "Saturn": 15,
-    "Uranus": 12,
-    "Neptune": 11,
-    "Pluto": 1,
-}
+# Movido para src.planet_data
 
 # Temporização de obstáculos e colecionáveis
 DEFAULT_OBSTACLE_SPAWN_RATE = 2500  # ms
