@@ -94,3 +94,7 @@ The game supports Brazilian Portuguese with translation dictionaries for planet 
 ## Development Directives
 
 - Leave all the UI and comments in the code in Brazilian Portuguese.
+
+## Memory Tracking
+
+- Please ask the user  to run the game so I can test the changes I made.

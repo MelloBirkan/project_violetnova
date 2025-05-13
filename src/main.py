@@ -6,7 +6,7 @@ from src.spacecraft import Spacecraft
 from src.obstacle import Obstacle
 from src.collectible import Collectible
 from src.planet import Planet
-from src.highscore import HighScore
+from src.highscore import PlanetTracker
 from src.nova_ai import NovaAI
 from src.quiz import Quiz
 
@@ -252,8 +252,10 @@ class Game:
     def __init__(self):
         # Estado do jogo
         self.score = 0
-        self.high_score_manager = HighScore()
-        self.high_score = self.high_score_manager.get()
+        self.planet_tracker = PlanetTracker()
+        self.last_planet = self.planet_tracker.get_last_planet()
+        self.furthest_planet = self.planet_tracker.get_furthest_planet()
+        self.furthest_planet_index = 0  # Rastreia o planeta mais distante alcançado
 
         # Sistema de vidas
         self.lives = SPACECRAFT_MAX_LIVES
@@ -277,8 +279,19 @@ class Game:
                              data["quiz_questions"])
                       for data in self.planet_data]
 
-        # Começa na Terra
+        # Encontra o índice do planeta salvo e do planeta mais distante
         self.current_planet_index = 0
+        for i, planet in enumerate(self.planets):
+            if planet.name.lower() == self.last_planet.lower():
+                self.current_planet_index = i
+                break
+                
+        # Encontra o índice do planeta mais distante
+        for i, planet in enumerate(self.planets):
+            if planet.name.lower() == self.furthest_planet.lower():
+                self.furthest_planet_index = i
+                break
+        
         self.current_planet = self.planets[self.current_planet_index]
 
         # Configuração da espaçonave
@@ -365,6 +378,9 @@ class Game:
             # Atualiza a dificuldade com base no índice do planeta
             self.difficulty_multiplier = 1.0 + (self.current_planet_index * 0.1)
             # Não reseta as vidas ao mudar de planeta
+            
+            # Salva o planeta atual e atualiza o planeta mais distante se necessário
+            self.planet_tracker.save(self.current_planet.name.lower(), update_furthest=True)
         else:
             # Começa do zero
             self.score = 0
@@ -373,6 +389,9 @@ class Game:
             self.difficulty_multiplier = 1.0
             # Reseta as vidas para o máximo ao iniciar um novo jogo
             self.reset_lives()
+            
+            # Salva o planeta atual (mercurio) - não atualiza o planeta mais distante ao resetar
+            self.planet_tracker.save(self.current_planet.name.lower(), update_furthest=False)
 
             # Toca o som de boas-vindas da Terra ao iniciar/reiniciar
             if self.current_planet.name in self.sound_manager.welcome_sounds:
@@ -542,6 +561,14 @@ class Game:
                 next_planet_en = self.planets[self.current_planet_index + 1].name
                 next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en)
                 self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
+                
+                # Atualiza o planeta mais distante alcançado na memória
+                next_planet = self.planets[self.current_planet_index + 1].name.lower()
+                self.furthest_planet_index = max(self.furthest_planet_index, self.current_planet_index + 1)
+                
+                # Salva o planeta atual e atualiza o planeta mais distante
+                self.planet_tracker.save(next_planet, update_furthest=True)
+                
                 # Inicia o quiz para avanço do planeta
                 self.state_manager.start_quiz()
 
@@ -563,9 +590,6 @@ class Game:
                 self.sound_manager.stop_thrust(100)  # Garante que o som de empuxo pare rapidamente
                 self.sound_manager.hitting_obstacle_sound.fadeout(100)  # Para o som de colisão se estiver tocando
                 self.sound_manager.play_explosion()
-                if self.score > self.high_score_manager.get():
-                    self.high_score = self.score
-                    self.high_score_manager.save(self.score)
                 return False  # Quarta colisão causa fim de jogo
             elif hit_count == 3:  # 3 acertos = última vida
                 self.nova.show_message("Atenção: Última vida restante!", "alert")
@@ -690,6 +714,13 @@ class Game:
                                         next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en)
                                         self.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
 
+                                    # Atualiza o planeta mais distante alcançado
+                                    next_planet = self.planets[self.current_planet_index + 1].name.lower()
+                                    self.furthest_planet_index = max(self.furthest_planet_index, self.current_planet_index + 1)
+                                    
+                                    # Salva o planeta atual e atualiza o planeta mais distante
+                                    self.planet_tracker.save(next_planet, update_furthest=True)
+                                    
                                     # Inicia o quiz sem incrementar o índice do planeta ainda - deixa o quiz lidar com a progressão
                                     self.state_manager.start_quiz()
 
@@ -816,6 +847,12 @@ class Game:
                 display_name = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
                 planet_text = config.SMALL_FONT.render(f"Planeta: {display_name}", True, (255, 255, 255))
                 screen.blit(planet_text, (20, 20))
+                
+                # Mostra o planeta mais distante alcançado
+                furthest_planet = self.planets[self.furthest_planet_index].name
+                furthest_planet_pt = PLANET_NAME_PT.get(furthest_planet, furthest_planet)
+                furthest_text = config.SMALL_FONT.render(f"Mais distante: {furthest_planet_pt}", True, (255, 215, 0))
+                screen.blit(furthest_text, (20, 50))
 
                 # Obtém o limite para o planeta atual
                 current_threshold = LEVEL_PROGRESSION_THRESHOLDS.get(
@@ -824,10 +861,7 @@ class Game:
                 )
 
                 score_text = config.SMALL_FONT.render(f"Pontuação: {self.score}/{current_threshold}", True, (255, 255, 255))
-                screen.blit(score_text, (20, 50))
-
-                high_score_text = config.SMALL_FONT.render(f"Maior Pontuação: {self.high_score_manager.get()}", True, (255, 255, 255))
-                screen.blit(high_score_text, (20, 80))
+                screen.blit(score_text, (20, 80))
 
                 # Desenha o indicador de vidas
                 lives_text = config.SMALL_FONT.render(f"Vidas:", True, (255, 255, 255))
@@ -912,7 +946,6 @@ class Game:
 
         game_over_text = config.GAME_FONT.render("MISSÃO CONCLUÍDA", True, (255, 215, 0))
         score_text = config.GAME_FONT.render(f"Pontuação Final: {self.score}", True, (255, 255, 255))
-        high_score_text = config.GAME_FONT.render(f"Maior Pontuação: {self.high_score_manager.get()}", True, (255, 255, 255))
         restart_text = config.GAME_FONT.render("Pressione ESPAÇO para iniciar nova missão", True, (255, 255, 255))
 
         # Calcula o planeta mais distante alcançado
@@ -921,7 +954,6 @@ class Game:
 
         screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, 150))
         screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, 220))
-        screen.blit(high_score_text, (SCREEN_WIDTH // 2 - high_score_text.get_width() // 2, 270))
         screen.blit(planet_text, (SCREEN_WIDTH // 2 - planet_text.get_width() // 2, 320))
         screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, 400))
 
