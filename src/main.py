@@ -23,7 +23,7 @@ pygame.mixer.init()
 
 # Configura a tela
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Project Blue Nova: Explorador do Sistema Solar")
+pygame.display.set_caption("Projeto Violeta Nova: Explorador do Sistema Solar")
 clock = pygame.time.Clock()
 
 # Inicializa as fontes após o pygame ser inicializado
@@ -477,7 +477,7 @@ class Game:
                         elif self.state == PLAYING:
                             # Alterna o modo de controle entre flappy e segurar
                             self.control_mode = CONTROL_MODE_HOLD if self.control_mode == CONTROL_MODE_FLAPPY else CONTROL_MODE_FLAPPY
-                            mode_name = "Hold" if self.control_mode == CONTROL_MODE_HOLD else "Flappy"
+                            mode_name = "Segurando" if self.control_mode == CONTROL_MODE_HOLD else "Toque"
                             
                             # Atualiza as cores da chama da espaçonave para o efeito de empuxo
                             if self.control_mode == CONTROL_MODE_HOLD:
@@ -915,7 +915,7 @@ class Game:
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
 
-        title_text = config.GAME_FONT.render("PROJECT BLUE NOVA", True, (255, 255, 255))
+        title_text = config.GAME_FONT.render("PROJETO VIOLETA NOVA", True, (255, 255, 255))
         subtitle_text = config.SMALL_FONT.render("Explorador do Sistema Solar", True, (200, 200, 255))
         instruction_text = config.GAME_FONT.render("Pressione ESPAÇO para Iniciar", True, (255, 255, 255))
         color_text = config.GAME_FONT.render(f"Nave: {COLOR_NAME_PT.get(self.spacecraft_color, self.spacecraft_color)}", True, (255, 255, 255))
@@ -950,7 +950,8 @@ class Game:
 
         # Calcula o planeta mais distante alcançado
         furthest_planet = self.planets[min(self.current_planet_index, len(self.planets) - 1)].name
-        planet_text = config.GAME_FONT.render(f"Planeta mais distante: {furthest_planet}", True, (255, 255, 255))
+        furthest_planet_pt = PLANET_NAME_PT.get(furthest_planet, furthest_planet)
+        planet_text = config.GAME_FONT.render(f"Planeta mais distante: {furthest_planet_pt}", True, (255, 255, 255))
 
         screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, 150))
         screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, 220))
