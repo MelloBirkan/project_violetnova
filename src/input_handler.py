@@ -36,8 +36,8 @@ class InputHandler:
             if event.key == pygame.K_SPACE:
                 self._handle_space_key_press()
                 
-            # Change spacecraft color with C in menu, toggle control mode in game
-            if event.key == pygame.K_c:
+            # Toggle control mode in game with C
+            if event.key == pygame.K_c and self.game.state == config.PLAYING:
                 self._handle_c_key_press()
                 
             # Activate weapon with W if available
@@ -83,25 +83,20 @@ class InputHandler:
             self.game.reset(new_planet=True)
     
     def _handle_c_key_press(self):
-        """Handles C key press based on game state"""
-        if self.game.state == config.MENU:
-            self.game.current_color_index = (self.game.current_color_index + 1) % len(self.game.available_colors)
-            self.game.spacecraft_color = self.game.available_colors[self.game.current_color_index]
-            self.game.spacecraft.change_color(self.game.spacecraft_color)
-        elif self.game.state == config.PLAYING:
-            # Toggle control mode between flappy and hold
-            self.game.control_mode = config.CONTROL_MODE_HOLD if self.game.control_mode == config.CONTROL_MODE_FLAPPY else config.CONTROL_MODE_FLAPPY
-            mode_name = "Segurando" if self.game.control_mode == config.CONTROL_MODE_HOLD else "Toque"
-            
-            # Update spacecraft flame colors for thrust effect
-            if self.game.control_mode == config.CONTROL_MODE_HOLD:
-                # Gradient from yellow to orange to red
-                self.game.spacecraft.flame_colors = [(255, 255, 0), (255, 165, 0), (255, 69, 0)]
-            else:
-                # Single color flame
-                self.game.spacecraft.flame_colors = []
-            self.game.spacecraft.update_image()
-            self.game.nova.show_message(f"Modo de controle: {mode_name}", "info")
+        """Handles C key press to toggle control mode"""
+        # Toggle control mode between flappy and hold
+        self.game.control_mode = config.CONTROL_MODE_HOLD if self.game.control_mode == config.CONTROL_MODE_FLAPPY else config.CONTROL_MODE_FLAPPY
+        mode_name = "Segurando" if self.game.control_mode == config.CONTROL_MODE_HOLD else "Toque"
+        
+        # Update spacecraft flame colors for thrust effect
+        if self.game.control_mode == config.CONTROL_MODE_HOLD:
+            # Gradient from yellow to orange to red
+            self.game.spacecraft.flame_colors = [(255, 255, 0), (255, 165, 0), (255, 69, 0)]
+        else:
+            # Single color flame
+            self.game.spacecraft.flame_colors = []
+        self.game.spacecraft.update_image()
+        self.game.nova.show_message(f"Modo de controle: {mode_name}", "info")
     
     def _handle_left_click(self):
         """Handles left mouse button click based on game state"""

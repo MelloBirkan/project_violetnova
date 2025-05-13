@@ -28,13 +28,6 @@ SMALL_FONT_SIZE = 24
 COUNTDOWN_FONT_SIZE = 180
 
 # Dicionários de tradução
-COLOR_NAME_PT = {
-    "silver": "Prateado",
-    "gold": "Dourado",
-    "blue": "Azul",
-    "red": "Vermelho"
-}
-
 PLANET_NAME_PT = {
     "Earth": "Terra",
     "Mercury": "Mercúrio",

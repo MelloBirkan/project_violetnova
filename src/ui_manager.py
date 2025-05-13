@@ -1,7 +1,7 @@
 import pygame
 import math
 import src.config as config
-from src.planet_data import PLANET_NAME_PT, COLOR_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
+from src.planet_data import PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
 
 class UIManager:
     def __init__(self, game):
@@ -83,7 +83,7 @@ class UIManager:
         screen.blit(lives_text, (20, 110))
         
         # Draw life icons
-        self.game.visual_effects.draw_life_icons(screen, self.game.lives, config.SPACECRAFT_MAX_LIVES, self.game.spacecraft_color)
+        self.game.visual_effects.draw_life_icons(screen, self.game.lives, config.SPACECRAFT_MAX_LIVES)
         
         # Draw weapon status at top center if active
         if self.game.weapon_active:
@@ -101,14 +101,10 @@ class UIManager:
         title_text = config.GAME_FONT.render("PROJETO VIOLETA NOVA", True, (255, 255, 255))
         subtitle_text = config.SMALL_FONT.render("Explorador do Sistema Solar", True, (200, 200, 255))
         instruction_text = config.GAME_FONT.render("Pressione ESPAÇO para Iniciar", True, (255, 255, 255))
-        color_text = config.GAME_FONT.render(f"Nave: {COLOR_NAME_PT.get(self.game.spacecraft_color, self.game.spacecraft_color)}", True, (255, 255, 255))
-        color_instruction = config.SMALL_FONT.render("Pressione C para mudar a cor", True, (255, 255, 255))
         
         screen.blit(title_text, (config.SCREEN_WIDTH // 2 - title_text.get_width() // 2, 180))
         screen.blit(subtitle_text, (config.SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 220))
         screen.blit(instruction_text, (config.SCREEN_WIDTH // 2 - instruction_text.get_width() // 2, 280))
-        screen.blit(color_text, (config.SCREEN_WIDTH // 2 - color_text.get_width() // 2, 330))
-        screen.blit(color_instruction, (config.SCREEN_WIDTH // 2 - color_instruction.get_width() // 2, 370))
         
         # Show controls
         controls_title = config.SMALL_FONT.render("Controles:", True, (255, 255, 255))

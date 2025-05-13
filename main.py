@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 
 """
 Project Blue Nova: Explorador do Sistema Solar - Ponto de Entrada Principal
 -----------------------------------

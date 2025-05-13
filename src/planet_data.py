@@ -13,15 +13,6 @@ PLANET_NAME_PT = {
     "Neptune": "Netuno"
 }
 
-# Color translation dictionary
-COLOR_NAME_PT = {
-    "silver": "Prata",
-    "gold": "Ouro",
-    "red": "Vermelho",
-    "blue": "Azul",
-    "green": "Verde",
-    "purple": "Roxo"
-}
 
 # Level progression thresholds
 LEVEL_PROGRESSION_THRESHOLDS = {

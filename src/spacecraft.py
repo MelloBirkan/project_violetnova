@@ -7,38 +7,13 @@ class Spacecraft:
     HITBOX_WIDTH = 70  # Largura da caixa de colisão
     HITBOX_HEIGHT = 28 # Altura da caixa de colisão
     
-    # Opções de cor da espaçonave
-    COLORS = {
-        "silver": {
-            "body": (192, 192, 192),  # Prata
-            "window": (135, 206, 250),  # Azul céu claro
-            "engine": (255, 69, 0)      # Vermelho-laranja para o brilho do motor
-        },
-        "gold": {
-            "body": (255, 215, 0),     # Ouro
-            "window": (135, 206, 250),  # Azul céu claro
-            "engine": (255, 69, 0)      # Vermelho-laranja para o brilho do motor
-        },
-        "blue": {
-            "body": (70, 130, 180),    # Azul aço
-            "window": (135, 206, 250),  # Azul céu claro
-            "engine": (255, 69, 0)      # Vermelho-laranja para o brilho do motor
-        },
-        "red": {
-            "body": (178, 34, 34),     # Vermelho tijolo
-            "window": (135, 206, 250),  # Azul céu claro
-            "engine": (255, 215, 0)     # Ouro para o brilho do motor
-        }
-    }
     
-    def __init__(self, x, y, color="silver"):
+    def __init__(self, x, y):
         # Posição e física
         self.x = x
         self.y = y
         self.velocity = 0
         self.angle = 0
-        # Seleção de cor
-        self.color = color if color in self.COLORS else "silver"
         # Cores da chama substituídas: gradiente do exterior para o interior (exterior estático, interior dinâmico)
         self.flame_colors = [
             (178, 34, 34),    # Vermelho escuro (exterior)
@@ -195,16 +170,9 @@ class Spacecraft:
         # Redefine o índice do quadro por precaução
     
     def update_image(self):
-        """Atualiza todos os quadros de animação com a cor atual"""
+        """Atualiza todos os quadros de animação"""
         self.create_animation_frames()
     
-    def change_color(self, color):
-        """Muda a cor da espaçonave"""
-        if color in self.COLORS:
-            self.color = color
-            # Com a implementação do sprite, só precisamos atualizar as cores da chama
-            self.update_image()
-            
     def draw(self, screen, invulnerable=False):
         """Desenha a espaçonave, mostrando a chama de empuxo se o empuxo foi acionado recentemente"""
         # Determina se devemos exibir a chama de empuxo

@@ -16,7 +16,7 @@ from src.ui_manager import UIManager
 from src.input_handler import InputHandler
 from src.game_mechanics import GameMechanics
 from src.weapon_system import WeaponSystem
-from src.planet_data import create_planet_data, PLANET_NAME_PT, COLOR_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
+from src.planet_data import create_planet_data, PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
 
 class Game:
     def __init__(self):
@@ -65,10 +65,7 @@ class Game:
         self.current_planet = self.planets[self.current_planet_index]
 
         # Spacecraft setup
-        self.spacecraft_color = "silver"  # Default color
-        self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2, self.spacecraft_color)
-        self.available_colors = list(Spacecraft.COLORS.keys())
-        self.current_color_index = 0
+        self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2)
 
         # Game elements
         self.obstacles = []
@@ -184,7 +181,7 @@ class Game:
                 self.welcome_sound_played = True
 
         # Reset spacecraft position
-        self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2, self.spacecraft_color)
+        self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2)
 
         # Clear all obstacles and collectibles
         self.obstacles = []

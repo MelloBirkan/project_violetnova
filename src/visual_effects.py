@@ -123,10 +123,8 @@ class VisualEffectsManager:
             flash_overlay.fill((255, 0, 0, flash_alpha))  # Flash vermelho
             screen.blit(flash_overlay, (0, 0))
     
-    def draw_life_icons(self, screen, lives, max_lives, spacecraft_color):
+    def draw_life_icons(self, screen, lives, max_lives):
         """Desenha ícones indicadores de vida"""
-        from src.spacecraft import Spacecraft
-        
         # Configura dimensões
         life_icon_width = 30
         life_icon_height = 15
@@ -137,8 +135,8 @@ class VisualEffectsManager:
         for i in range(max_lives):
             # Determina a cor com base se esta vida está disponível
             if i < lives:
-                # Vida disponível - usa a cor atual da espaçonave
-                color = Spacecraft.COLORS[spacecraft_color]["body"]
+                # Vida disponível - usa cor padrão prata
+                color = (192, 192, 192) # Cor prata
                 alpha = 255
             else:
                 # Vida perdida - cinza e semitransparente
@@ -154,7 +152,7 @@ class VisualEffectsManager:
                               (0, 0, life_icon_width, life_icon_height))
             
             # Adiciona pequena janela/cabine
-            window_color = Spacecraft.COLORS[spacecraft_color]["window"]
+            window_color = (135, 206, 250) # Azul céu claro
             pygame.draw.ellipse(life_icon, (*window_color, alpha),
                               (life_icon_width // 2, life_icon_height // 4,
                                life_icon_width // 4, life_icon_height // 2))
