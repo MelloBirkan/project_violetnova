@@ -22,33 +22,86 @@ class Obstacle:
         }
     }
 
-    def __init__(self, x, gap_y, speed, obstacle_type=None, screen_height=720):
+    def __init__(self, x, gap_y, speed, obstacle_type=None, screen_height=720, planet_name="Earth"):
         self.x = x
         self.gap_y = gap_y
         self.speed = speed
         self.scored = False
         self.screen_height = screen_height
         self.using_sprites = False
+        self.planet_name = planet_name
+        # Todos os planetas têm dois obstáculos agora
+        self.has_two_obstacles = True
+        self.top_sprite = None
+        self.bottom_sprite = None
+        self.top_width = self.WIDTH
+        self.bottom_width = self.WIDTH
         
-        # Tenta carregar as imagens de sprites
+        # Tradução de nomes de planetas para caminhos de arquivo
+        planet_folder_names = {
+            "Earth": "terra",
+            "Mercury": "mercurio",
+            "Venus": "venus",
+            "Mars": "marte",
+            "Jupiter": "jupiter",
+            "Saturn": "saturno",
+            "Moon": "lua",
+            "Uranus": "urano",
+            "Neptune": "netuno"
+        }
+        
+        folder_name = planet_folder_names.get(planet_name, "terra")
+        
+        # Tenta carregar as imagens de sprites específicas do planeta
         try:
-            # Caminho para as imagens de obstáculos
-            self.top_sprite_path = os.path.join("assets", "images", "obstaculo_cima_terra.png")
-            self.bottom_sprite_path = os.path.join("assets", "images", "obstaculo_baixo_terra.png")
-            
-            # Carrega os sprites
-            self.top_sprite = pygame.image.load(self.top_sprite_path)
-            self.bottom_sprite = pygame.image.load(self.bottom_sprite_path)
-            
-            # Obtém as dimensões reais do sprite
-            self.top_width = self.top_sprite.get_width()
-            self.bottom_width = self.bottom_sprite.get_width()
-            
-            # Marca que estamos usando sprites
-            self.using_sprites = True
+            # Earth tem obstáculos específicos para cima e baixo
+            if planet_name == "Earth":
+                self.top_sprite_path = os.path.join("assets", "images", "planets_sprites", folder_name, f"obstaculo_cima_{folder_name}.png")
+                self.bottom_sprite_path = os.path.join("assets", "images", "planets_sprites", folder_name, f"obstaculo_baixo_{folder_name}.png")
+                
+                # Verificando existência dos arquivos antes de carregar
+                if os.path.exists(self.top_sprite_path) and os.path.exists(self.bottom_sprite_path):
+                    # Carrega os sprites
+                    self.top_sprite = pygame.image.load(self.top_sprite_path).convert_alpha()
+                    self.bottom_sprite = pygame.image.load(self.bottom_sprite_path).convert_alpha()
+                    
+                    # Obtém as dimensões reais dos sprites
+                    self.top_width = self.top_sprite.get_width()
+                    self.bottom_width = self.bottom_sprite.get_width()
+                    
+                    # Marca que estamos usando sprites
+                    self.using_sprites = True
+                else:
+                    print(f"Arquivos de sprite para {planet_name} não encontrados, usando fallback")
+                    self.using_sprites = False
+            else:
+                # Outros planetas usam o mesmo sprite para ambos os obstáculos
+                obstacle_path = os.path.join("assets", "images", "planets_sprites", folder_name, f"obstaculo_{folder_name}.png")
+                
+                # Verificando existência do arquivo antes de carregar
+                if os.path.exists(obstacle_path):
+                    obstacle_sprite = pygame.image.load(obstacle_path).convert_alpha()
+                    
+                    # Usa o mesmo sprite para o topo e a base
+                    self.top_sprite = obstacle_sprite
+                    self.bottom_sprite = obstacle_sprite
+                    
+                    # Obtém as dimensões reais do sprite
+                    self.top_width = obstacle_sprite.get_width()
+                    self.bottom_width = obstacle_sprite.get_width()
+                    
+                    # Marca que estamos usando sprites
+                    self.using_sprites = True
+                else:
+                    print(f"Arquivo de sprite para {planet_name} não encontrado, usando fallback")
+                    self.using_sprites = False
         except (pygame.error, FileNotFoundError) as e:
-            print(f"Não foi possível carregar os sprites de obstáculos: {e}")
+            print(f"Não foi possível carregar os sprites de obstáculos para {planet_name}: {e}")
             self.using_sprites = False
+            
+        # Cria superfícies de fallback para quando não há sprites
+        if not self.using_sprites:
+            self._create_fallback_obstacles(obstacle_type)
 
         # Seleciona aleatoriamente o tipo de obstáculo se não especificado
         if obstacle_type is None or obstacle_type not in self.TYPES:
@@ -58,11 +111,54 @@ class Obstacle:
 
         # Cria superfícies do obstáculo
         self.create_obstacle_surfaces()
+        
+    def _create_fallback_obstacles(self, obstacle_type):
+        """Cria obstáculos de fallback quando sprites não estão disponíveis"""
+        # Determina o tipo de obstáculo
+        if obstacle_type is None or obstacle_type not in self.TYPES:
+            obstacle_type = random.choice(list(self.TYPES.keys()))
+        self.type = obstacle_type
+        self.colors = self.TYPES[self.type]
+        
+        # Cria obstáculo superior
+        top_obstacle_height = self.gap_y - self.GAP // 2
+        # Garante que a altura seja de pelo menos 1 pixel
+        top_obstacle_height = max(1, top_obstacle_height)
+        self.top_obstacle = pygame.Surface((self.WIDTH, top_obstacle_height))
+        self.top_obstacle.fill(self.colors["color"])
+        
+        # Cria obstáculo inferior
+        bottom_obstacle_height = self.screen_height - self.gap_y - self.GAP // 2
+        # Garante que a altura seja de pelo menos 1 pixel
+        bottom_obstacle_height = max(1, bottom_obstacle_height)
+        self.bottom_obstacle = pygame.Surface((self.WIDTH, bottom_obstacle_height))
+        self.bottom_obstacle.fill(self.colors["color"])
+        
+        # Adiciona detalhes aos obstáculos
+        if self.type == "asteroid":
+            self._add_asteroid_details(self.top_obstacle)
+            self._add_asteroid_details(self.bottom_obstacle)
+        elif self.type == "debris":
+            self._add_debris_details(self.top_obstacle)
+            self._add_debris_details(self.bottom_obstacle)
+        elif self.type == "storm":
+            self._add_storm_details(self.top_obstacle)
+            self._add_storm_details(self.bottom_obstacle)
 
     def create_obstacle_surfaces(self):
         if self.using_sprites:
-            # Quando usamos sprites, não precisamos criar superfícies personalizadas
-            # Apenas definimos a posição para os obstáculos superior e inferior
+            # Quando usamos sprites, padronizamos os sprites para garantir consistência
+            
+            # Redimensiona os sprites para a largura padrão, mantendo a proporção
+            if self.top_width != self.WIDTH:
+                top_height = int(self.top_sprite.get_height() * (self.WIDTH / self.top_width))
+                self.top_sprite = pygame.transform.scale(self.top_sprite, (self.WIDTH, top_height))
+                self.top_width = self.WIDTH
+                
+            if hasattr(self, 'bottom_width') and self.bottom_width != self.WIDTH:
+                bottom_height = int(self.bottom_sprite.get_height() * (self.WIDTH / self.bottom_width))
+                self.bottom_sprite = pygame.transform.scale(self.bottom_sprite, (self.WIDTH, bottom_height))
+                self.bottom_width = self.WIDTH
             
             # Para o obstáculo superior, ajustamos sua posição Y
             # A parte superior do obstáculo fica na posição 0, 
@@ -144,23 +240,27 @@ class Obstacle:
         self.x -= self.speed
 
     def draw(self, screen):
-        if self.using_sprites:
-            # Desenha o obstáculo superior usando o sprite na posição correta
-            # Não precisamos recortar - apenas posicionamos o sprite completo no topo
-            # e ajustamos sua posição Y para que a base fique na posição gap_y - GAP/2
+        if self.using_sprites and self.top_sprite is not None and self.bottom_sprite is not None:
+            # Para todos os planetas, sempre desenhar ambos os obstáculos
+            # Desenha o obstáculo superior
             top_y_position = (self.gap_y - self.GAP // 2) - self.top_sprite.get_height()
             
             # Garante que não desenhamos fora da tela (pode estar parcialmente visível)
             if top_y_position + self.top_sprite.get_height() > 0:
                 screen.blit(self.top_sprite, (self.x, top_y_position))
             
-            # Desenha o obstáculo inferior usando o sprite na posição gap_y + GAP/2
+            # Desenha o obstáculo inferior
             bottom_y = self.gap_y + self.GAP // 2
             screen.blit(self.bottom_sprite, (self.x, bottom_y))
         else:
-            # Desenha obstáculo superior
-            screen.blit(self.top_obstacle, (self.x, 0))
-
-            # Desenha obstáculo inferior
-            bottom_obstacle_y = self.gap_y + self.GAP // 2
-            screen.blit(self.bottom_obstacle, (self.x, bottom_obstacle_y))
+            # Desenha obstáculo superior e inferior quando não há sprites
+            if hasattr(self, 'top_obstacle') and hasattr(self, 'bottom_obstacle'):
+                # Verifica se os obstáculos fallback foram criados corretamente
+                
+                # Sempre desenha ambos os obstáculos para todos os planetas
+                # Desenha obstáculo superior
+                screen.blit(self.top_obstacle, (self.x, 0))
+                
+                # Desenha obstáculo inferior
+                bottom_obstacle_y = self.gap_y + self.GAP // 2
+                screen.blit(self.bottom_obstacle, (self.x, bottom_obstacle_y))

@@ -106,8 +106,18 @@ class GameMechanics:
         # Randomly select obstacle type
         obstacle_type = random.choice(list(Obstacle.TYPES.keys()))
         
-        # Create new obstacle
-        new_obstacle = Obstacle(config.SCREEN_WIDTH, gap_y, self.game.obstacle_speed, obstacle_type, config.SCREEN_HEIGHT)
+        # Get current planet name
+        current_planet_name = self.game.current_planet.name
+        
+        # Create new obstacle with planet name
+        new_obstacle = Obstacle(
+            config.SCREEN_WIDTH, 
+            gap_y, 
+            self.game.obstacle_speed, 
+            obstacle_type, 
+            config.SCREEN_HEIGHT,
+            current_planet_name
+        )
         self.game.obstacles.append(new_obstacle)
         
         # Occasionally have NOVA alert about obstacles

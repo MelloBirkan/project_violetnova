@@ -133,3 +133,7 @@ The codebase was refactored following SOLID principles:
    - Constant data moved to appropriate modules
    - Planet data and progression thresholds defined in `planet_data.py`
    - Game loop simplified in `main.py`
+
+## Asset Management
+
+- All planet sprites will be at @assets/images/planets_sprites/ and will have 3 sprites for each planet ceu_..., obstaculo_..., chao_...

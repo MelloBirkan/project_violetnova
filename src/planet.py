@@ -21,90 +21,100 @@ class Planet:
         """Cria assets visuais específicos do planeta"""
         # Tamanho base da superfície para textura do solo
         self.ground_texture = pygame.Surface((800, 100))
-
-        # Estilização diferente do solo com base no planeta
-        if self.name == "Earth":
-            # Carrega imagem de fundo para a Terra
-            bg_path = os.path.join("assets", "images", "ceu_terra.png")
-            try:
-                self.background_image = pygame.image.load(bg_path).convert_alpha()
-            except pygame.error:
-                print("Falha ao carregar imagem de fundo da Terra, usando fallback")
-                self.background_image = None
-                
-            # Carrega imagem de textura do solo para a Terra e a ladrilha para evitar esticar
-            img_path = os.path.join("assets", "images", "earth_ground.png")
-            try:
-                tile_img = pygame.image.load(img_path).convert_alpha()
-                tile_w, tile_h = tile_img.get_size()
-                # Cria uma nova superfície para a textura do solo com altura adequada
-                self.ground_texture = pygame.Surface((800, tile_h), pygame.SRCALPHA)
-                # Ladrilha a imagem horizontalmente
-                for x in range(0, 800, tile_w):
-                    self.ground_texture.blit(tile_img, (x, 0))
-            except pygame.error:
-                # Fallback para verde sólido padrão se o carregamento da imagem falhar
-                self.ground_texture = pygame.Surface((800, 100))
+        
+        # Tradução de nomes de planetas para caminhos de arquivo
+        planet_folder_names = {
+            "Earth": "terra",
+            "Mercury": "mercurio",
+            "Venus": "venus",
+            "Mars": "marte",
+            "Jupiter": "jupiter",
+            "Saturn": "saturno",
+            "Moon": "lua",
+            "Uranus": "urano",
+            "Neptune": "netuno"
+        }
+        
+        # Obtém o nome da pasta para o planeta atual
+        folder_name = planet_folder_names.get(self.name, "terra")
+        
+        # Tenta carregar imagem de fundo específica do planeta
+        bg_path = os.path.join("assets", "images", "planets_sprites", folder_name, f"ceu_{folder_name}.png")
+        try:
+            self.background_image = pygame.image.load(bg_path).convert_alpha()
+        except pygame.error:
+            print(f"Falha ao carregar imagem de fundo de {self.name}, usando fallback")
+            self.background_image = None
+            
+        # Tenta carregar imagem de textura do solo específica do planeta
+        img_path = os.path.join("assets", "images", "planets_sprites", folder_name, f"chao_{folder_name}.png")
+        try:
+            tile_img = pygame.image.load(img_path).convert_alpha()
+            tile_w, tile_h = tile_img.get_size()
+            # Cria uma nova superfície para a textura do solo com altura adequada
+            self.ground_texture = pygame.Surface((800, tile_h), pygame.SRCALPHA)
+            # Ladrilha a imagem horizontalmente
+            for x in range(0, 800, tile_w):
+                self.ground_texture.blit(tile_img, (x, 0))
+        except pygame.error:
+            print(f"Falha ao carregar textura do solo de {self.name}, usando fallback")
+            
+            # Fallbacks específicos por planeta
+            if self.name == "Earth":
                 self.ground_texture.fill((34, 139, 34))  # Verde floresta
                 # Adiciona detalhes de grama
                 for i in range(0, 800, 20):
                     pygame.draw.rect(self.ground_texture, (0, 100, 0), (i, 0, 10, 20))
-
-        elif self.name == "Moon":
-            self.ground_texture.fill((169, 169, 169))  # Cinza escuro
-            # Adiciona alguns detalhes de cratera
-            for i in range(0, 800, 50):
-                pygame.draw.circle(self.ground_texture, (120, 120, 120), (i, 20), 10)
-
-        elif self.name == "Mercury":
-            self.ground_texture.fill((160, 82, 45))  # Marrom siena
-            # Adiciona alguns detalhes de cratera
-            for i in range(0, 800, 40):
-                pygame.draw.circle(self.ground_texture, (139, 69, 19), (i, 20), 8)
-
-        elif self.name == "Venus":
-            self.ground_texture.fill((218, 165, 32))  # Dourado
-            # Adiciona alguns detalhes de rocha
-            for i in range(0, 800, 30):
-                pygame.draw.rect(self.ground_texture, (184, 134, 11), (i, 0, 15, 15))
-
-        elif self.name == "Mars":
-            self.ground_texture.fill((205, 92, 92))  # Vermelho indiano
-            # Adiciona alguns detalhes de rocha
-            for i in range(0, 800, 35):
-                pygame.draw.rect(self.ground_texture, (178, 34, 34), (i, 0, 12, 12))
-
-        elif self.name == "Jupiter":
-            # Júpiter não tem superfície sólida, então cria um padrão semelhante a gás
-            self.ground_texture.fill((244, 164, 96))  # Marrom arenoso
-            for i in range(0, 800, 25):
-                pygame.draw.rect(self.ground_texture, (210, 105, 30), (i, 10, 15, 80))
-
-        elif self.name == "Saturn":
-            # Saturno não tem superfície sólida, então cria um padrão semelhante a gás
-            self.ground_texture.fill((245, 222, 179))  # Cor de trigo
-            for i in range(0, 800, 20):
-                pygame.draw.rect(self.ground_texture, (222, 184, 135), (i, 5, 10, 90))
-
-        elif self.name == "Uranus":
-            # Urano não tem superfície sólida, então cria um padrão semelhante a gás
-            self.ground_texture.fill((175, 238, 238))  # Turquesa pálido
-            for i in range(0, 800, 30):
-                pygame.draw.rect(self.ground_texture, (127, 255, 212), (i, 0, 20, 100))
-
-        elif self.name == "Neptune":
-            # Netuno não tem superfície sólida, então cria um padrão semelhante a gás
-            self.ground_texture.fill((65, 105, 225))  # Azul royal
-            for i in range(0, 800, 22):
-                pygame.draw.rect(self.ground_texture, (0, 0, 205), (i, 0, 11, 100))
-
-        elif self.name == "Pluto":
-            # Superfície gelada de Plutão
-            self.ground_texture.fill((220, 220, 230))  # Cinza-azulado muito claro
-            # Adiciona alguns detalhes de crateras de gelo
-            for i in range(0, 800, 60):
-                pygame.draw.circle(self.ground_texture, (200, 200, 210), (i, 25), 12)
-                pygame.draw.circle(self.ground_texture, (190, 190, 200), (i+30, 15), 8)
+            elif self.name == "Moon":
+                self.ground_texture.fill((169, 169, 169))  # Cinza escuro
+                # Adiciona alguns detalhes de cratera
+                for i in range(0, 800, 50):
+                    pygame.draw.circle(self.ground_texture, (120, 120, 120), (i, 20), 10)
+            elif self.name == "Mercury":
+                self.ground_texture.fill((160, 82, 45))  # Marrom siena
+                # Adiciona alguns detalhes de cratera
+                for i in range(0, 800, 40):
+                    pygame.draw.circle(self.ground_texture, (139, 69, 19), (i, 20), 8)
+            elif self.name == "Venus":
+                self.ground_texture.fill((218, 165, 32))  # Dourado
+                # Adiciona alguns detalhes de rocha
+                for i in range(0, 800, 30):
+                    pygame.draw.rect(self.ground_texture, (184, 134, 11), (i, 0, 15, 15))
+            elif self.name == "Mars":
+                self.ground_texture.fill((205, 92, 92))  # Vermelho indiano
+                # Adiciona alguns detalhes de rocha
+                for i in range(0, 800, 35):
+                    pygame.draw.rect(self.ground_texture, (178, 34, 34), (i, 0, 12, 12))
+            elif self.name == "Jupiter":
+                # Júpiter não tem superfície sólida, então cria um padrão semelhante a gás
+                self.ground_texture.fill((244, 164, 96))  # Marrom arenoso
+                for i in range(0, 800, 25):
+                    pygame.draw.rect(self.ground_texture, (210, 105, 30), (i, 10, 15, 80))
+            elif self.name == "Saturn":
+                # Saturno não tem superfície sólida, então cria um padrão semelhante a gás
+                self.ground_texture.fill((245, 222, 179))  # Cor de trigo
+                for i in range(0, 800, 20):
+                    pygame.draw.rect(self.ground_texture, (222, 184, 135), (i, 5, 10, 90))
+            elif self.name == "Uranus":
+                # Urano não tem superfície sólida, então cria um padrão semelhante a gás
+                self.ground_texture.fill((175, 238, 238))  # Turquesa pálido
+                for i in range(0, 800, 30):
+                    pygame.draw.rect(self.ground_texture, (127, 255, 212), (i, 0, 20, 100))
+            elif self.name == "Neptune":
+                # Netuno não tem superfície sólida, então cria um padrão semelhante a gás
+                self.ground_texture.fill((65, 105, 225))  # Azul royal
+                for i in range(0, 800, 22):
+                    pygame.draw.rect(self.ground_texture, (0, 0, 205), (i, 0, 11, 100))
+            elif self.name == "Pluto":
+                # Superfície gelada de Plutão
+                self.ground_texture.fill((220, 220, 230))  # Cinza-azulado muito claro
+                # Adiciona alguns detalhes de crateras de gelo
+                for i in range(0, 800, 60):
+                    pygame.draw.circle(self.ground_texture, (200, 200, 210), (i, 25), 12)
+                    pygame.draw.circle(self.ground_texture, (190, 190, 200), (i+30, 15), 8)
+            else:
+                # Fallback genérico para outros planetas
+                self.ground_texture.fill((120, 120, 120))  # Cinza neutro
 
     def get_info_text(self):
         """Retorna informações sobre o planeta para a tela de transição"""
