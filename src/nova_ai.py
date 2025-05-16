@@ -383,28 +383,6 @@ class NovaAI:
             inner_rect = bubble_rect.inflate(-4, -4)
             pygame.draw.rect(screen, (*bubble_color, 180), inner_rect, border_radius=8)
 
-            # Desenha a cauda animada apontando para NOVA
-            tail_height = 15
-            tail_width = 20
-            tail_top_x = self.screen_width // 2 + self.tail_offset
-
-            # Pontos para a cauda do balão de fala (triângulo)
-            tail_points = [
-                (tail_top_x - tail_width//2, bubble_y + message_height),  # Canto inferior esquerdo
-                (tail_top_x + tail_width//2, bubble_y + message_height),  # Canto inferior direito
-                (self.x + self.WIDTH//2, self.y)                         # Aponta para a IA
-            ]
-
-            # Desenha a cauda
-            pygame.draw.polygon(screen, border_color, tail_points)
-
-            # Desenha uma cauda interna ligeiramente menor com a mesma cor do balão
-            inner_tail_points = [
-                (tail_top_x - tail_width//2 + 2, bubble_y + message_height - 2),
-                (tail_top_x + tail_width//2 - 2, bubble_y + message_height - 2),
-                (self.x + self.WIDTH//2, self.y + 5)
-            ]
-            pygame.draw.polygon(screen, (*bubble_color, 180), inner_tail_points)
 
             # Posiciona e desenha o texto da mensagem
             text_x = bubble_x + 10  # Preenchimento esquerdo
