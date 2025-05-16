@@ -67,3 +67,7 @@ TRANSITION_DURATION = 180  # quadros (3s a 60fps)
 
 # Duração da arma
 WEAPON_DURATION = 600  # quadros (10s a 60fps)
+
+# Durações do quiz
+QUIZ_DURATION = 600  # quadros (10s a 60fps)
+QUIZ_RESULT_DURATION = 120  # quadros (2s a 60fps)

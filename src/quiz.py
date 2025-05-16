@@ -28,7 +28,7 @@ class Quiz:
         self.correct_answer = correct_answer
         self.selected_option = None
         self.result = None
-        self.quiz_timer = 600  # 10 segundos a 60fps
+        self.quiz_timer = config.QUIZ_DURATION
     
     def handle_event(self, event):
         """Lida com a entrada do usuário para o quiz"""
@@ -63,7 +63,7 @@ class Quiz:
         else:
             self.result = "incorrect"
             
-        self.result_timer = 120  # 2 segundos a 60fps
+        self.result_timer = config.QUIZ_RESULT_DURATION
     
     def update(self):
         """Atualiza o estado do quiz"""
@@ -76,7 +76,7 @@ class Quiz:
             if self.quiz_timer <= 0:
                 # Tempo esgotado - conta como incorreto
                 self.result = "timeout"
-                self.result_timer = 120  # 2 segundos a 60fps
+                self.result_timer = config.QUIZ_RESULT_DURATION
         else:
             # Atualiza o temporizador de exibição do resultado
             self.result_timer -= 1
@@ -125,7 +125,7 @@ class Quiz:
         pygame.draw.rect(screen, (100, 100, 100), (timer_x, timer_y, timer_width, timer_height))
         
         # Desenha preenchimento do temporizador com base no tempo restante
-        timer_fill_width = int(timer_width * (self.quiz_timer / 600))
+        timer_fill_width = int(timer_width * (self.quiz_timer / config.QUIZ_DURATION))
         timer_color = (0, 255, 0) if self.quiz_timer > 200 else (255, 165, 0) if self.quiz_timer > 100 else (255, 0, 0)
         pygame.draw.rect(screen, timer_color, (timer_x, timer_y, timer_fill_width, timer_height))
         
