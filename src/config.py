@@ -48,6 +48,11 @@ SOUND_FADEOUT_TIME = 500  # ms
 # Parâmetros da espaçonave
 SPACECRAFT_MAX_LIVES = 3
 SPACECRAFT_INVULNERABILITY_TIME = 90  # quadros (1.5s a 60fps)
+
+# Configurações do menu
+MENU_OPTIONS = ["Jogar", "Configurações", "Créditos", "Sair"]
+MENU_OPTION_SPACING = 50
+MENU_START_Y = 280
 SPACECRAFT_KNOCKBACK = -3.5
 
 # Limiares de progressão de nível - pontos necessários para avançar para o próximo planeta

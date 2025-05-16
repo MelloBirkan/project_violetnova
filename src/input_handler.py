@@ -28,7 +28,21 @@ class InputHandler:
             pygame.quit()
             sys.exit()
             
-        if self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
+        if self.game.state == config.MENU:
+            # Handle menu navigation
+            if event.key == pygame.K_UP:
+                self.game.selected_menu_option = (self.game.selected_menu_option - 1) % len(config.MENU_OPTIONS)
+                # Play a small click sound if available
+                if hasattr(self.game.sound_manager, 'menu_select_sound'):
+                    self.game.sound_manager.menu_select_sound.play()
+            elif event.key == pygame.K_DOWN:
+                self.game.selected_menu_option = (self.game.selected_menu_option + 1) % len(config.MENU_OPTIONS)
+                # Play a small click sound if available
+                if hasattr(self.game.sound_manager, 'menu_select_sound'):
+                    self.game.sound_manager.menu_select_sound.play()
+            elif event.key == pygame.K_RETURN:
+                self._handle_menu_selection()
+        elif self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
             # Only pass events to quiz system if in QUIZ state
             if self.game.state == config.QUIZ:
                 self.game.quiz.handle_event(event)
@@ -65,7 +79,8 @@ class InputHandler:
     def _handle_space_key_press(self):
         """Handles Space key press based on game state"""
         if self.game.state == config.MENU:
-            self.game.reset()
+            # Space key in menu triggers the selected option
+            self._handle_menu_selection()
         elif self.game.state == config.PLAYING:
             # Single thrust when pressed
             self.game.spacecraft.thrust()
@@ -97,6 +112,22 @@ class InputHandler:
             self.game.spacecraft.flame_colors = []
         self.game.spacecraft.update_image()
         self.game.nova.show_message(f"Modo de controle: {mode_name}", "info")
+    
+    def _handle_menu_selection(self):
+        """Handles menu option selection"""
+        selected_option = config.MENU_OPTIONS[self.game.selected_menu_option]
+        
+        if selected_option == "Jogar":
+            self.game.reset()
+        elif selected_option == "Configurações":
+            # TODO: Implement settings screen
+            self.game.nova.show_message("Configurações em breve!", "info")
+        elif selected_option == "Créditos":
+            # TODO: Implement credits screen
+            self.game.nova.show_message("Créditos em breve!", "info")
+        elif selected_option == "Sair":
+            pygame.quit()
+            sys.exit()
     
     def _handle_left_click(self):
         """Handles left mouse button click based on game state"""

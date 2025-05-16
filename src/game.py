@@ -111,6 +111,9 @@ class Game:
         # Control settings
         self.space_held = False
         self.control_mode = config.CONTROL_MODE_HOLD  # Default changed to HOLD
+        
+        # Menu navigation
+        self.selected_menu_option = 0
 
     @property
     def state(self):

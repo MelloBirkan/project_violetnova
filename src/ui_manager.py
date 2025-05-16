@@ -100,21 +100,59 @@ class UIManager:
         
         title_text = config.GAME_FONT.render("PROJETO VIOLETA NOVA", True, (255, 255, 255))
         subtitle_text = config.SMALL_FONT.render("Explorador do Sistema Solar", True, (200, 200, 255))
-        instruction_text = config.GAME_FONT.render("Pressione ESPAÇO para Iniciar", True, (255, 255, 255))
         
         screen.blit(title_text, (config.SCREEN_WIDTH // 2 - title_text.get_width() // 2, 180))
         screen.blit(subtitle_text, (config.SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 220))
-        screen.blit(instruction_text, (config.SCREEN_WIDTH // 2 - instruction_text.get_width() // 2, 280))
+        
+        # Draw menu options
+        for i, option in enumerate(config.MENU_OPTIONS):
+            y_pos = config.MENU_START_Y + (i * config.MENU_OPTION_SPACING)
+            
+            # Highlight selected option
+            if i == self.game.selected_menu_option:
+                # Draw selection box
+                box_padding = 20
+                box_width = 400
+                box_height = 40
+                box_x = config.SCREEN_WIDTH // 2 - box_width // 2
+                box_y = y_pos - 10
+                
+                # Draw glowing effect for selected option
+                glow_surface = pygame.Surface((box_width + 40, box_height + 40), pygame.SRCALPHA)
+                for offset in range(3):
+                    alpha = 50 - (offset * 15)
+                    pygame.draw.rect(glow_surface, (100, 100, 255, alpha), 
+                                   (20 - offset * 4, 20 - offset * 4, 
+                                    box_width + offset * 8, box_height + offset * 8), 
+                                   2, border_radius=10)
+                screen.blit(glow_surface, (box_x - 20, box_y - 20))
+                
+                # Draw the box
+                pygame.draw.rect(screen, (50, 50, 150), (box_x, box_y, box_width, box_height), 
+                               border_radius=10)
+                pygame.draw.rect(screen, (100, 100, 255), (box_x, box_y, box_width, box_height), 
+                               2, border_radius=10)
+                
+                option_text = config.GAME_FONT.render(option, True, (255, 255, 255))
+            else:
+                option_text = config.GAME_FONT.render(option, True, (180, 180, 180))
+            
+            screen.blit(option_text, (config.SCREEN_WIDTH // 2 - option_text.get_width() // 2, y_pos))
         
         # Show controls
-        controls_title = config.SMALL_FONT.render("Controles:", True, (255, 255, 255))
-        controls_space = config.SMALL_FONT.render("ESPAÇO - Impulsionar", True, (200, 200, 200))
-        controls_w = config.SMALL_FONT.render("W - Usar Arma (quando disponível)", True, (200, 200, 200))
+        controls_title = config.SMALL_FONT.render("Controles do Menu:", True, (255, 255, 255))
+        controls_nav = config.SMALL_FONT.render("↑↓ - Navegar | ENTER - Selecionar", True, (200, 200, 200))
         
-        controls_y = config.SCREEN_HEIGHT - 120
+        controls_y = config.SCREEN_HEIGHT - 150
         screen.blit(controls_title, (config.SCREEN_WIDTH // 2 - controls_title.get_width() // 2, controls_y))
-        screen.blit(controls_space, (config.SCREEN_WIDTH // 2 - controls_space.get_width() // 2, controls_y + 30))
-        screen.blit(controls_w, (config.SCREEN_WIDTH // 2 - controls_w.get_width() // 2, controls_y + 60))
+        screen.blit(controls_nav, (config.SCREEN_WIDTH // 2 - controls_nav.get_width() // 2, controls_y + 30))
+        
+        # Show game controls
+        game_controls_title = config.SMALL_FONT.render("Controles do Jogo:", True, (255, 255, 255))
+        controls_space = config.SMALL_FONT.render("ESPAÇO - Impulsionar | W - Usar Arma", True, (200, 200, 200))
+        
+        screen.blit(game_controls_title, (config.SCREEN_WIDTH // 2 - game_controls_title.get_width() // 2, controls_y + 60))
+        screen.blit(controls_space, (config.SCREEN_WIDTH // 2 - controls_space.get_width() // 2, controls_y + 90))
         
     def draw_game_over_screen(self, screen):
         """Draws the game over screen"""
