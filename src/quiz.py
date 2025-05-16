@@ -157,12 +157,14 @@ class Quiz:
         if self.result is not None:
             if self.result == "correct":
                 result_text = self.font_large.render("Correto!", True, (0, 255, 0))
+                result_rect = result_text.get_rect(center=(self.screen_width // 2, 150))
             elif self.result == "incorrect":
                 result_text = self.font_large.render("Incorreto!", True, (255, 0, 0))
+                result_rect = result_text.get_rect(center=(self.screen_width // 2, 150))
             else:  # timeout
                 result_text = self.font_large.render("Tempo Esgotado!", True, (255, 165, 0))
-                
-            result_rect = result_text.get_rect(center=(self.screen_width // 2, self.screen_height - 100))
+                result_rect = result_text.get_rect(center=(self.screen_width // 2, self.screen_height - 100))
+
             screen.blit(result_text, result_rect)
     
     def is_complete(self):
