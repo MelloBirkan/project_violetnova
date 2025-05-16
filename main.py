@@ -1,6 +1,6 @@
 #!/usr/bin/env python3 
 """
-Project Blue Nova: Explorador do Sistema Solar - Ponto de Entrada Principal
+Project Violetnova: Explorador do Sistema Solar - Ponto de Entrada Principal
 -----------------------------------
 Este script inicia o jogo de exploração do Sistema Solar.
 """
@@ -10,7 +10,7 @@ import sys
 
 def main():
     """Ponto de entrada principal para o jogo"""
-    print("Iniciando Project Blue Nova: Explorador do Sistema Solar...")
+    print("Iniciando Project Violetnova: Explorador do Sistema Solar...")
     
     # Verifica se os requisitos estão instalados
     try:

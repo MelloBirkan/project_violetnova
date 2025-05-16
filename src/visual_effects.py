@@ -91,7 +91,10 @@ class VisualEffectsManager:
             color = (star["brightness"], star["brightness"], star["brightness"])
             x_pos = int(star["x"]) + offset_x
             y_pos = int(star["y"]) + offset_y
-            pygame.draw.circle(screen, color, (x_pos, y_pos), star["size"])
+            # pygame.draw.circle expects the radius as an integer. When using a
+            # float radius, some versions of pygame raise a TypeError. Cast to
+            # int to avoid runtime errors on platforms that enforce this.
+            pygame.draw.circle(screen, color, (x_pos, y_pos), int(star["size"]))
     
     def _draw_planet_background(self, screen, planet, offset_x, offset_y):
         """Desenha a imagem de fundo ou cor do planeta"""
