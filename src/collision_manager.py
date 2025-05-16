@@ -158,9 +158,8 @@ class CollisionManager:
             self._check_level_progression()
             
         elif effect["effect"] == "attack":
-            # Habilita a arma temporariamente
-            self.game.weapon_active = True
-            self.game.weapon_timer = 600  # 10 segundos a 60fps
+            # Habilita a arma temporariamente através do sistema de armas
+            self.game.weapon_system.activate()
             self.game.nova.react_to_discovery("weapon")
             
         elif effect["effect"] == "life":

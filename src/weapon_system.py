@@ -11,6 +11,7 @@ class WeaponSystem:
         """Updates the weapon state"""
         if self.active:
             self.timer -= 1
+            self.game.weapon_timer = self.timer
             if self.timer <= 0:
                 self.deactivate()
                 
@@ -18,12 +19,16 @@ class WeaponSystem:
         """Activates the weapon for a specified duration (default 10 seconds at 60fps)"""
         self.active = True
         self.timer = duration
+        self.game.weapon_active = True
+        self.game.weapon_timer = duration
         self.game.nova.show_message("Sistemas defensivos ativados! Pressione W para usar.", "excited")
         
     def deactivate(self):
         """Deactivates the weapon"""
         self.active = False
         self.timer = 0
+        self.game.weapon_active = False
+        self.game.weapon_timer = 0
         self.game.nova.show_message("Sistemas defensivos offline", "normal")
         
     def use(self):

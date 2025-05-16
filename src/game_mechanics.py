@@ -181,6 +181,4 @@ class GameMechanics:
                 self.game.score += 2  # Bonus points instead
                 
         elif collectible.type == "weapon":
-            self.game.weapon_active = True
-            self.game.weapon_timer = 600  # 10 seconds at 60fps
-            self.game.nova.show_message("Sistemas defensivos ativados! Pressione W para usar.", "excited")
+            self.game.weapon_system.activate()

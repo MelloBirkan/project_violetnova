@@ -167,7 +167,7 @@ class Spacecraft:
         self.thrust_images = thrust_images
         # Atualiza o número de quadros de animação com base nas imagens geradas
         self.animation_frames = len(self.thrust_images)
-        # Redefine o índice do quadro por precaução
+        self.current_frame = 0  # Redefine o índice do quadro por precaução
     
     def update_image(self):
         """Atualiza todos os quadros de animação"""
