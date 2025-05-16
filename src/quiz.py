@@ -1,4 +1,5 @@
 import pygame
+import src.config as config
 
 class Quiz:
     def __init__(self, screen_width, screen_height):
@@ -13,10 +14,11 @@ class Quiz:
         self.quiz_timer = 0
         self.result_timer = 0
         
-        # Fonte para texto do quiz
-        self.font_large = pygame.font.Font(None, 36)
-        self.font_medium = pygame.font.Font(None, 30)
-        self.font_small = pygame.font.Font(None, 24)
+        # Fonte para texto do quiz usando fontes globais
+        # GAME_FONT e SMALL_FONT são inicializados em src.main
+        self.font_large = config.GAME_FONT
+        self.font_medium = config.GAME_FONT
+        self.font_small = config.SMALL_FONT
     
     def start_quiz(self, question, options, correct_answer):
         """Inicia um novo quiz com a pergunta e opções dadas"""

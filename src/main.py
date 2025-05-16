@@ -13,6 +13,7 @@ def main():
     pygame.display.set_caption("Projeto Violeta Nova: Explorador do Sistema Solar")
     
     # Initialize fonts after pygame is initialized
+    # Quiz e outros componentes dependem dessas fontes na criação
     import src.config as config
     config.GAME_FONT = pygame.font.Font(None, config.GAME_FONT_SIZE)
     config.SMALL_FONT = pygame.font.Font(None, config.SMALL_FONT_SIZE)
