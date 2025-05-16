@@ -40,7 +40,7 @@ class InputHandler:
                 # Play a small click sound if available
                 if hasattr(self.game.sound_manager, 'menu_select_sound'):
                     self.game.sound_manager.menu_select_sound.play()
-            elif event.key == pygame.K_RETURN:
+            elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                 self._handle_menu_selection()
         elif self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
             # Only pass events to quiz system if in QUIZ state

@@ -141,7 +141,7 @@ class UIManager:
         
         # Show controls
         controls_title = config.SMALL_FONT.render("Controles do Menu:", True, (255, 255, 255))
-        controls_nav = config.SMALL_FONT.render("↑↓ - Navegar | ENTER - Selecionar", True, (200, 200, 200))
+        controls_nav = config.SMALL_FONT.render("SETA PARA CIMA/BAIXO - Navegar | ENTER/ESPAÇO - Selecionar", True, (200, 200, 200))
         
         controls_y = config.SCREEN_HEIGHT - 150
         screen.blit(controls_title, (config.SCREEN_WIDTH // 2 - controls_title.get_width() // 2, controls_y))
