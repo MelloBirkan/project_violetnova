@@ -129,8 +129,15 @@ class Game:
 
     def reset(self, new_planet=False):
         """Resets the game, optionally changing to a new planet"""
-        self.state_manager.change_state(config.PLAYING)
-        self.state = config.PLAYING  # Keep in sync with state manager
+        if not new_planet:
+            # When starting a new game, begin with Earth's transition screen
+            self.state_manager.change_state(config.TRANSITION)
+            self.state = config.TRANSITION
+        else:
+            # When changing planets, go directly to playing
+            self.state_manager.change_state(config.PLAYING)
+            self.state = config.PLAYING
+        
         self.weapon_active = False
         self.weapon_timer = 0
 
@@ -156,31 +163,32 @@ class Game:
             # Save current planet and update furthest planet if necessary
             self.planet_tracker.save(self.current_planet.name.lower(), update_furthest=True)
         else:
-            # Start from scratch
+            # Start from scratch on Earth
             self.score = 0
-            self.current_planet_index = 0
+            # Find Earth's index in the planets list
+            earth_index = 0
+            for i, planet in enumerate(self.planets):
+                if planet.name.lower() == "earth":
+                    earth_index = i
+                    break
+            
+            self.current_planet_index = earth_index
             self.current_planet = self.planets[self.current_planet_index]
             self.difficulty_multiplier = 1.0
             # Reset lives to maximum when starting a new game
             self.reset_lives()
             
-            # Save current planet (mercury) - don't update furthest planet when resetting
+            # Save current planet (Earth) - don't update furthest planet when resetting
             self.planet_tracker.save(self.current_planet.name.lower(), update_furthest=False)
 
-            # Play Earth welcome sound when starting/restarting
-            if self.current_planet.name in self.sound_manager.welcome_sounds:
+            # Play Earth welcome sound through sound manager
+            if hasattr(self, 'sound_manager'):
                 # Stop any playing sounds first
                 for sound in self.sound_manager.welcome_sounds.values():
                     sound.fadeout(100)
 
-                # Small delay before playing Earth welcome sound
-                pygame.time.delay(200)
-
-                # Store reference to current sound
-                self.current_welcome_sound = self.sound_manager.welcome_sounds[self.current_planet.name]
-                self.current_welcome_sound.play()
-                # Set timer based on sound duration (in milliseconds)
-                self.welcome_sound_timer = int(self.current_welcome_sound.get_length() * 1000)
+                # Play welcome sound and set timer
+                self.state_manager.welcome_sound_timer = self.sound_manager.play_welcome(self.current_planet.name)
                 self.welcome_sound_played = True
 
         # Reset spacecraft position
