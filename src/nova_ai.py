@@ -149,6 +149,12 @@ class NovaAI:
         self.tail_direction = 1
         self.tail_speed = 0.5
 
+        # Animation for radio signal when playing audio
+        self.audio_playing = False
+        self.audio_timer = 0
+        self.signal_y = 0
+        self.signal_speed = 2
+
         # Cria a superfície do assistente AI
         self.update_surface()
         self.planet_name_translations = planet_name_translations
@@ -211,6 +217,18 @@ class NovaAI:
             expression_text = font.render(self.EXPRESSIONS[self.expression], True, (255, 255, 255))
             expression_rect = expression_text.get_rect(center=(width // 2, height // 2))
             self.surface.blit(expression_text, expression_rect)
+
+    def start_radio_signal(self, duration_ms):
+        """Inicia a animação de sinal de rádio por determinado tempo em ms"""
+        self.audio_playing = True
+        # Converte duração de ms para quadros (aprox.)
+        self.audio_timer = max(1, int(duration_ms / 16))
+        self.signal_y = 0
+
+    def stop_radio_signal(self):
+        """Encerra a animação de sinal de rádio"""
+        self.audio_playing = False
+        self.audio_timer = 0
     
     def set_expression(self, expression):
         """Muda a expressão da IA com transição suave"""
@@ -333,8 +351,17 @@ class NovaAI:
                 self.set_expression("normal")
 
         # Sempre atualiza a superfície para a animação de pulsação
-        if self.message_timer > 0 or self.transition_progress < 1.0:
+        if self.message_timer > 0 or self.transition_progress < 1.0 or self.audio_playing:
             self.update_surface()
+
+        # Atualiza animação de sinal de rádio se áudio estiver tocando
+        if self.audio_playing:
+            self.audio_timer -= 1
+            if self.audio_timer <= 0:
+                self.audio_playing = False
+            # Move a linha do sinal verticalmente
+            max_offset = self.surface.get_height() - 6
+            self.signal_y = (self.signal_y + self.signal_speed) % max_offset
     
     def draw(self, screen):
         """Desenha o assistente AI e quaisquer mensagens ativas"""
@@ -357,6 +384,17 @@ class NovaAI:
         offset_x = center_x - (self.surface.get_width() // 2)
         offset_y = center_y - (self.surface.get_height() // 2)
         screen.blit(self.surface, (offset_x, offset_y))
+
+        # Desenha animação de sinal de rádio quando áudio está tocando
+        if self.audio_playing:
+            line_y = offset_y + int(self.signal_y)
+            pygame.draw.line(
+                screen,
+                (255, 255, 255),
+                (offset_x + 6, line_y),
+                (offset_x + self.surface.get_width() - 6, line_y),
+                2
+            )
 
         # Desenha qualquer mensagem ativa
         if self.message and self.message_timer > 0:

@@ -188,8 +188,11 @@ class Game:
                     sound.fadeout(100)
 
                 # Play welcome sound and set timer
-                self.state_manager.welcome_sound_timer = self.sound_manager.play_welcome(self.current_planet.name)
+                duration_ms = self.sound_manager.play_welcome(self.current_planet.name)
+                self.state_manager.welcome_sound_timer = duration_ms
                 self.welcome_sound_played = True
+                if hasattr(self, 'nova'):
+                    self.nova.start_radio_signal(duration_ms)
 
         # Reset spacecraft position
         self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2)
