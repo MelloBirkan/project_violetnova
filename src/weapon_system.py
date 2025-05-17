@@ -1,5 +1,6 @@
 import pygame
 from src.planet_data import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
+import src.config as config
 
 class WeaponSystem:
     def __init__(self, game):
@@ -72,8 +73,12 @@ class WeaponSystem:
                 next_planet = self.game.planets[self.game.current_planet_index + 1].name.lower()
                 self.game.furthest_planet_index = max(self.game.furthest_planet_index, self.game.current_planet_index + 1)
                 
-                # Save current planet and update furthest planet
-                self.game.planet_tracker.save(next_planet, update_furthest=True)
+                # Save current planet and update furthest planet conforme dificuldade
+                self.game.planet_tracker.save(
+                    next_planet,
+                    update_furthest=True,
+                    allow_save=config.DIFFICULTY_SETTINGS[self.game.difficulty]["save_checkpoint"],
+                )
                 
                 # Start quiz for planet advancement
                 self.game.state_manager.start_quiz()
