@@ -155,6 +155,12 @@ class NovaAI:
         self.tail_direction = 1
         self.tail_speed = 0.5
 
+        # Animation for radio signal when playing audio
+        self.audio_playing = False
+        self.audio_timer = 0
+        self.signal_y = 0
+        self.signal_speed = 2
+
         # Cria a superfície do assistente AI
         self.update_surface()
         self.planet_name_translations = planet_name_translations
@@ -217,6 +223,18 @@ class NovaAI:
             expression_text = font.render(self.EXPRESSIONS[self.expression], True, (255, 255, 255))
             expression_rect = expression_text.get_rect(center=(width // 2, height // 2))
             self.surface.blit(expression_text, expression_rect)
+
+    def start_radio_signal(self, duration_ms):
+        """Inicia a animação de sinal de rádio por determinado tempo em ms"""
+        self.audio_playing = True
+        # Converte duração de ms para quadros (aprox.)
+        self.audio_timer = max(1, int(duration_ms / 16))
+        self.signal_y = 0
+
+    def stop_radio_signal(self):
+        """Encerra a animação de sinal de rádio"""
+        self.audio_playing = False
+        self.audio_timer = 0
     
     def set_expression(self, expression):
         """Muda a expressão da IA com transição suave"""
@@ -346,8 +364,16 @@ class NovaAI:
                 self.set_expression("normal")
 
         # Sempre atualiza a superfície para a animação de pulsação
-        if self.message_timer > 0 or self.transition_progress < 1.0:
+        if self.message_timer > 0 or self.transition_progress < 1.0 or self.audio_playing:
             self.update_surface()
+
+        # Atualiza animação de sinal de rádio se áudio estiver tocando
+        if self.audio_playing:
+            self.audio_timer -= 1
+            if self.audio_timer <= 0:
+                self.audio_playing = False
+            # Incrementa o contador de animação para criar movimento de onda
+            self.signal_y += self.signal_speed
     
     def draw(self, screen):
         """Desenha o assistente AI e quaisquer mensagens ativas"""
@@ -370,6 +396,38 @@ class NovaAI:
         offset_x = center_x - (self.surface.get_width() // 2)
         offset_y = center_y - (self.surface.get_height() // 2)
         screen.blit(self.surface, (offset_x, offset_y))
+
+        # Desenha animação de sinal de rádio quando áudio está tocando
+        if self.audio_playing:
+            center_y_line = offset_y + self.surface.get_height() // 2
+            
+            # Desenha uma linha ondulada (onda senoidal)
+            points = []
+            line_start_x = offset_x + 6
+            line_end_x = offset_x + self.surface.get_width() - 6
+            
+            # Adiciona o ponto inicial estático
+            points.append((line_start_x, center_y_line))
+            
+            # Cria pontos para a onda no meio
+            wave_segments = 20
+            for i in range(1, wave_segments):
+                x = line_start_x + (line_end_x - line_start_x) * i / wave_segments
+                # Cria amplitude que diminui nas extremidades
+                distance_from_center = abs(i - wave_segments/2) / (wave_segments/2)
+                amplitude = 10 * (1 - distance_from_center**2)  # Quadrático para suavizar
+                
+                # Calcula altura da onda com base no tempo
+                phase = self.signal_y * 0.1 + i * 0.3
+                y = center_y_line + amplitude * math.sin(phase)
+                points.append((x, y))
+            
+            # Adiciona o ponto final estático
+            points.append((line_end_x, center_y_line))
+            
+            # Desenha a linha ondulada
+            if len(points) > 1:
+                pygame.draw.lines(screen, (255, 255, 255), False, points, 2)
 
         # Desenha qualquer mensagem ativa
         if self.message and self.message_timer > 0:

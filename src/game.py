@@ -27,10 +27,20 @@ class Game:
         self.furthest_planet = self.planet_tracker.get_furthest_planet()
         self.furthest_planet_index = 0  # Tracks the furthest planet reached
 
-        # Lives system
-        self.lives = config.SPACECRAFT_MAX_LIVES
+        # Lives system e dificuldade
+        self.difficulty = config.DEFAULT_DIFFICULTY
+        self.max_lives = config.DIFFICULTY_SETTINGS[self.difficulty].get(
+            "max_lives",
+            config.DIFFICULTY_SETTINGS[self.difficulty]["lives"],
+        )
+        self.lives = self.max_lives
         self.invulnerable = False
         self.invulnerable_timer = 0
+        # Controle do menu de dificuldade
+        self.in_difficulty_menu = False
+        self.selected_difficulty = self.difficulty
+        # Track planet where player died to continue from there
+        self.planet_at_death = 0
 
         # Initialize internal state before the property is used
         self._state = config.MENU
@@ -128,9 +138,32 @@ class Game:
         # Don't call state_manager.change_state here to avoid infinite recursion
         # when the state_manager changes the state
 
-    def reset(self, new_planet=False):
-        """Resets the game, optionally changing to a new planet"""
+    def reset(self, new_planet=False, continue_from_death=False, continue_from_saved=False):
+        """Resets the game, optionally changing to a new planet, continuing from death, or continuing from saved planet"""
+        settings = config.DIFFICULTY_SETTINGS[self.difficulty]
+        self.max_lives = settings.get("max_lives", settings["lives"])
         if not new_planet:
+            self.lives = self.max_lives
+        
+        if continue_from_saved:
+            # Continue from the saved planet (checkpoint)
+            # current_planet_index já está definido no __init__ baseado no planeta salvo
+            self.state_manager.change_state(config.TRANSITION)
+            self.state = config.TRANSITION
+            # Play welcome sound for saved planet
+            self.state_manager.welcome_sound_timer = self.sound_manager.play_welcome(self.current_planet.name)
+        elif continue_from_death:
+            # Continue from the planet where the player died
+            self.current_planet_index = self.planet_at_death
+            self.current_planet = self.planets[self.current_planet_index]
+            self.state_manager.change_state(config.PLAYING)
+            self.state = config.PLAYING
+            
+            # NOVA message about continuing on same planet
+            from src.planet_data import PLANET_NAME_PT
+            planet_name_pt = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
+            self.nova.show_message(f"Reabastecendo e retornando a {planet_name_pt}...", "info")
+        elif not new_planet:
             # When starting a new game, begin with Earth's transition screen
             self.state_manager.change_state(config.TRANSITION)
             self.state = config.TRANSITION
@@ -161,10 +194,14 @@ class Game:
             self.difficulty_multiplier = 1.0 + (self.current_planet_index * 0.1)
             # Don't reset lives when changing planets
             
-            # Save current planet and update furthest planet if necessary
-            self.planet_tracker.save(self.current_planet.name.lower(), update_furthest=True)
-        else:
-            # Start from scratch on Earth
+            # Save current planet and update furthest planet se permitido
+            self.planet_tracker.save(
+                self.current_planet.name.lower(),
+                update_furthest=True,
+                allow_save=settings["save_checkpoint"],
+            )
+        elif not continue_from_death:
+            # Start from scratch on Earth (only when not continuing from death)
             self.score = 0
             # Find Earth's index in the planets list
             earth_index = 0
@@ -179,8 +216,12 @@ class Game:
             # Reset lives to maximum when starting a new game
             self.reset_lives()
             
-            # Save current planet (Earth) - don't update furthest planet when resetting
-            self.planet_tracker.save(self.current_planet.name.lower(), update_furthest=False)
+            # Save current planet (Earth) se checkpoints estiverem ativos
+            self.planet_tracker.save(
+                self.current_planet.name.lower(),
+                update_furthest=False,
+                allow_save=settings["save_checkpoint"],
+            )
 
             # Play Earth welcome sound through sound manager
             if hasattr(self, 'sound_manager'):
@@ -189,8 +230,11 @@ class Game:
                     sound.fadeout(100)
 
                 # Play welcome sound and set timer
-                self.state_manager.welcome_sound_timer = self.sound_manager.play_welcome(self.current_planet.name)
+                duration_ms = self.sound_manager.play_welcome(self.current_planet.name)
+                self.state_manager.welcome_sound_timer = duration_ms
                 self.welcome_sound_played = True
+                if hasattr(self, 'nova'):
+                    self.nova.start_radio_signal(duration_ms)
 
         # Reset spacecraft position
         self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2)
@@ -204,10 +248,14 @@ class Game:
         # Reset floor position
         self.floor_x = 0
 
-        # Base difficulty adjusted by planet and progression
+        # Base difficulty ajustada pela dificuldade e progressão
         self.obstacle_speed = 3 * self.difficulty_multiplier
-        self.obstacle_spawn_rate = int(config.DEFAULT_OBSTACLE_SPAWN_RATE / self.difficulty_multiplier)
-        self.collectible_spawn_rate = int(config.DEFAULT_COLLECTIBLE_SPAWN_RATE / self.difficulty_multiplier)
+        base_rate = (config.DEFAULT_OBSTACLE_SPAWN_RATE *
+                     settings["obstacle_distance_multiplier"])
+        self.obstacle_spawn_rate = int(base_rate / self.difficulty_multiplier)
+        self.collectible_spawn_rate = int(
+            config.DEFAULT_COLLECTIBLE_SPAWN_RATE / self.difficulty_multiplier
+        )
 
         # NOVA should alert about gravity
         if new_planet:
@@ -221,23 +269,20 @@ class Game:
         if not self.invulnerable:
             self.lives -= 1
 
-            # More intuitive hit count (starts with 3 lives, 4th hit = game over)
-            hit_count = config.SPACECRAFT_MAX_LIVES - self.lives
-
-            # Check if all lives are lost
-            if hit_count >= 4:  # 4 hits = game over
-                self.lives = 0  # Ensure it doesn't go negative
+            if self.lives <= 0:
+                self.lives = 0
                 self.nova.show_message("Dano crítico! Fim de jogo!", "alert")
                 self.state_manager.change_state(config.GAME_OVER)
-                self.state = config.GAME_OVER  # Keep in sync with state manager
-                # Play explosion sound at game over
-                self.sound_manager.stop_thrust(100)  # Ensure engine thrust sound stops quickly
-                self.sound_manager.hitting_obstacle_sound.fadeout(100)  # Stop collision sound if playing
+                self.state = config.GAME_OVER
+                self.sound_manager.stop_thrust(100)
+                self.sound_manager.hitting_obstacle_sound.fadeout(100)
                 self.sound_manager.play_explosion()
-                return False  # Fourth collision causes game over
-            elif hit_count == 3:  # 3 hits = last life
+                # Save the current planet index to continue from where player failed
+                self.planet_at_death = self.current_planet_index
+                return False
+            elif self.lives == 1 and self.max_lives > 1:
                 self.nova.show_message("Atenção: Última vida restante!", "alert")
-            elif hit_count == 2:  # 2 hits = penultimate life
+            elif self.lives == 2 and self.max_lives > 2:
                 self.nova.show_message("Atenção: Duas vidas restantes!", "alert")
 
             return True  # Still has lives
@@ -245,7 +290,7 @@ class Game:
 
     def add_life(self):
         """Adds a life, up to the maximum allowed"""
-        if self.lives < config.SPACECRAFT_MAX_LIVES:
+        if self.lives < self.max_lives:
             self.lives += 1
             self.nova.show_message("Vida extra adquirida!", "excited")
             return True
@@ -253,7 +298,7 @@ class Game:
 
     def reset_lives(self):
         """Resets lives to the maximum value"""
-        self.lives = config.SPACECRAFT_MAX_LIVES
+        self.lives = self.max_lives
         self.invulnerable = False
         self.invulnerable_timer = 0
 

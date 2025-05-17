@@ -126,16 +126,23 @@ class GameMechanics:
             
     def generate_collectible(self):
         """Generates a new collectible"""
-        # Place collectible in a safe location
+        settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
+
+        # Se não houver colecionáveis nesta dificuldade, sai
+        if settings["life_collectible_chance"] == 0 and settings["weapon_collectible_chance"] == 0:
+            return
+
         x = config.SCREEN_WIDTH
         y = random.randint(100, config.SCREEN_HEIGHT - config.FLOOR_HEIGHT - 50)
-        
-        # Determine collectible type (1% chance for life, 10% for weapon, rest data)
-        collectible_type = "data"
+
         rand_val = random.random()
-        if rand_val < 0.01:  # 1% chance for life
+        collectible_type = "data"
+        life_chance = settings["life_collectible_chance"]
+        weapon_chance = settings["weapon_collectible_chance"]
+
+        if rand_val < life_chance:
             collectible_type = "life"
-        elif rand_val < 0.11 and not self.game.weapon_active:  # 10% chance for weapon
+        elif rand_val < life_chance + weapon_chance and not self.game.weapon_active:
             collectible_type = "weapon"
             
         quiz_idx = None
@@ -163,10 +170,15 @@ class GameMechanics:
             
             # Update furthest planet reached
             next_planet = self.game.planets[self.game.current_planet_index + 1].name.lower()
+            current_planet = self.game.current_planet.name.lower()
             self.game.furthest_planet_index = max(self.game.furthest_planet_index, self.game.current_planet_index + 1)
             
-            # Save current planet and update furthest planet
-            self.game.planet_tracker.save(next_planet, update_furthest=True)
+            # Save current planet and update furthest planet, respeitando checkpoints
+            self.game.planet_tracker.save(
+                current_planet,  # Salva o planeta ATUAL, não o próximo
+                update_furthest=True,
+                allow_save=config.DIFFICULTY_SETTINGS[self.game.difficulty]["save_checkpoint"],
+            )
             
             # Start quiz without incrementing planet index yet - let quiz handle progression
             self.game.state_manager.start_quiz()

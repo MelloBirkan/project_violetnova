@@ -146,7 +146,10 @@ class StateManager:
 
                 # Toca o som de boas-vindas e define o temporizador
                 if hasattr(self.game, 'sound_manager'):
-                    self.welcome_sound_timer = self.game.sound_manager.play_welcome(planet_name_en)
+                    duration_ms = self.game.sound_manager.play_welcome(planet_name_en)
+                    self.welcome_sound_timer = duration_ms
+                    if hasattr(self.game, 'nova'):
+                        self.game.nova.start_radio_signal(duration_ms)
 
                 # NOVA anuncia o novo planeta
                 if hasattr(self.game, 'nova'):

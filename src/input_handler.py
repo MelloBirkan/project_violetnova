@@ -25,23 +25,45 @@ class InputHandler:
     def _handle_key_down(self, event):
         """Handles key press events"""
         if event.key == pygame.K_ESCAPE:
-            pygame.quit()
-            sys.exit()
+            # Se está no menu principal ou submenu de dificuldade
+            if self.game.state == config.MENU:
+                if self.game.in_difficulty_menu:
+                    # Se está no submenu de dificuldade, volta ao menu principal
+                    self.game.in_difficulty_menu = False
+                else:
+                    # Se está no menu principal, sai do jogo
+                    pygame.quit()
+                    sys.exit()
+            else:
+                # Se está jogando, volta ao menu
+                self.game.state_manager.change_state(config.MENU)
+                self.game.state = config.MENU
+                self.game.sound_manager.stop_all_sounds()
+                # Reseta alguns estados
+                self.game.space_held = False
+                self.game.in_difficulty_menu = False
             
         if self.game.state == config.MENU:
-            # Handle menu navigation
-            if event.key == pygame.K_UP:
-                self.game.selected_menu_option = (self.game.selected_menu_option - 1) % len(config.MENU_OPTIONS)
-                # Play a small click sound if available
-                if hasattr(self.game.sound_manager, 'menu_select_sound'):
-                    self.game.sound_manager.menu_select_sound.play()
-            elif event.key == pygame.K_DOWN:
-                self.game.selected_menu_option = (self.game.selected_menu_option + 1) % len(config.MENU_OPTIONS)
-                # Play a small click sound if available
-                if hasattr(self.game.sound_manager, 'menu_select_sound'):
-                    self.game.sound_manager.menu_select_sound.play()
-            elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
-                self._handle_menu_selection()
+            if self.game.in_difficulty_menu:
+                if event.key == pygame.K_UP:
+                    self.game.selected_difficulty = (self.game.selected_difficulty - 1) % 3
+                elif event.key == pygame.K_DOWN:
+                    self.game.selected_difficulty = (self.game.selected_difficulty + 1) % 3
+                elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    self.game.difficulty = self.game.selected_difficulty
+                    self.game.in_difficulty_menu = False
+            else:
+                # Handle main menu navigation
+                if event.key == pygame.K_UP:
+                    self.game.selected_menu_option = (self.game.selected_menu_option - 1) % len(config.MENU_OPTIONS)
+                    if hasattr(self.game.sound_manager, 'menu_select_sound'):
+                        self.game.sound_manager.menu_select_sound.play()
+                elif event.key == pygame.K_DOWN:
+                    self.game.selected_menu_option = (self.game.selected_menu_option + 1) % len(config.MENU_OPTIONS)
+                    if hasattr(self.game.sound_manager, 'menu_select_sound'):
+                        self.game.sound_manager.menu_select_sound.play()
+                elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    self._handle_menu_selection()
         elif self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
             # Only pass events to quiz system if in QUIZ state
             if self.game.state == config.QUIZ:
@@ -92,7 +114,15 @@ class InputHandler:
         elif self.game.state == config.GAME_OVER:
             # Reset welcome_sound_played flag
             self.game.welcome_sound_played = False
-            self.game.reset()
+            # Verifica as configurações de dificuldade
+            difficulty_settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
+            
+            # Se tem checkpoint, continua do planeta onde morreu
+            # Se não tem checkpoint (médio/difícil), volta para a Terra
+            if difficulty_settings["save_checkpoint"]:
+                self.game.reset(continue_from_death=True)
+            else:
+                self.game.reset()  # Volta para a Terra
         elif self.game.state == config.TRANSITION:
             # Skip transition and force start on new planet
             self.game.reset(new_planet=True)
@@ -116,9 +146,23 @@ class InputHandler:
     def _handle_menu_selection(self):
         """Handles menu option selection"""
         selected_option = config.MENU_OPTIONS[self.game.selected_menu_option]
-        
+
         if selected_option == "Jogar":
-            self.game.reset()
+            # Verifica se deve continuar do planeta salvo ou começar novo jogo
+            difficulty_settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
+            
+            # Se permite checkpoint e tem planeta salvo diferente de Earth/Terra
+            if (difficulty_settings["save_checkpoint"] and 
+                self.game.last_planet.lower() not in ["earth", "terra"] and
+                self.game.current_planet_index > 0):
+                # Continua do planeta salvo
+                self.game.reset(continue_from_saved=True)
+            else:
+                # Começa novo jogo da Terra
+                self.game.reset()
+        elif selected_option == "Dificuldade":
+            self.game.in_difficulty_menu = True
+            self.game.selected_difficulty = self.game.difficulty
         elif selected_option == "Configurações":
             # TODO: Implement settings screen
             self.game.nova.show_message("Configurações em breve!", "info")
@@ -132,14 +176,26 @@ class InputHandler:
     def _handle_left_click(self):
         """Handles left mouse button click based on game state"""
         if self.game.state == config.MENU:
-            self.game.reset()
+            if self.game.in_difficulty_menu:
+                self.game.difficulty = self.game.selected_difficulty
+                self.game.in_difficulty_menu = False
+            else:
+                self.game.reset()
         elif self.game.state == config.PLAYING:
             self.game.spacecraft.thrust()
             self.game.sound_manager.play_thrust()
         elif self.game.state == config.GAME_OVER:
             # Reset welcome_sound_played flag
             self.game.welcome_sound_played = False
-            self.game.reset()
+            # Verifica as configurações de dificuldade
+            difficulty_settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
+            
+            # Se tem checkpoint, continua do planeta onde morreu
+            # Se não tem checkpoint (médio/difícil), volta para a Terra
+            if difficulty_settings["save_checkpoint"]:
+                self.game.reset(continue_from_death=True)
+            else:
+                self.game.reset()  # Volta para a Terra
         elif self.game.state == config.TRANSITION:
             # If in transition and sound is playing, allow skipping but continue sound with reduced volume
             if self.game.welcome_sound_timer > 0 and self.game.current_welcome_sound:
