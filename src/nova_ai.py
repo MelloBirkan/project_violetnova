@@ -359,9 +359,8 @@ class NovaAI:
             self.audio_timer -= 1
             if self.audio_timer <= 0:
                 self.audio_playing = False
-            # Move a linha do sinal verticalmente
-            max_offset = self.surface.get_height() - 6
-            self.signal_y = (self.signal_y + self.signal_speed) % max_offset
+            # Incrementa o contador de animação para criar movimento de onda
+            self.signal_y += self.signal_speed
     
     def draw(self, screen):
         """Desenha o assistente AI e quaisquer mensagens ativas"""
@@ -387,14 +386,35 @@ class NovaAI:
 
         # Desenha animação de sinal de rádio quando áudio está tocando
         if self.audio_playing:
-            line_y = offset_y + int(self.signal_y)
-            pygame.draw.line(
-                screen,
-                (255, 255, 255),
-                (offset_x + 6, line_y),
-                (offset_x + self.surface.get_width() - 6, line_y),
-                2
-            )
+            center_y_line = offset_y + self.surface.get_height() // 2
+            
+            # Desenha uma linha ondulada (onda senoidal)
+            points = []
+            line_start_x = offset_x + 6
+            line_end_x = offset_x + self.surface.get_width() - 6
+            
+            # Adiciona o ponto inicial estático
+            points.append((line_start_x, center_y_line))
+            
+            # Cria pontos para a onda no meio
+            wave_segments = 20
+            for i in range(1, wave_segments):
+                x = line_start_x + (line_end_x - line_start_x) * i / wave_segments
+                # Cria amplitude que diminui nas extremidades
+                distance_from_center = abs(i - wave_segments/2) / (wave_segments/2)
+                amplitude = 10 * (1 - distance_from_center**2)  # Quadrático para suavizar
+                
+                # Calcula altura da onda com base no tempo
+                phase = self.signal_y * 0.1 + i * 0.3
+                y = center_y_line + amplitude * math.sin(phase)
+                points.append((x, y))
+            
+            # Adiciona o ponto final estático
+            points.append((line_end_x, center_y_line))
+            
+            # Desenha a linha ondulada
+            if len(points) > 1:
+                pygame.draw.lines(screen, (255, 255, 255), False, points, 2)
 
         # Desenha qualquer mensagem ativa
         if self.message and self.message_timer > 0:
