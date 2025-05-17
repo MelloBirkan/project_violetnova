@@ -16,6 +16,11 @@ class Collectible:
             "color": (220, 20, 60),  # Carmesim
             "value": 0,  # Valor em pontos
             "effect": "attack"  # Permite destruir obstáculos
+        },
+        "life": {
+            "color": (50, 220, 50),  # Verde brilhante
+            "value": 0,  # Valor em pontos
+            "effect": "life"  # Adiciona uma vida extra
         }
     }
     
@@ -93,6 +98,27 @@ class Collectible:
             # Círculo interno
             pygame.draw.circle(self.surface, (255, 255, 255),
                              (self.WIDTH//2, self.HEIGHT//2), self.WIDTH//6)
+                             
+        elif self.type == "life":
+            # Vida (forma de coração)
+            center_x, center_y = self.WIDTH//2, self.HEIGHT//2 - 2
+            
+            # Desenha as duas partes superiores do coração
+            pygame.draw.circle(self.surface, color, (center_x - 6, center_y - 3), 8)
+            pygame.draw.circle(self.surface, color, (center_x + 6, center_y - 3), 8)
+            
+            # Desenha a parte inferior do coração
+            points = [
+                (center_x - 14, center_y + 1),
+                (center_x, center_y + 14),
+                (center_x + 14, center_y + 1),
+                (center_x, center_y - 2)
+            ]
+            pygame.draw.polygon(self.surface, color, points)
+            
+            # Adiciona um brilho no coração
+            pygame.draw.circle(self.surface, (255, 255, 255), 
+                             (center_x - 4, center_y - 3), 3)
     
     def update(self):
         # Animação flutuante
