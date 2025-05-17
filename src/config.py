@@ -50,7 +50,7 @@ SPACECRAFT_MAX_LIVES = 3
 SPACECRAFT_INVULNERABILITY_TIME = 90  # quadros (1.5s a 60fps)
 
 # Configurações do menu
-MENU_OPTIONS = ["Jogar", "Configurações", "Créditos", "Sair"]
+MENU_OPTIONS = ["Jogar", "Dificuldade", "Configurações", "Créditos", "Sair"]
 MENU_OPTION_SPACING = 50
 MENU_START_Y = 280
 SPACECRAFT_KNOCKBACK = -3.5
@@ -71,3 +71,48 @@ WEAPON_DURATION = 600  # quadros (10s a 60fps)
 # Durações do quiz
 QUIZ_DURATION = 600  # quadros (10s a 60fps)
 QUIZ_RESULT_DURATION = 120  # quadros (2s a 60fps)
+
+# ================================
+# Configurações de dificuldade
+# ================================
+
+# Níveis de dificuldade
+DIFFICULTY_EASY = 0
+DIFFICULTY_MEDIUM = 1
+DIFFICULTY_HARD = 2
+
+# Dificuldade padrão
+DEFAULT_DIFFICULTY = DIFFICULTY_MEDIUM
+
+# Configurações específicas de cada dificuldade
+DIFFICULTY_SETTINGS = {
+    DIFFICULTY_EASY: {
+        "lives": 3,
+        "life_collectible_chance": 0.15,
+        "weapon_collectible_chance": 0.20,
+        "obstacle_distance_multiplier": 1.5,
+        "save_checkpoint": True
+    },
+    DIFFICULTY_MEDIUM: {
+        "lives": 1,
+        "life_collectible_chance": 0.05,
+        "weapon_collectible_chance": 0.10,
+        "obstacle_distance_multiplier": 1.0,
+        "save_checkpoint": False,
+        "max_lives": 3
+    },
+    DIFFICULTY_HARD: {
+        "lives": 1,
+        "life_collectible_chance": 0.0,
+        "weapon_collectible_chance": 0.0,
+        "obstacle_distance_multiplier": 1.0,
+        "save_checkpoint": False
+    },
+}
+
+# Nomes exibidos para cada dificuldade
+DIFFICULTY_NAMES = {
+    DIFFICULTY_EASY: "Fácil",
+    DIFFICULTY_MEDIUM: "Médio",
+    DIFFICULTY_HARD: "Difícil",
+}
