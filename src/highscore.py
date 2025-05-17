@@ -19,7 +19,10 @@ class PlanetTracker:
             print(f"Erro ao carregar dados de planetas: {e}")
             return {"last_planet": "mercurio", "furthest_planet": "mercurio"}
     
-    def save(self, planet, update_furthest=False):
+    def save(self, planet, update_furthest=False, allow_save=True):
+        if not allow_save:
+            return False
+
         self.last_planet = planet
         
         # Atualiza o planeta mais distante se solicitado

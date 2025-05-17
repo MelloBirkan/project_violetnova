@@ -29,19 +29,28 @@ class InputHandler:
             sys.exit()
             
         if self.game.state == config.MENU:
-            # Handle menu navigation
-            if event.key == pygame.K_UP:
-                self.game.selected_menu_option = (self.game.selected_menu_option - 1) % len(config.MENU_OPTIONS)
-                # Play a small click sound if available
-                if hasattr(self.game.sound_manager, 'menu_select_sound'):
-                    self.game.sound_manager.menu_select_sound.play()
-            elif event.key == pygame.K_DOWN:
-                self.game.selected_menu_option = (self.game.selected_menu_option + 1) % len(config.MENU_OPTIONS)
-                # Play a small click sound if available
-                if hasattr(self.game.sound_manager, 'menu_select_sound'):
-                    self.game.sound_manager.menu_select_sound.play()
-            elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
-                self._handle_menu_selection()
+            if self.game.in_difficulty_menu:
+                if event.key == pygame.K_UP:
+                    self.game.selected_difficulty = (self.game.selected_difficulty - 1) % 3
+                elif event.key == pygame.K_DOWN:
+                    self.game.selected_difficulty = (self.game.selected_difficulty + 1) % 3
+                elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    self.game.difficulty = self.game.selected_difficulty
+                    self.game.in_difficulty_menu = False
+                elif event.key == pygame.K_ESCAPE:
+                    self.game.in_difficulty_menu = False
+            else:
+                # Handle main menu navigation
+                if event.key == pygame.K_UP:
+                    self.game.selected_menu_option = (self.game.selected_menu_option - 1) % len(config.MENU_OPTIONS)
+                    if hasattr(self.game.sound_manager, 'menu_select_sound'):
+                        self.game.sound_manager.menu_select_sound.play()
+                elif event.key == pygame.K_DOWN:
+                    self.game.selected_menu_option = (self.game.selected_menu_option + 1) % len(config.MENU_OPTIONS)
+                    if hasattr(self.game.sound_manager, 'menu_select_sound'):
+                        self.game.sound_manager.menu_select_sound.play()
+                elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    self._handle_menu_selection()
         elif self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
             # Only pass events to quiz system if in QUIZ state
             if self.game.state == config.QUIZ:
@@ -116,9 +125,12 @@ class InputHandler:
     def _handle_menu_selection(self):
         """Handles menu option selection"""
         selected_option = config.MENU_OPTIONS[self.game.selected_menu_option]
-        
+
         if selected_option == "Jogar":
             self.game.reset()
+        elif selected_option == "Dificuldade":
+            self.game.in_difficulty_menu = True
+            self.game.selected_difficulty = self.game.difficulty
         elif selected_option == "Configurações":
             # TODO: Implement settings screen
             self.game.nova.show_message("Configurações em breve!", "info")
@@ -132,7 +144,11 @@ class InputHandler:
     def _handle_left_click(self):
         """Handles left mouse button click based on game state"""
         if self.game.state == config.MENU:
-            self.game.reset()
+            if self.game.in_difficulty_menu:
+                self.game.difficulty = self.game.selected_difficulty
+                self.game.in_difficulty_menu = False
+            else:
+                self.game.reset()
         elif self.game.state == config.PLAYING:
             self.game.spacecraft.thrust()
             self.game.sound_manager.play_thrust()

@@ -83,7 +83,7 @@ class UIManager:
         screen.blit(lives_text, (20, 110))
         
         # Draw life icons
-        self.game.visual_effects.draw_life_icons(screen, self.game.lives, config.SPACECRAFT_MAX_LIVES)
+        self.game.visual_effects.draw_life_icons(screen, self.game.lives, self.game.max_lives)
         
         # Draw weapon status at top center if active
         if self.game.weapon_active:
@@ -100,9 +100,13 @@ class UIManager:
         
         title_text = config.GAME_FONT.render("PROJETO VIOLETA NOVA", True, (255, 255, 255))
         subtitle_text = config.SMALL_FONT.render("Explorador do Sistema Solar", True, (200, 200, 255))
-        
+
         screen.blit(title_text, (config.SCREEN_WIDTH // 2 - title_text.get_width() // 2, 180))
         screen.blit(subtitle_text, (config.SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 220))
+
+        if self.game.in_difficulty_menu:
+            self.draw_difficulty_menu(screen)
+            return
         
         # Draw menu options
         for i, option in enumerate(config.MENU_OPTIONS):
@@ -139,6 +143,13 @@ class UIManager:
             
             screen.blit(option_text, (config.SCREEN_WIDTH // 2 - option_text.get_width() // 2, y_pos))
         
+        # Show current difficulty
+        diff_name = config.DIFFICULTY_NAMES.get(self.game.difficulty, "")
+        diff_text = config.SMALL_FONT.render(
+            f"Dificuldade: {diff_name}", True, (255, 255, 255)
+        )
+        screen.blit(diff_text, (config.SCREEN_WIDTH // 2 - diff_text.get_width() // 2, config.MENU_START_Y - 40))
+
         # Show controls
         controls_title = config.SMALL_FONT.render("Controles do Menu:", True, (255, 255, 255))
         controls_nav = config.SMALL_FONT.render("SETA PARA CIMA/BAIXO - Navegar | ENTER/ESPAÇO - Selecionar", True, (200, 200, 200))
@@ -244,4 +255,32 @@ class UIManager:
             pygame.font.Font(None, 42),  # Create temporary font for pulsing text
             (255, 255, 255),
             (config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2 + 100)
+        )
+
+    def draw_difficulty_menu(self, screen):
+        """Desenha o submenu de seleção de dificuldade"""
+        title = config.GAME_FONT.render("Selecione a Dificuldade", True, (255, 255, 255))
+        screen.blit(title, (config.SCREEN_WIDTH // 2 - title.get_width() // 2, 220))
+
+        for i, diff in enumerate([
+            config.DIFFICULTY_EASY,
+            config.DIFFICULTY_MEDIUM,
+            config.DIFFICULTY_HARD,
+        ]):
+            y_pos = config.MENU_START_Y + i * config.MENU_OPTION_SPACING
+            name = config.DIFFICULTY_NAMES[diff]
+            if i == self.game.selected_difficulty:
+                option_text = config.GAME_FONT.render(name, True, (255, 255, 255))
+            else:
+                option_text = config.GAME_FONT.render(name, True, (180, 180, 180))
+            screen.blit(option_text, (config.SCREEN_WIDTH // 2 - option_text.get_width() // 2, y_pos))
+
+        info_text = config.SMALL_FONT.render(
+            "SETA PARA CIMA/BAIXO - Escolher | ENTER - Confirmar | ESC - Voltar",
+            True,
+            (200, 200, 200),
+        )
+        screen.blit(
+            info_text,
+            (config.SCREEN_WIDTH // 2 - info_text.get_width() // 2, config.SCREEN_HEIGHT - 150),
         )
