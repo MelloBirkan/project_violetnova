@@ -52,6 +52,11 @@ def create_planet_data():
                     "options": ["12 horas", "24 horas", "365 dias", "28 dias"],
                     "answer": 1  # 24 horas
                 }
+            ],
+            "hints": [
+                "Mais de dois terços do planeta é recoberto por oceanos.",
+                "Esse gás corresponde a cerca de 78% da atmosfera.",
+                "É o período que define a duração de um dia na Terra."
             ]
         },
         {
@@ -75,6 +80,11 @@ def create_planet_data():
                     "options": ["100°C", "230°C", "430°C", "530°C"],
                     "answer": 2  # 430°C
                 }
+            ],
+            "hints": [
+                "É o planeta mais próximo do Sol.",
+                "Sua rotação leva quase dois meses terrestres.",
+                "A face iluminada pode superar 400°C."
             ]
         },
         {
@@ -98,6 +108,11 @@ def create_planet_data():
                     "options": ["Tem oceanos", "Tamanho e massa similares", "Tem vida", "Mesmo tempo de órbita"],
                     "answer": 1  # Tamanho e massa similares
                 }
+            ],
+            "hints": [
+                "Seu movimento de rotação é contrário ao da maioria dos planetas.",
+                "A atmosfera é espessa e composta quase toda por CO2.",
+                "Possui tamanho e massa parecidos com os da Terra."
             ]
         },
         {
@@ -121,6 +136,11 @@ def create_planet_data():
                     "options": ["Mauna Loa", "Olympus Mons", "Monte Everest", "Mons Huygens"],
                     "answer": 1  # Olympus Mons
                 }
+            ],
+            "hints": [
+                "Sua superfície contém muito óxido de ferro.",
+                "O planeta possui dois pequenos satélites naturais.",
+                "O maior vulcão conhecido do Sistema Solar está aqui."
             ]
         },
         {
@@ -144,6 +164,11 @@ def create_planet_data():
                     "options": ["6 horas", "10 horas", "14 horas", "18 horas"],
                     "answer": 1  # ~10 horas
                 }
+            ],
+            "hints": [
+                "É formado basicamente por gases leves.",
+                "Sua famosa mancha é uma enorme tempestade.",
+                "O planeta gira muito rápido em torno de si."
             ]
         },
         {
@@ -167,6 +192,11 @@ def create_planet_data():
                     "options": ["É oco", "É muito pequeno", "Sua densidade é menor que a da água", "Tem hélio"],
                     "answer": 2  # Baixa densidade
                 }
+            ],
+            "hints": [
+                "Seus anéis são compostos principalmente de gelo.",
+                "O sistema de anéis visíveis é formado por sete divisões.",
+                "Por ter baixa densidade, poderia flutuar em água."
             ]
         },
         {
@@ -190,6 +220,11 @@ def create_planet_data():
                     "options": ["Sombra da Terra", "Posição do Sol", "Rotação da Lua", "Nuvens na Lua"],
                     "answer": 1  # Posição do Sol
                 }
+            ],
+            "hints": [
+                "Fica a aproximadamente 384 mil quilômetros do nosso planeta.",
+                "Neil Armstrong foi quem deu os primeiros passos em seu solo.",
+                "As fases acontecem conforme sua posição em relação ao Sol."
             ]
         },
         {
@@ -213,6 +248,11 @@ def create_planet_data():
                     "options": ["Olho nu", "Telescópio", "Sonda espacial", "Radiotelescópio"],
                     "answer": 1  # Telescópio
                 }
+            ],
+            "hints": [
+                "Seu eixo de rotação é extremamente inclinado.",
+                "A coloração azulada vem do metano na atmosfera.",
+                "Foi o primeiro planeta descoberto com o auxílio de telescópios."
             ]
         },
         {
@@ -236,6 +276,11 @@ def create_planet_data():
                     "options": ["Tritão", "Nereida", "Proteus", "Larissa"],
                     "answer": 0  # Tritão
                 }
+            ],
+            "hints": [
+                "Sua existência foi prevista antes mesmo de ser observado.",
+                "Abriga uma grande tempestade conhecida como Mancha Escura.",
+                "Tritão é sua maior lua e possui órbita retrógrada."
             ]
         }
         # Plutão removido da progressão principal

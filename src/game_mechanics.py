@@ -138,7 +138,11 @@ class GameMechanics:
         elif rand_val < 0.11 and not self.game.weapon_active:  # 10% chance for weapon
             collectible_type = "weapon"
             
-        self.game.collectibles.append(Collectible(x, y, collectible_type))
+        quiz_idx = None
+        if collectible_type == "data":
+            quiz_idx = random.randrange(len(self.game.current_planet.quiz_questions))
+
+        self.game.collectibles.append(Collectible(x, y, collectible_type, quiz_idx))
         
     def check_progression(self):
         """Checks if player has met criteria to progress to next planet"""

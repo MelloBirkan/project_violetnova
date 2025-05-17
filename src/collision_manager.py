@@ -146,8 +146,8 @@ class CollisionManager:
         effect = collectible.get_effect()
         
         if effect["effect"] == "info":
-            # Mostra informações do planeta
-            self.game.nova.give_random_fact(self.game.current_planet.name)
+            # Mostra dica relacionada ao quiz
+            self.game.nova.give_quiz_hint(self.game.current_planet.name, effect.get("quiz_index"))
             self.game.score += effect["value"]
             self._check_level_progression()
             

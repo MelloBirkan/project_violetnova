@@ -46,7 +46,8 @@ class Game:
                              data["gravity_factor"],
                              data["background_color"],
                              data["obstacle_count"],
-                             data["quiz_questions"])
+                             data["quiz_questions"],
+                             data.get("hints", []))
                       for data in self.planet_data]
 
         # Find the index of the saved planet and the furthest planet
