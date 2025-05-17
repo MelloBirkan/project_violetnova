@@ -166,11 +166,12 @@ class GameMechanics:
             
             # Update furthest planet reached
             next_planet = self.game.planets[self.game.current_planet_index + 1].name.lower()
+            current_planet = self.game.current_planet.name.lower()
             self.game.furthest_planet_index = max(self.game.furthest_planet_index, self.game.current_planet_index + 1)
             
             # Save current planet and update furthest planet, respeitando checkpoints
             self.game.planet_tracker.save(
-                next_planet,
+                current_planet,  # Salva o planeta ATUAL, não o próximo
                 update_furthest=True,
                 allow_save=config.DIFFICULTY_SETTINGS[self.game.difficulty]["save_checkpoint"],
             )

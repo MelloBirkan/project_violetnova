@@ -39,6 +39,8 @@ class Game:
         # Controle do menu de dificuldade
         self.in_difficulty_menu = False
         self.selected_difficulty = self.difficulty
+        # Track planet where player died to continue from there
+        self.planet_at_death = 0
 
         # Initialize internal state before the property is used
         self._state = config.MENU
@@ -135,14 +137,32 @@ class Game:
         # Don't call state_manager.change_state here to avoid infinite recursion
         # when the state_manager changes the state
 
-    def reset(self, new_planet=False):
-        """Resets the game, optionally changing to a new planet"""
+    def reset(self, new_planet=False, continue_from_death=False, continue_from_saved=False):
+        """Resets the game, optionally changing to a new planet, continuing from death, or continuing from saved planet"""
         settings = config.DIFFICULTY_SETTINGS[self.difficulty]
         self.max_lives = settings.get("max_lives", settings["lives"])
         if not new_planet:
             self.lives = self.max_lives
         
-        if not new_planet:
+        if continue_from_saved:
+            # Continue from the saved planet (checkpoint)
+            # current_planet_index já está definido no __init__ baseado no planeta salvo
+            self.state_manager.change_state(config.TRANSITION)
+            self.state = config.TRANSITION
+            # Play welcome sound for saved planet
+            self.state_manager.welcome_sound_timer = self.sound_manager.play_welcome(self.current_planet.name)
+        elif continue_from_death:
+            # Continue from the planet where the player died
+            self.current_planet_index = self.planet_at_death
+            self.current_planet = self.planets[self.current_planet_index]
+            self.state_manager.change_state(config.PLAYING)
+            self.state = config.PLAYING
+            
+            # NOVA message about continuing on same planet
+            from src.planet_data import PLANET_NAME_PT
+            planet_name_pt = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
+            self.nova.show_message(f"Reabastecendo e retornando a {planet_name_pt}...", "info")
+        elif not new_planet:
             # When starting a new game, begin with Earth's transition screen
             self.state_manager.change_state(config.TRANSITION)
             self.state = config.TRANSITION
@@ -179,8 +199,8 @@ class Game:
                 update_furthest=True,
                 allow_save=settings["save_checkpoint"],
             )
-        else:
-            # Start from scratch on Earth
+        elif not continue_from_death:
+            # Start from scratch on Earth (only when not continuing from death)
             self.score = 0
             # Find Earth's index in the planets list
             earth_index = 0
@@ -253,6 +273,8 @@ class Game:
                 self.sound_manager.stop_thrust(100)
                 self.sound_manager.hitting_obstacle_sound.fadeout(100)
                 self.sound_manager.play_explosion()
+                # Save the current planet index to continue from where player failed
+                self.planet_at_death = self.current_planet_index
                 return False
             elif self.lives == 1 and self.max_lives > 1:
                 self.nova.show_message("Atenção: Última vida restante!", "alert")

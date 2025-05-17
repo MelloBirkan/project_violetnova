@@ -174,7 +174,13 @@ class UIManager:
         
         game_over_text = config.GAME_FONT.render("MISSÃO CONCLUÍDA", True, (255, 215, 0))
         score_text = config.GAME_FONT.render(f"Pontuação Final: {self.game.score}", True, (255, 255, 255))
-        restart_text = config.GAME_FONT.render("Pressione ESPAÇO para iniciar nova missão", True, (255, 255, 255))
+        
+        # Mensagem personalizada baseada no checkpoint
+        difficulty_settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
+        if difficulty_settings["save_checkpoint"]:
+            restart_text = config.GAME_FONT.render("Pressione ESPAÇO para continuar a missão", True, (255, 255, 255))
+        else:
+            restart_text = config.GAME_FONT.render("Pressione ESPAÇO para nova missão desde a Terra", True, (255, 255, 255))
         
         # Calculate furthest planet reached
         furthest_planet = self.game.planets[min(self.game.current_planet_index, len(self.game.planets) - 1)].name
@@ -259,22 +265,143 @@ class UIManager:
 
     def draw_difficulty_menu(self, screen):
         """Desenha o submenu de seleção de dificuldade"""
+        # Criar um overlay escuro para melhor visibilidade
+        overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 200))
+        screen.blit(overlay, (0, 0))
+        
+        # Título principal
         title = config.GAME_FONT.render("Selecione a Dificuldade", True, (255, 255, 255))
-        screen.blit(title, (config.SCREEN_WIDTH // 2 - title.get_width() // 2, 220))
-
-        for i, diff in enumerate([
-            config.DIFFICULTY_EASY,
-            config.DIFFICULTY_MEDIUM,
-            config.DIFFICULTY_HARD,
-        ]):
-            y_pos = config.MENU_START_Y + i * config.MENU_OPTION_SPACING
-            name = config.DIFFICULTY_NAMES[diff]
+        screen.blit(title, (config.SCREEN_WIDTH // 2 - title.get_width() // 2, 60))
+        
+        # Descrições e cores para cada dificuldade
+        difficulty_data = {
+            config.DIFFICULTY_EASY: {
+                "name": "Fácil",
+                "color": (50, 255, 50),  # Verde
+                "description": "Para novos exploradores espaciais",
+                "details": [
+                    "• 3 vidas desde o início",
+                    "• Obstáculos mais espaçados",
+                    "• Salvamento de progresso"
+                ],
+                "stars": 1
+            },
+            config.DIFFICULTY_MEDIUM: {
+                "name": "Médio",
+                "color": (255, 255, 50),  # Amarelo
+                "description": "Desafio equilibrado",
+                "details": [
+                    "• Até 3 vidas totais",
+                    "• Obstáculos normais",
+                    "• Sem salvamento automático"
+                ],
+                "stars": 2
+            },
+            config.DIFFICULTY_HARD: {
+                "name": "Difícil",
+                "color": (255, 50, 50),  # Vermelho
+                "description": "Para pilotos experientes",
+                "details": [
+                    "• 1 vida apenas",
+                    "• Obstáculos mais frequentes",
+                    "• Sem salvamento automático"
+                ],
+                "stars": 3
+            }
+        }
+        
+        difficulties = [config.DIFFICULTY_EASY, config.DIFFICULTY_MEDIUM, config.DIFFICULTY_HARD]
+        
+        for i, diff in enumerate(difficulties):
+            y_base = 130 + i * 180  # Espaçamento ainda maior entre opções
+            
+            data = difficulty_data[diff]
+            
+            # Box de seleção
+            box_width = 620
+            box_height = 100
+            box_x = config.SCREEN_WIDTH // 2 - box_width // 2
+            box_y = y_base
+            
+            # Destacar opção selecionada
             if i == self.game.selected_difficulty:
-                option_text = config.GAME_FONT.render(name, True, (255, 255, 255))
+                # Efeito de brilho
+                glow_surf = pygame.Surface((box_width + 40, box_height + 40), pygame.SRCALPHA)
+                for offset in range(3):
+                    alpha = 50 - (offset * 15)
+                    color_with_alpha = (*data["color"], alpha)
+                    pygame.draw.rect(glow_surf, color_with_alpha, 
+                                   (20 - offset * 4, 20 - offset * 4, 
+                                    box_width + offset * 8, box_height + offset * 8), 
+                                   3, border_radius=15)
+                screen.blit(glow_surf, (box_x - 20, box_y - 20))
+                
+                # Box principal
+                box_surf = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+                pygame.draw.rect(box_surf, (*data["color"], 30), 
+                               (0, 0, box_width, box_height), 
+                               border_radius=10)
+                pygame.draw.rect(box_surf, data["color"], 
+                               (0, 0, box_width, box_height), 
+                               3, border_radius=10)
+                screen.blit(box_surf, (box_x, box_y))
+                
+                # Indicador de seleção
+                arrow = config.GAME_FONT.render("►", True, data["color"])
+                screen.blit(arrow, (box_x - 40, box_y + box_height//2 - arrow.get_height()//2))
             else:
-                option_text = config.GAME_FONT.render(name, True, (180, 180, 180))
-            screen.blit(option_text, (config.SCREEN_WIDTH // 2 - option_text.get_width() // 2, y_pos))
-
+                # Box não selecionado
+                box_surf = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+                pygame.draw.rect(box_surf, (50, 50, 50, 100), 
+                               (0, 0, box_width, box_height), 
+                               border_radius=10)
+                pygame.draw.rect(box_surf, (100, 100, 100), 
+                               (0, 0, box_width, box_height), 
+                               2, border_radius=10)
+                screen.blit(box_surf, (box_x, box_y))
+            
+            # Nome da dificuldade
+            name_text = config.GAME_FONT.render(data["name"], True, data["color"])
+            screen.blit(name_text, (box_x + 20, box_y + 10))
+            
+            # Descrição
+            desc_text = config.SMALL_FONT.render(data["description"], True, (200, 200, 200))
+            screen.blit(desc_text, (box_x + 20, box_y + 40))
+            
+            # Detalhes
+            for j, detail in enumerate(data["details"]):
+                detail_text = config.SMALL_FONT.render(detail, True, (180, 180, 180))
+                screen.blit(detail_text, (box_x + 300, box_y + 15 + j * 22))
+            
+            # Desenhar estrelas para indicar dificuldade - canto superior direito
+            star_base_x = box_x + box_width - 100  # Posicionar no canto direito
+            star_y = box_y + 20  # Mais para cima
+            star_size = 8  # Estrelas menores
+            for star_idx in range(data["stars"]):
+                star_x = star_base_x + star_idx * 20  # Menor espaçamento
+                # Desenhar estrela
+                points = []
+                for point in range(10):
+                    if point % 2 == 0:
+                        # Pontas externas
+                        angle = math.pi * 2 * point / 10 - math.pi / 2
+                        x = star_x + star_size * math.cos(angle)
+                        y = star_y + star_size * math.sin(angle)
+                    else:
+                        # Pontas internas
+                        angle = math.pi * 2 * point / 10 - math.pi / 2
+                        x = star_x + star_size // 2 * math.cos(angle)
+                        y = star_y + star_size // 2 * math.sin(angle)
+                    points.append((x, y))
+                pygame.draw.polygon(screen, data["color"], points)
+            
+            # Indicador de dificuldade atual
+            if self.game.difficulty == diff:
+                current_text = config.SMALL_FONT.render("(Atual)", True, data["color"])
+                screen.blit(current_text, (box_x + name_text.get_width() + 30, box_y + 12))
+        
+        # Instruções
         info_text = config.SMALL_FONT.render(
             "SETA PARA CIMA/BAIXO - Escolher | ENTER - Confirmar | ESC - Voltar",
             True,
@@ -282,5 +409,5 @@ class UIManager:
         )
         screen.blit(
             info_text,
-            (config.SCREEN_WIDTH // 2 - info_text.get_width() // 2, config.SCREEN_HEIGHT - 150),
+            (config.SCREEN_WIDTH // 2 - info_text.get_width() // 2, config.SCREEN_HEIGHT - 80),
         )
