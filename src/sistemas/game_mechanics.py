@@ -1,9 +1,9 @@
 import random
 import pygame
-from src.obstacle import Obstacle
-from src.collectible import Collectible
-import src.config as config
-from src.planet_data import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
+from src.entidades.obstacle import Obstacle
+from src.entidades.collectible import Collectible
+import src.dados.config as config
+from src.dados.planet_data import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
 
 class GameMechanics:
     def __init__(self, game):

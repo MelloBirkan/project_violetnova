@@ -1,5 +1,5 @@
-import src.config as config
-from src.planet_data import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
+import src.dados.config as config
+from src.dados.planet_data import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
 
 class CollisionManager:
     def __init__(self, game):

@@ -1,5 +1,5 @@
 import pygame
-import src.config as config
+import src.dados.config as config
 
 class Quiz:
     def __init__(self, screen_width, screen_height):

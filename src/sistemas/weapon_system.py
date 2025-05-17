@@ -1,5 +1,5 @@
 import pygame
-from src.planet_data import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
+from src.dados.planet_data import LEVEL_PROGRESSION_THRESHOLDS, PLANET_NAME_PT
 
 class WeaponSystem:
     def __init__(self, game):

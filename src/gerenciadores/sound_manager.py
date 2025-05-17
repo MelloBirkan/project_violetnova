@@ -1,5 +1,5 @@
 import pygame
-from src.config import DEFAULT_SOUND_VOLUME
+from src.dados.config import DEFAULT_SOUND_VOLUME
 
 class SoundManager:
     def __init__(self):

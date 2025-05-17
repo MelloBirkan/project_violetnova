@@ -20,9 +20,9 @@ def main():
         print("Por favor, instale os pacotes necessários: pip install -r requirements.txt")
         sys.exit(1)
     
-    # Inicia o jog
-    import src.main 
-    src.main.main()
+    # Inicia o jogo
+    import src.nucleo.main as game_main
+    game_main.main()
 
 if __name__ == "__main__":
     main()

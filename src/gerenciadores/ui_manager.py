@@ -1,7 +1,7 @@
 import pygame
 import math
-import src.config as config
-from src.planet_data import PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
+import src.dados.config as config
+from src.dados.planet_data import PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
 
 class UIManager:
     def __init__(self, game):

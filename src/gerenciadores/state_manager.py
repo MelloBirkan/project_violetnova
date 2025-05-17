@@ -1,4 +1,4 @@
-import src.config as config
+import src.dados.config as config
 
 class StateManager:
     def __init__(self, game):
@@ -140,7 +140,7 @@ class StateManager:
                 self.game.current_planet = self.game.planets[self.game.current_planet_index]
 
                 # Toca o som de boas-vindas para o novo planeta
-                from src.planet_data import PLANET_NAME_PT
+                from src.dados.planet_data import PLANET_NAME_PT
                 planet_name_en = self.game.current_planet.name
                 planet_name_pt = PLANET_NAME_PT.get(planet_name_en, planet_name_en)
 

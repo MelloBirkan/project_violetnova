@@ -1,7 +1,7 @@
 import pygame
 import sys
-from src.game import Game
-from src.config import *
+from src.nucleo.game import Game
+from src.dados.config import *
 
 def main():
     # Initialize pygame
@@ -14,7 +14,7 @@ def main():
     
     # Initialize fonts after pygame is initialized
     # Quiz e outros componentes dependem dessas fontes na criação
-    import src.config as config
+    import src.dados.config as config
     config.GAME_FONT = pygame.font.Font(None, config.GAME_FONT_SIZE)
     config.SMALL_FONT = pygame.font.Font(None, config.SMALL_FONT_SIZE)
     config.COUNTDOWN_FONT = pygame.font.Font(None, config.COUNTDOWN_FONT_SIZE)

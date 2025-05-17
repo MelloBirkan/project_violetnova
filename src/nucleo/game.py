@@ -1,22 +1,22 @@
 import pygame
 import sys
-from src.spacecraft import Spacecraft
-from src.planet import Planet
-from src.highscore import PlanetTracker
-from src.nova_ai import NovaAI
-from src.quiz import Quiz
+from src.entidades.spacecraft import Spacecraft
+from src.entidades.planet import Planet
+from src.gerenciadores.highscore import PlanetTracker
+from src.educacao.nova_ai import NovaAI
+from src.educacao.quiz import Quiz
 
 # Import refactored modules
-import src.config as config
-from src.sound_manager import SoundManager
-from src.state_manager import StateManager
-from src.collision_manager import CollisionManager
-from src.visual_effects import VisualEffectsManager
-from src.ui_manager import UIManager
-from src.input_handler import InputHandler
-from src.game_mechanics import GameMechanics
-from src.weapon_system import WeaponSystem
-from src.planet_data import create_planet_data, PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
+import src.dados.config as config
+from src.gerenciadores.sound_manager import SoundManager
+from src.gerenciadores.state_manager import StateManager
+from src.gerenciadores.collision_manager import CollisionManager
+from src.sistemas.visual_effects import VisualEffectsManager
+from src.gerenciadores.ui_manager import UIManager
+from src.sistemas.input_handler import InputHandler
+from src.sistemas.game_mechanics import GameMechanics
+from src.sistemas.weapon_system import WeaponSystem
+from src.dados.planet_data import create_planet_data, PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
 
 class Game:
     def __init__(self):
@@ -336,7 +336,7 @@ if __name__ == "__main__":
     pygame.display.set_caption("Projeto Violeta Nova: Explorador do Sistema Solar")
     
     # Initialize fonts after pygame is initialized
-    import src.config as config
+    import src.dados.config as config
     config.GAME_FONT = pygame.font.Font(None, config.GAME_FONT_SIZE)
     config.SMALL_FONT = pygame.font.Font(None, config.SMALL_FONT_SIZE)
     config.COUNTDOWN_FONT = pygame.font.Font(None, config.COUNTDOWN_FONT_SIZE)

@@ -27,8 +27,8 @@ The main development files are located in the `/src` directory. There are no spe
 ### Core Game Loop
 
 - `main.py`: Entry point that checks dependencies and starts the game
-- `src/main.py`: Contains the main game loop initialization
-- `src/game.py`: Contains the `Game` class that manages game states, game mechanics, and rendering
+- `src/nucleo/main.py`: Contains the main game loop initialization
+- `src/nucleo/game.py`: Contains the `Game` class that manages game states, game mechanics, and rendering
 
 ### Game States
 
@@ -103,7 +103,7 @@ Players progress through the solar system by:
 
 ## Translation Support
 
-The game supports Brazilian Portuguese with translation dictionaries for planet names and other text elements. Translation mappings are defined in `src/planet_data.py` and `src/config.py`, and passed to various components.
+The game supports Brazilian Portuguese with translation dictionaries for planet names and other text elements. Translation mappings are defined in `src/dados/planet_data.py` and `src/dados/config.py`, and passed to various components.
 
 ## Development Directives
 

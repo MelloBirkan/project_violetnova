@@ -1,6 +1,6 @@
 import pygame
 import sys
-import src.config as config
+import src.dados.config as config
 
 class InputHandler:
     def __init__(self, game):

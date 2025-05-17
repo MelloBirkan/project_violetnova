@@ -1,7 +1,7 @@
 import random
 import math
 import pygame
-import src.config as config
+import src.dados.config as config
 
 class VisualEffectsManager:
     def __init__(self, game):
