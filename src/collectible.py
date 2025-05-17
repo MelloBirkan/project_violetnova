@@ -24,12 +24,13 @@ class Collectible:
         }
     }
     
-    def __init__(self, x, y, collectible_type=None):
+    def __init__(self, x, y, collectible_type=None, quiz_index=None):
         self.x = x
         self.y = y
         self.collected = False
         self.animation_counter = 0
         self.bob_offset = 0  # Para animação flutuante
+        self.quiz_index = quiz_index  # Índice da pergunta do quiz associada
         
         # Seleciona aleatoriamente o tipo de colecionável se não especificado
         if collectible_type is None or collectible_type not in self.TYPES:
@@ -69,6 +70,12 @@ class Collectible:
                 (self.WIDTH//2, self.HEIGHT//4),
                 (self.WIDTH//2, self.HEIGHT*3//4)
             ], 2)
+            # Ícone de dica de quiz (apenas se for um colecionável de dados com quiz)
+            if self.quiz_index is not None:
+                font = pygame.font.Font(None, 18)
+                text = font.render("?", True, (0, 0, 0))
+                text_rect = text.get_rect(center=(self.WIDTH//2, self.HEIGHT//2))
+                self.surface.blit(text, text_rect)
             
         elif self.type == "fuel":
             # Contêiner de combustível (cilindro)
@@ -154,5 +161,6 @@ class Collectible:
         return {
             "type": self.type,
             "effect": self.properties["effect"],
-            "value": self.properties["value"]
+            "value": self.properties["value"],
+            "quiz_index": self.quiz_index
         }

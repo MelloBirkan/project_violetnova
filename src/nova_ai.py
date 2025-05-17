@@ -29,7 +29,8 @@ class NovaAI:
         "surprised": (138, 43, 226),  # Azul violeta
         "warning": (255, 140, 0),   # Laranja escuro
         "happy": (50, 205, 50),     # Verde limão
-        "alert": (220, 20, 60)      # Carmesim
+        "alert": (220, 20, 60),     # Carmesim
+        "hint": (100, 149, 237)     # Azul claro para dicas
     }
 
     # Símbolos de alerta que a IA pode mostrar
@@ -40,7 +41,8 @@ class NovaAI:
         "surprised": "",
         "warning": "⚠️",
         "happy": "",
-        "alert": "🚨"
+        "alert": "🚨",
+        "hint": ""
     }
     
     # Fatos científicos sobre planetas
@@ -116,6 +118,10 @@ class NovaAI:
             "Plutão leva 248 anos terrestres para orbitar o Sol uma vez."
         ]
     }
+
+    # Dicas de quiz mapeadas por planeta
+    from src.planet_data import create_planet_data
+    PLANET_HINTS = {data["name"]: data.get("hints", []) for data in create_planet_data()}
     
     def __init__(self, screen_width, screen_height, planet_name_translations):
         self.screen_width = screen_width
@@ -261,6 +267,13 @@ class NovaAI:
         if planet_name_pt in self.FACTS:
             fact = random.choice(self.FACTS[planet_name_pt])
             self.show_message(fact, "curious")
+
+    def give_quiz_hint(self, planet_name_en, question_index):
+        """Mostra uma dica relacionada a uma pergunta do quiz"""
+        hints = self.PLANET_HINTS.get(planet_name_en, [])
+        if hints and question_index is not None and 0 <= question_index < len(hints):
+            hint = hints[question_index]
+            self.show_message(f"DICA DE QUIZ: {hint}", "hint")
     
     def react_to_discovery(self, collectible_type):
         """Reage ao jogador coletando um item"""

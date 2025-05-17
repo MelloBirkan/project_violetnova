@@ -2,12 +2,13 @@ import pygame
 import os
 
 class Planet:
-    def __init__(self, name, gravity_factor, background_color, obstacle_count, quiz_questions):
+    def __init__(self, name, gravity_factor, background_color, obstacle_count, quiz_questions, quiz_hints=None):
         self.name = name
         self.gravity_factor = gravity_factor  # Porcentagem da gravidade da Terra
         self.background_color = background_color
         self.obstacle_count = obstacle_count  # Número de obstáculos baseado no tamanho do planeta
         self.quiz_questions = quiz_questions  # Lista de dict com 'question', 'options', e 'answer'
+        self.quiz_hints = quiz_hints or []  # Lista de dicas de quiz
         self.completed = False
         self.background_image = None  # Armazenará a imagem de fundo se disponível
 

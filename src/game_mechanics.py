@@ -144,8 +144,12 @@ class GameMechanics:
             collectible_type = "life"
         elif rand_val < life_chance + weapon_chance and not self.game.weapon_active:
             collectible_type = "weapon"
+            
+        quiz_idx = None
+        if collectible_type == "data":
+            quiz_idx = random.randrange(len(self.game.current_planet.quiz_questions))
 
-        self.game.collectibles.append(Collectible(x, y, collectible_type))
+        self.game.collectibles.append(Collectible(x, y, collectible_type, quiz_idx))
         
     def check_progression(self):
         """Checks if player has met criteria to progress to next planet"""
