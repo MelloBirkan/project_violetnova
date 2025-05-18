@@ -1,6 +1,6 @@
 import pygame
 
-# Planet translation dictionary
+# Dicionário de tradução de planetas
 PLANET_NAME_PT = {
     "Earth": "Terra",
     "Mercury": "Mercúrio",
@@ -14,7 +14,7 @@ PLANET_NAME_PT = {
 }
 
 
-# Level progression thresholds
+# Limiares de progressão de nível
 LEVEL_PROGRESSION_THRESHOLDS = {
     "Earth": 6,
     "Mercury": 2,
@@ -29,7 +29,7 @@ LEVEL_PROGRESSION_THRESHOLDS = {
 }
 
 def create_planet_data():
-    """Creates data for all planets in the game"""
+    """Cria os dados para todos os planetas do jogo"""
     planet_data = [
         {
             "name": "Earth",

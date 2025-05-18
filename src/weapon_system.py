@@ -9,7 +9,7 @@ class WeaponSystem:
         self.timer = 0
         
     def update(self):
-        """Updates the weapon state"""
+        """Atualiza o estado da arma"""
         if self.active:
             self.timer -= 1
             self.game.weapon_timer = self.timer
@@ -17,7 +17,7 @@ class WeaponSystem:
                 self.deactivate()
                 
     def activate(self, duration=600):
-        """Activates the weapon for a specified duration (default 10 seconds at 60fps)"""
+        """Ativa a arma por um tempo determinado (padrão 10s a 60fps)"""
         self.active = True
         self.timer = duration
         self.game.weapon_active = True
@@ -25,7 +25,7 @@ class WeaponSystem:
         self.game.nova.show_message("Sistemas defensivos ativados! Pressione W para usar.", "excited")
         
     def deactivate(self):
-        """Deactivates the weapon"""
+        """Desativa a arma"""
         self.active = False
         self.timer = 0
         self.game.weapon_active = False
@@ -33,19 +33,19 @@ class WeaponSystem:
         self.game.nova.show_message("Sistemas defensivos offline", "normal")
         
     def use(self):
-        """Uses the weapon to destroy obstacles"""
+        """Usa a arma para destruir obstáculos"""
         if not self.active:
             return
 
-        # Find closest obstacle ahead of the spacecraft
+        # Encontra o obstáculo mais próximo à frente da nave
         target_obstacle = None
         min_distance = float('inf')
 
-        # Define the x position of spacecraft body
+        # Define a posição x do corpo da nave
         spacecraft_body_x = self.game.spacecraft.x + self.game.spacecraft.flame_extent
 
         for obstacle in self.game.obstacles:
-            # Only target obstacles ahead of spacecraft body
+            # Considera apenas obstáculos à frente do corpo da nave
             if obstacle.x > spacecraft_body_x:
                 distance = obstacle.x - spacecraft_body_x
                 if distance < min_distance:
@@ -53,15 +53,15 @@ class WeaponSystem:
                     target_obstacle = obstacle
 
         if target_obstacle:
-            # Remove obstacle and grant points
+            # Remove o obstáculo e concede pontos
             self.game.obstacles.remove(target_obstacle)
             self.game.score += 2
             self.game.nova.show_message("Obstáculo destruído!", "alert")
             
-            # Check progression to next planet based on new score
+            # Verifica progressão para o próximo planeta com a nova pontuação
             current_threshold = LEVEL_PROGRESSION_THRESHOLDS.get(
                 self.game.current_planet.name,
-                10  # Default limit for unspecified planets
+                10  # Limite padrão para planetas não especificados
             )
             if (self.game.score >= current_threshold and 
                 self.game.current_planet_index < len(self.game.planets) - 1):
@@ -69,16 +69,16 @@ class WeaponSystem:
                 next_planet_pt = PLANET_NAME_PT.get(next_planet_en, next_planet_en)
                 self.game.nova.show_message(f"Navegação automática engajada! Indo para {next_planet_pt}!", "excited")
                 
-                # Update furthest planet reached in memory
+                # Atualiza o planeta mais distante alcançado na memória
                 next_planet = self.game.planets[self.game.current_planet_index + 1].name.lower()
                 self.game.furthest_planet_index = max(self.game.furthest_planet_index, self.game.current_planet_index + 1)
                 
-                # Save current planet and update furthest planet conforme dificuldade
+                # Salva o planeta atual e atualiza o mais distante conforme a dificuldade
                 self.game.planet_tracker.save(
                     next_planet,
                     update_furthest=True,
                     allow_save=config.DIFFICULTY_SETTINGS[self.game.difficulty]["save_checkpoint"],
                 )
                 
-                # Start quiz for planet advancement
+                # Inicia o quiz para avanço de planeta
                 self.game.state_manager.start_quiz()

@@ -44,7 +44,7 @@ class SoundManager:
             return True
             
         except pygame.error as e:
-            print(f"Could not load sound assets: {e}")
+            print(f"Não foi possível carregar os arquivos de som: {e}")
             return False
     
     def play_thrust(self, loop=True):

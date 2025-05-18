@@ -7,7 +7,7 @@ class InputHandler:
         self.game = game
         
     def handle_events(self):
-        """Handles all game input events"""
+        """Processa todos os eventos de entrada do jogo"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -23,7 +23,7 @@ class InputHandler:
                 self._handle_mouse_down(event)
     
     def _handle_key_down(self, event):
-        """Handles key press events"""
+        """Lida com eventos de pressionamento de tecla"""
         if event.key == pygame.K_ESCAPE:
             # Se está no menu principal ou submenu de dificuldade
             if self.game.state == config.MENU:
@@ -53,7 +53,7 @@ class InputHandler:
                     self.game.difficulty = self.game.selected_difficulty
                     self.game.in_difficulty_menu = False
             else:
-                # Handle main menu navigation
+                # Navegação do menu principal
                 if event.key == pygame.K_UP:
                     self.game.selected_menu_option = (self.game.selected_menu_option - 1) % len(config.MENU_OPTIONS)
                     if hasattr(self.game.sound_manager, 'menu_select_sound'):
@@ -65,50 +65,50 @@ class InputHandler:
                 elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     self._handle_menu_selection()
         elif self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
-            # Only pass events to quiz system if in QUIZ state
+            # Só repassa eventos ao quiz se estiver no estado QUIZ
             if self.game.state == config.QUIZ:
                 self.game.quiz.handle_event(event)
         else:
             if event.key == pygame.K_SPACE:
                 self._handle_space_key_press()
                 
-            # Toggle control mode in game with C
+            # Alterna o modo de controle com C
             if event.key == pygame.K_c and self.game.state == config.PLAYING:
                 self._handle_c_key_press()
                 
-            # Activate weapon with W if available
+            # Ativa a arma com W se disponível
             if event.key == pygame.K_w and self.game.state == config.PLAYING and self.game.weapon_active:
                 self.game.weapon_system.use()
     
     def _handle_key_up(self, event):
-        """Handles key release events"""
+        """Lida com eventos de soltura de tecla"""
         if event.key == pygame.K_SPACE:
-            # Stop continuous thrust when released
+            # Para o impulso contínuo ao soltar a tecla
             self.game.space_held = False
-            # Fade out engine thrust sound
+            # Faz fade out no som do motor
             self.game.sound_manager.stop_thrust(config.SOUND_FADEOUT_TIME)
     
     def _handle_mouse_down(self, event):
-        """Handles mouse button press events"""
-        if event.button == 1:  # Left mouse button
+        """Lida com cliques do mouse"""
+        if event.button == 1:  # Botão esquerdo do mouse
             if self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
-                # Only pass events to quiz system if in QUIZ state
+                # Só repassa eventos ao quiz se estiver no estado QUIZ
                 if self.game.state == config.QUIZ:
                     self.game.quiz.handle_event(event)
             else:
                 self._handle_left_click()
     
     def _handle_space_key_press(self):
-        """Handles Space key press based on game state"""
+        """Trata a tecla Espaço conforme o estado do jogo"""
         if self.game.state == config.MENU:
-            # Space key in menu triggers the selected option
+            # Tecla Espaço no menu ativa a opção selecionada
             self._handle_menu_selection()
         elif self.game.state == config.PLAYING:
-            # Single thrust when pressed
+            # Impulso único ao pressionar
             self.game.spacecraft.thrust()
-            # Play engine thrust sound
+            # Reproduz o som do motor
             self.game.sound_manager.play_thrust()
-            # Enable continuous thrust if in hold mode
+            # Habilita impulso contínuo se estiver no modo segurar
             if self.game.control_mode == config.CONTROL_MODE_HOLD:
                 self.game.space_held = True
         elif self.game.state == config.GAME_OVER:
@@ -128,7 +128,7 @@ class InputHandler:
             self.game.reset(new_planet=True)
     
     def _handle_c_key_press(self):
-        """Handles C key press to toggle control mode"""
+        """Trata a tecla C para alternar o modo de controle"""
         # Toggle control mode between flappy and hold
         self.game.control_mode = config.CONTROL_MODE_HOLD if self.game.control_mode == config.CONTROL_MODE_FLAPPY else config.CONTROL_MODE_FLAPPY
         mode_name = "Segurando" if self.game.control_mode == config.CONTROL_MODE_HOLD else "Toque"
@@ -144,7 +144,7 @@ class InputHandler:
         self.game.nova.show_message(f"Modo de controle: {mode_name}", "info")
     
     def _handle_menu_selection(self):
-        """Handles menu option selection"""
+        """Processa a seleção de opções do menu"""
         selected_option = config.MENU_OPTIONS[self.game.selected_menu_option]
 
         if selected_option == "Jogar":
@@ -174,7 +174,7 @@ class InputHandler:
             sys.exit()
     
     def _handle_left_click(self):
-        """Handles left mouse button click based on game state"""
+        """Lida com clique do botão esquerdo conforme o estado"""
         if self.game.state == config.MENU:
             if self.game.in_difficulty_menu:
                 self.game.difficulty = self.game.selected_difficulty
