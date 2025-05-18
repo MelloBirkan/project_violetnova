@@ -158,11 +158,12 @@ class Game:
             self.current_planet = self.planets[self.current_planet_index]
             self.state_manager.change_state(config.PLAYING)
             self.state = config.PLAYING
-            
+
             # NOVA message about continuing on same planet
             from src.planet_data import PLANET_NAME_PT
             planet_name_pt = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
             self.nova.show_message(f"Reabastecendo e retornando a {planet_name_pt}...", "info")
+            self.score = 0
         elif not new_planet:
             # When starting a new game, begin with Earth's transition screen
             self.state_manager.change_state(config.TRANSITION)
