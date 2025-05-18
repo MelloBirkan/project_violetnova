@@ -13,6 +13,7 @@ class Quiz:
         self.result = None  # 'correct', 'incorrect', ou None
         self.quiz_timer = 0
         self.result_timer = 0
+        self.explanation = None
         
         # Fonte para texto do quiz usando fontes globais
         # GAME_FONT e SMALL_FONT são inicializados em src.main
@@ -20,7 +21,7 @@ class Quiz:
         self.font_medium = config.GAME_FONT
         self.font_small = config.SMALL_FONT
     
-    def start_quiz(self, question, options, correct_answer):
+    def start_quiz(self, question, options, correct_answer, explanation=None):
         """Inicia um novo quiz com a pergunta e opções dadas"""
         self.active = True
         self.current_question = question
@@ -29,6 +30,7 @@ class Quiz:
         self.selected_option = None
         self.result = None
         self.quiz_timer = config.QUIZ_DURATION
+        self.explanation = explanation
     
     def handle_event(self, event):
         """Lida com a entrada do usuário para o quiz"""
@@ -168,6 +170,12 @@ class Quiz:
                 result_rect = result_text.get_rect(center=(self.screen_width // 2, self.screen_height - 100))
 
             screen.blit(result_text, result_rect)
+
+            # Desenha explicação ou dica abaixo do resultado
+            if self.result in ["correct", "incorrect"] and self.explanation:
+                explanation_text = self.font_small.render(self.explanation, True, (255, 255, 255))
+                explanation_rect = explanation_text.get_rect(center=(self.screen_width // 2, result_rect.bottom + 30))
+                screen.blit(explanation_text, explanation_rect)
     
     def is_complete(self):
         """Verifica se o quiz foi concluído"""

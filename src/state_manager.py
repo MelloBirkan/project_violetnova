@@ -104,7 +104,8 @@ class StateManager:
                 self.game.quiz.start_quiz(
                     question_data["question"],
                     question_data["options"],
-                    question_data["answer"]
+                    question_data["answer"],
+                    question_data.get("explanation")
                 )
         except (AttributeError, IndexError) as e:
             # Registra o erro e continua
