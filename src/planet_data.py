@@ -1,6 +1,6 @@
 import pygame
 
-# Planet translation dictionary
+# Dicionário de tradução de planetas
 PLANET_NAME_PT = {
     "Earth": "Terra",
     "Mercury": "Mercúrio",
@@ -14,7 +14,7 @@ PLANET_NAME_PT = {
 }
 
 
-# Level progression thresholds
+# Limiares de progressão de nível
 LEVEL_PROGRESSION_THRESHOLDS = {
     "Earth": 6,
     "Mercury": 2,
@@ -29,7 +29,7 @@ LEVEL_PROGRESSION_THRESHOLDS = {
 }
 
 def create_planet_data():
-    """Creates data for all planets in the game"""
+    """Cria os dados para todos os planetas do jogo"""
     planet_data = [
         {
             "name": "Earth",
@@ -40,17 +40,20 @@ def create_planet_data():
                 {
                     "question": "Qual percentual da Terra é coberto por água?",
                     "options": ["51%", "61%", "71%", "81%"],
-                    "answer": 2  # 71%
+                    "answer": 2,  # 71%
+                    "explanation": "Mais de dois terços do planeta é recoberto por oceanos."
                 },
                 {
                     "question": "A atmosfera da Terra é composta principalmente por qual gás?",
                     "options": ["Oxigênio", "Dióxido de Carbono", "Hidrogênio", "Nitrogênio"],
-                    "answer": 3  # Nitrogênio
+                    "answer": 3,  # Nitrogênio
+                    "explanation": "Esse gás corresponde a cerca de 78% da atmosfera."
                 },
                 {
                     "question": "Quanto tempo leva para a Terra girar uma vez em seu eixo?",
                     "options": ["12 horas", "24 horas", "365 dias", "28 dias"],
-                    "answer": 1  # 24 horas
+                    "answer": 1,  # 24 horas
+                    "explanation": "É o período que define a duração de um dia na Terra."
                 }
             ],
             "hints": [
@@ -68,17 +71,20 @@ def create_planet_data():
                 {
                     "question": "Mercúrio é o _____ planeta a partir do Sol.",
                     "options": ["Primeiro", "Segundo", "Terceiro", "Quarto"],
-                    "answer": 0  # Primeiro
+                    "answer": 0,
+                    "explanation": "É o planeta mais próximo do Sol."
                 },
                 {
                     "question": "Um dia em Mercúrio equivale a aproximadamente quantos dias terrestres?",
                     "options": ["29 dias", "59 dias", "88 dias", "176 dias"],
-                    "answer": 1  # 59 dias
+                    "answer": 1,
+                    "explanation": "Sua rotação leva quase dois meses terrestres."
                 },
                 {
                     "question": "A temperatura na superfície de Mercúrio pode chegar a:",
                     "options": ["100°C", "230°C", "430°C", "530°C"],
-                    "answer": 2  # 430°C
+                    "answer": 2,
+                    "explanation": "A face iluminada pode superar 400°C."
                 }
             ],
             "hints": [
@@ -96,17 +102,20 @@ def create_planet_data():
                 {
                     "question": "Vênus gira em qual direção?",
                     "options": ["Igual à Terra", "Oposta à Terra", "Não gira", "Muda aleatoriamente"],
-                    "answer": 1  # Oposta à Terra (retrógrado)
+                    "answer": 1,
+                    "explanation": "Seu movimento de rotação é contrário ao da maioria dos planetas."
                 },
                 {
                     "question": "A atmosfera de Vênus é composta principalmente por:",
                     "options": ["Nitrogênio", "Dióxido de Carbono", "Ácido Sulfúrico", "Metano"],
-                    "answer": 1  # Dióxido de Carbono
+                    "answer": 1,
+                    "explanation": "A atmosfera é espessa e composta quase toda por CO2."
                 },
                 {
                     "question": "Vênus é frequentemente chamado de planeta irmão da Terra porque:",
                     "options": ["Tem oceanos", "Tamanho e massa similares", "Tem vida", "Mesmo tempo de órbita"],
-                    "answer": 1  # Tamanho e massa similares
+                    "answer": 1,
+                    "explanation": "Possui tamanho e massa parecidos com os da Terra."
                 }
             ],
             "hints": [
@@ -124,17 +133,20 @@ def create_planet_data():
                 {
                     "question": "O que dá a Marte sua cor vermelha distintiva?",
                     "options": ["Vida vegetal", "Óxido de ferro (ferrugem)", "Dióxido de carbono", "Luz solar refletida"],
-                    "answer": 1  # Óxido de ferro
+                    "answer": 1,
+                    "explanation": "Sua superfície contém muito óxido de ferro."
                 },
                 {
                     "question": "Quantas luas Marte possui?",
                     "options": ["Nenhuma", "Uma", "Duas", "Três"],
-                    "answer": 2  # Duas (Fobos e Deimos)
+                    "answer": 2,
+                    "explanation": "O planeta possui dois pequenos satélites naturais."
                 },
                 {
                     "question": "Qual é o nome do maior vulcão em Marte?",
                     "options": ["Mauna Loa", "Olympus Mons", "Monte Everest", "Mons Huygens"],
-                    "answer": 1  # Olympus Mons
+                    "answer": 1,
+                    "explanation": "O maior vulcão conhecido do Sistema Solar está aqui."
                 }
             ],
             "hints": [
@@ -152,17 +164,20 @@ def create_planet_data():
                 {
                     "question": "Do que Júpiter é composto principalmente?",
                     "options": ["Rocha e metal", "Água e gelo", "Hidrogênio e hélio", "Dióxido de carbono"],
-                    "answer": 2  # Hidrogênio e hélio
+                    "answer": 2,
+                    "explanation": "É formado basicamente por gases leves."
                 },
                 {
                     "question": "O que é a Grande Mancha Vermelha em Júpiter?",
                     "options": ["Um vulcão", "Uma tempestade de poeira", "Uma tempestade tipo furacão", "Uma cratera de impacto"],
-                    "answer": 2  # Uma tempestade tipo furacão
+                    "answer": 2,
+                    "explanation": "Sua famosa mancha é uma enorme tempestade."
                 },
                 {
                     "question": "Júpiter tem o dia mais curto de qualquer planeta. Quanto tempo dura?",
                     "options": ["6 horas", "10 horas", "14 horas", "18 horas"],
-                    "answer": 1  # ~10 horas
+                    "answer": 1,
+                    "explanation": "O planeta gira muito rápido em torno de si."
                 }
             ],
             "hints": [
@@ -180,17 +195,20 @@ def create_planet_data():
                 {
                     "question": "Do que são feitos os anéis de Saturno principalmente?",
                     "options": ["Gás", "Poeira", "Rocha e metal", "Partículas de gelo"],
-                    "answer": 3  # Partículas de gelo
+                    "answer": 3,
+                    "explanation": "Seus anéis são compostos principalmente de gelo."
                 },
                 {
                     "question": "Quantos anéis principais Saturno possui?",
                     "options": ["3", "5", "7", "9"],
-                    "answer": 2  # 7 anéis principais
+                    "answer": 2,
+                    "explanation": "O sistema de anéis visíveis é formado por sete divisões."
                 },
                 {
                     "question": "Saturno é o único planeta que poderia flutuar na água porque:",
                     "options": ["É oco", "É muito pequeno", "Sua densidade é menor que a da água", "Tem hélio"],
-                    "answer": 2  # Baixa densidade
+                    "answer": 2,
+                    "explanation": "Por ter baixa densidade, poderia flutuar em água."
                 }
             ],
             "hints": [
@@ -208,17 +226,20 @@ def create_planet_data():
                 {
                     "question": "Qual é a distância média da Lua à Terra?",
                     "options": ["184.000 km", "238.000 km", "384.000 km", "584.000 km"],
-                    "answer": 2  # 384.000 km
+                    "answer": 2,
+                    "explanation": "Fica a aproximadamente 384 mil quilômetros do nosso planeta."
                 },
                 {
                     "question": "O primeiro humano a caminhar na Lua foi:",
                     "options": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Alan Shepard"],
-                    "answer": 1  # Neil Armstrong
+                    "answer": 1,
+                    "explanation": "Neil Armstrong foi quem deu os primeiros passos em seu solo."
                 },
                 {
                     "question": "O que causa as fases da Lua?",
                     "options": ["Sombra da Terra", "Posição do Sol", "Rotação da Lua", "Nuvens na Lua"],
-                    "answer": 1  # Posição do Sol
+                    "answer": 1,
+                    "explanation": "As fases acontecem conforme sua posição em relação ao Sol."
                 }
             ],
             "hints": [
@@ -236,17 +257,20 @@ def create_planet_data():
                 {
                     "question": "Urano gira de lado com uma inclinação axial de aproximadamente:",
                     "options": ["23 graus", "45 graus", "72 graus", "98 graus"],
-                    "answer": 3  # 98 graus
+                    "answer": 3,
+                    "explanation": "Seu eixo de rotação é extremamente inclinado."
                 },
                 {
                     "question": "O que dá a Urano sua cor azul-esverdeada?",
                     "options": ["Água", "Metano", "Amônia", "Nitrogênio"],
-                    "answer": 1  # Metano
+                    "answer": 1,
+                    "explanation": "A coloração azulada vem do metano na atmosfera."
                 },
                 {
                     "question": "Urano foi o primeiro planeta descoberto usando um:",
                     "options": ["Olho nu", "Telescópio", "Sonda espacial", "Radiotelescópio"],
-                    "answer": 1  # Telescópio
+                    "answer": 1,
+                    "explanation": "Foi o primeiro planeta descoberto com o auxílio de telescópios."
                 }
             ],
             "hints": [
@@ -264,17 +288,20 @@ def create_planet_data():
                 {
                     "question": "Netuno foi descoberto com base em previsões matemáticas em:",
                     "options": ["1646", "1746", "1846", "1946"],
-                    "answer": 2  # 1846
+                    "answer": 2,
+                    "explanation": "Sua existência foi prevista antes mesmo de ser observado."
                 },
                 {
                     "question": "O que é a Grande Mancha Escura em Netuno?",
                     "options": ["Um oceano", "Um sistema de tempestade", "Uma cratera", "Uma sombra"],
-                    "answer": 1  # Um sistema de tempestade
+                    "answer": 1,
+                    "explanation": "Abriga uma grande tempestade conhecida como Mancha Escura."
                 },
                 {
                     "question": "A maior lua de Netuno é:",
                     "options": ["Tritão", "Nereida", "Proteus", "Larissa"],
-                    "answer": 0  # Tritão
+                    "answer": 0,
+                    "explanation": "Tritão é sua maior lua e possui órbita retrógrada."
                 }
             ],
             "hints": [

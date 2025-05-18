@@ -20,14 +20,14 @@ from src.planet_data import create_planet_data, PLANET_NAME_PT, LEVEL_PROGRESSIO
 
 class Game:
     def __init__(self):
-        # Game state
+        # Estado do jogo
         self.score = 0
         self.planet_tracker = PlanetTracker()
         self.last_planet = self.planet_tracker.get_last_planet()
         self.furthest_planet = self.planet_tracker.get_furthest_planet()
-        self.furthest_planet_index = 0  # Tracks the furthest planet reached
+        self.furthest_planet_index = 0  # Registra o planeta mais distante alcançado
 
-        # Lives system e dificuldade
+        # Sistema de vidas e dificuldade
         self.difficulty = config.DEFAULT_DIFFICULTY
         self.max_lives = config.DIFFICULTY_SETTINGS[self.difficulty].get(
             "max_lives",
@@ -39,18 +39,18 @@ class Game:
         # Controle do menu de dificuldade
         self.in_difficulty_menu = False
         self.selected_difficulty = self.difficulty
-        # Track planet where player died to continue from there
+        # Rastreia o planeta em que o jogador morreu para continuar dali
         self.planet_at_death = 0
 
-        # Initialize internal state before the property is used
+        # Inicializa o estado interno antes de usar a propriedade
         self._state = config.MENU
 
-        # Welcome sound control
+        # Controle de som de boas-vindas
         self.welcome_sound_played = False
         self.current_welcome_sound = None
         self.welcome_sound_timer = 0
 
-        # Planet setup
+        # Configuração dos planetas
         self.planet_data = create_planet_data()
         self.planets = [Planet(data["name"],
                              data["gravity_factor"],
@@ -60,14 +60,14 @@ class Game:
                              data.get("hints", []))
                       for data in self.planet_data]
 
-        # Find the index of the saved planet and the furthest planet
+        # Encontra o índice do planeta salvo e do mais distante
         self.current_planet_index = 0
         for i, planet in enumerate(self.planets):
             if planet.name.lower() == self.last_planet.lower():
                 self.current_planet_index = i
                 break
                 
-        # Find the index of the furthest planet
+        # Encontra o índice do planeta mais distante
         for i, planet in enumerate(self.planets):
             if planet.name.lower() == self.furthest_planet.lower():
                 self.furthest_planet_index = i
@@ -75,36 +75,36 @@ class Game:
         
         self.current_planet = self.planets[self.current_planet_index]
 
-        # Spacecraft setup
+        # Configuração da nave espacial
         self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2)
 
-        # Game elements
+        # Elementos do jogo
         self.obstacles = []
         self.collectibles = []
-        # Initialize time tracking
+        # Inicializa controle de tempo
         self.last_obstacle_time = pygame.time.get_ticks() - 2000
         self.last_collectible_time = pygame.time.get_ticks()
         self.floor_x = 0
 
-        # Obstacle and collectible timing
+        # Temporização de obstáculos e colecionáveis
         self.obstacle_spawn_rate = config.DEFAULT_OBSTACLE_SPAWN_RATE
         self.collectible_spawn_rate = config.DEFAULT_COLLECTIBLE_SPAWN_RATE
 
-        # Game progression
+        # Progressão do jogo
         self.obstacle_speed = 3
         self.weapon_active = False
         self.weapon_timer = 0
 
-        # Initialize NOVA AI assistant
+        # Inicializa a assistente NOVA AI
         self.nova = NovaAI(config.SCREEN_WIDTH, config.SCREEN_HEIGHT, PLANET_NAME_PT)
 
-        # Initialize quiz system
+        # Inicializa o sistema de quiz
         self.quiz = Quiz(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
 
-        # Game progression settings
+        # Configurações de progressão
         self.difficulty_multiplier = 1.0
 
-        # Initialize managers
+        # Inicializa os gerenciadores
         self.sound_manager = SoundManager()
         self.visual_effects = VisualEffectsManager(self)
         self.collision_manager = CollisionManager(self)
@@ -113,33 +113,33 @@ class Game:
         self.game_mechanics = GameMechanics(self)
         self.weapon_system = WeaponSystem(self)
 
-        # Initialize state manager last to avoid circular dependencies
+        # Inicializa o gerenciador de estado por último para evitar dependências circulares
         self.state_manager = StateManager(self)
 
-        # Initialize game state (uses existing _state value)
+        # Inicializa o estado do jogo (usa o valor existente de _state)
         self.state_manager.change_state(config.MENU)
 
         # Control settings
         self.space_held = False
-        self.control_mode = config.CONTROL_MODE_HOLD  # Default changed to HOLD
+        self.control_mode = config.CONTROL_MODE_HOLD  # Padrão alterado para HOLD
         
         # Menu navigation
         self.selected_menu_option = 0
 
     @property
     def state(self):
-        """Gets the current game state"""
+        """Obtém o estado atual do jogo"""
         return self._state
 
     @state.setter
     def state(self, new_state):
-        """Sets the game state and updates the state manager"""
+        """Define o estado do jogo e atualiza o gerenciador"""
         self._state = new_state
         # Don't call state_manager.change_state here to avoid infinite recursion
         # when the state_manager changes the state
 
     def reset(self, new_planet=False, continue_from_death=False, continue_from_saved=False):
-        """Resets the game, optionally changing to a new planet, continuing from death, or continuing from saved planet"""
+        """Reinicia o jogo, podendo mudar de planeta, continuar após a morte ou a partir do salvo"""
         settings = config.DIFFICULTY_SETTINGS[self.difficulty]
         self.max_lives = settings.get("max_lives", settings["lives"])
         if not new_planet:
@@ -266,7 +266,7 @@ class Game:
             )
 
     def lose_life(self):
-        """Reduces the number of lives and checks if the game is over"""
+        """Reduz o número de vidas e verifica se o jogo terminou"""
         if not self.invulnerable:
             self.lives -= 1
 
@@ -290,7 +290,7 @@ class Game:
         return True  # Didn't lose life due to invulnerability
 
     def add_life(self):
-        """Adds a life, up to the maximum allowed"""
+        """Adiciona uma vida até o máximo permitido"""
         if self.lives < self.max_lives:
             self.lives += 1
             self.nova.show_message("Vida extra adquirida!", "excited")
@@ -298,13 +298,13 @@ class Game:
         return False  # Already at maximum lives
 
     def reset_lives(self):
-        """Resets lives to the maximum value"""
+        """Reseta as vidas para o valor máximo"""
         self.lives = self.max_lives
         self.invulnerable = False
         self.invulnerable_timer = 0
 
     def is_invulnerable(self):
-        """Returns the current invulnerability state"""
+        """Retorna o estado atual de invulnerabilidade"""
         return self.invulnerable
 
     def update(self):
@@ -355,7 +355,7 @@ class Game:
             # Continue game loop
 
     def draw(self):
-        """Draws the game"""
+        """Desenha o jogo"""
         screen = pygame.display.get_surface()
         self.ui_manager.draw(screen)
 

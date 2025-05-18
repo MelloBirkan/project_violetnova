@@ -14,7 +14,7 @@ class PlanetTracker:
                 with open(self.file_path, 'r') as f:
                     data = json.load(f)
                     return data
-            return {"last_planet": "mercurio", "furthest_planet": "mercurio"}  # Default values
+            return {"last_planet": "mercurio", "furthest_planet": "mercurio"}  # Valores padrão
         except Exception as e:
             print(f"Erro ao carregar dados de planetas: {e}")
             return {"last_planet": "mercurio", "furthest_planet": "mercurio"}
