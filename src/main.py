@@ -4,25 +4,25 @@ from src.game import Game
 from src.config import *
 
 def main():
-    # Initialize pygame
+    # Inicializa o pygame
     pygame.init()
     pygame.mixer.init()
-    
-    # Setup screen
+
+    # Configura a tela
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Projeto Violeta Nova: Explorador do Sistema Solar")
-    
-    # Initialize fonts after pygame is initialized
+
+    # Inicializa as fontes após o pygame
     # Quiz e outros componentes dependem dessas fontes na criação
     import src.config as config
     config.GAME_FONT = pygame.font.Font(None, config.GAME_FONT_SIZE)
     config.SMALL_FONT = pygame.font.Font(None, config.SMALL_FONT_SIZE)
     config.COUNTDOWN_FONT = pygame.font.Font(None, config.COUNTDOWN_FONT_SIZE)
     
-    # Create game instance
+    # Cria a instância do jogo
     game = Game()
-    
-    # Game loop
+
+    # Loop principal do jogo
     clock = pygame.time.Clock()
     while True:
         game.input_handler.handle_events()

@@ -8,15 +8,15 @@ class UIManager:
         self.game = game
         
     def draw(self, screen):
-        """Draws the game UI based on current state"""
-        # Draw the background
+        """Desenha a interface do jogo de acordo com o estado atual"""
+        # Desenha o plano de fundo
         self.game.visual_effects.draw_background(screen, self.game.current_planet)
         
-        # Draw content based on game state
+        # Desenha conteúdo conforme o estado do jogo
         if self.game.state == config.PLAYING or self.game.state == config.MENU or self.game.state == config.GAME_OVER or self.game.state == config.QUIZ_FAILURE:
             self._draw_game_elements(screen)
             
-            # Draw specific UI screens based on state
+            # Desenha telas específicas conforme o estado
             if self.game.state == config.MENU:
                 self.draw_menu_screen(screen)
             elif self.game.state == config.GAME_OVER:
@@ -28,72 +28,72 @@ class UIManager:
         elif self.game.state == config.TRANSITION:
             self.draw_transition_screen(screen)
         elif self.game.state == config.QUIZ:
-            # Draw the quiz
+            # Desenha o quiz
             self.game.quiz.draw(screen)
         elif self.game.state == config.QUIZ_FAILURE:
             self.draw_quiz_failure_screen(screen)
             
-        # Always draw the NOVA AI assistant on top
+        # Sempre desenha a assistente NOVA por cima
         self.game.nova.draw(screen)
             
     def _draw_game_elements(self, screen):
-        """Draws the common game elements (obstacles, collectibles, spacecraft, etc.)"""
-        # Draw obstacles
+        """Desenha elementos comuns do jogo (obstáculos, itens, nave, etc.)"""
+        # Desenha os obstáculos
         for obstacle in self.game.obstacles:
             obstacle.draw(screen)
             
-        # Draw collectibles
+        # Desenha os colecionáveis
         for collectible in self.game.collectibles:
             collectible.draw(screen)
             
-        # Draw the ground/floor
+        # Desenha o chão
         self.game.current_planet.draw_ground(screen, self.game.floor_x, config.SCREEN_HEIGHT)
         
-        # Draw the spacecraft (with invulnerability effect if applicable)
+        # Desenha a nave (com efeito de invulnerabilidade se aplicável)
         self.game.spacecraft.draw(screen, self.game.invulnerable)
         
-        # Draw game info if not in menu state
+        # Desenha informações do jogo se não estiver no menu
         if self.game.state != config.MENU:
             self._draw_game_info(screen)
             
     def _draw_game_info(self, screen):
-        """Draws game information (score, lives, etc.)"""
-        # Left side information
+        """Desenha informações do jogo (pontuação, vidas etc.)"""
+        # Informações do lado esquerdo
         display_name = PLANET_NAME_PT.get(self.game.current_planet.name, self.game.current_planet.name)
         planet_text = config.SMALL_FONT.render(f"Planeta: {display_name}", True, (255, 255, 255))
         screen.blit(planet_text, (20, 20))
         
-        # Show furthest planet reached
+        # Mostra o planeta mais distante alcançado
         furthest_planet = self.game.planets[self.game.furthest_planet_index].name
         furthest_planet_pt = PLANET_NAME_PT.get(furthest_planet, furthest_planet)
         furthest_text = config.SMALL_FONT.render(f"Mais distante: {furthest_planet_pt}", True, (255, 215, 0))
         screen.blit(furthest_text, (20, 50))
         
-        # Get threshold for current planet
+        # Obtém o limite para o planeta atual
         current_threshold = LEVEL_PROGRESSION_THRESHOLDS.get(
             self.game.current_planet.name,
-            10  # Default limit
+            10  # Limite padrão
         )
         
         score_text = config.SMALL_FONT.render(f"Pontuação: {self.game.score}/{current_threshold}", True, (255, 255, 255))
         screen.blit(score_text, (20, 80))
         
-        # Draw lives indicator
+        # Desenha o indicador de vidas
         lives_text = config.SMALL_FONT.render(f"Vidas:", True, (255, 255, 255))
         screen.blit(lives_text, (20, 110))
         
-        # Draw life icons
+        # Desenha ícones de vida
         self.game.visual_effects.draw_life_icons(screen, self.game.lives, self.game.max_lives)
         
-        # Draw weapon status at top center if active
+        # Exibe o status da arma no topo, se ativa
         if self.game.weapon_active:
-            weapon_time = self.game.weapon_timer // 60  # Convert to seconds
+            weapon_time = self.game.weapon_timer // 60  # Converte para segundos
             weapon_text = config.SMALL_FONT.render(f"Arma Ativa: {weapon_time}s", True, (255, 100, 100))
             screen.blit(weapon_text, (config.SCREEN_WIDTH // 2 - weapon_text.get_width() // 2, 20))
             
     def draw_menu_screen(self, screen):
-        """Draws the menu screen"""
-        # Semi-transparent overlay
+        """Desenha a tela de menu"""
+        # Sobreposição semitransparente
         overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
@@ -108,20 +108,20 @@ class UIManager:
             self.draw_difficulty_menu(screen)
             return
         
-        # Draw menu options
+        # Desenha as opções do menu
         for i, option in enumerate(config.MENU_OPTIONS):
             y_pos = config.MENU_START_Y + (i * config.MENU_OPTION_SPACING)
             
-            # Highlight selected option
+            # Destaca a opção selecionada
             if i == self.game.selected_menu_option:
-                # Draw selection box
+                # Desenha a caixa de seleção
                 box_padding = 20
                 box_width = 400
                 box_height = 40
                 box_x = config.SCREEN_WIDTH // 2 - box_width // 2
                 box_y = y_pos - 10
                 
-                # Draw glowing effect for selected option
+                # Desenha efeito de brilho para a opção selecionada
                 glow_surface = pygame.Surface((box_width + 40, box_height + 40), pygame.SRCALPHA)
                 for offset in range(3):
                     alpha = 50 - (offset * 15)
@@ -131,7 +131,7 @@ class UIManager:
                                    2, border_radius=10)
                 screen.blit(glow_surface, (box_x - 20, box_y - 20))
                 
-                # Draw the box
+                # Desenha a caixa
                 pygame.draw.rect(screen, (50, 50, 150), (box_x, box_y, box_width, box_height), 
                                border_radius=10)
                 pygame.draw.rect(screen, (100, 100, 255), (box_x, box_y, box_width, box_height), 
@@ -143,14 +143,14 @@ class UIManager:
             
             screen.blit(option_text, (config.SCREEN_WIDTH // 2 - option_text.get_width() // 2, y_pos))
         
-        # Show current difficulty
+        # Exibe a dificuldade atual
         diff_name = config.DIFFICULTY_NAMES.get(self.game.difficulty, "")
         diff_text = config.SMALL_FONT.render(
             f"Dificuldade: {diff_name}", True, (255, 255, 255)
         )
         screen.blit(diff_text, (config.SCREEN_WIDTH // 2 - diff_text.get_width() // 2, config.MENU_START_Y - 40))
 
-        # Show controls
+        # Mostra os controles
         controls_title = config.SMALL_FONT.render("Controles do Menu:", True, (255, 255, 255))
         controls_nav = config.SMALL_FONT.render("SETA PARA CIMA/BAIXO - Navegar | ENTER/ESPAÇO - Selecionar", True, (200, 200, 200))
         
@@ -158,7 +158,7 @@ class UIManager:
         screen.blit(controls_title, (config.SCREEN_WIDTH // 2 - controls_title.get_width() // 2, controls_y))
         screen.blit(controls_nav, (config.SCREEN_WIDTH // 2 - controls_nav.get_width() // 2, controls_y + 30))
         
-        # Show game controls
+        # Mostra controles do jogo
         game_controls_title = config.SMALL_FONT.render("Controles do Jogo:", True, (255, 255, 255))
         controls_space = config.SMALL_FONT.render("ESPAÇO - Impulsionar | W - Usar Arma", True, (200, 200, 200))
         
@@ -166,7 +166,7 @@ class UIManager:
         screen.blit(controls_space, (config.SCREEN_WIDTH // 2 - controls_space.get_width() // 2, controls_y + 90))
         
     def draw_game_over_screen(self, screen):
-        """Draws the game over screen"""
+        """Desenha a tela de fim de jogo"""
         # Semi-transparent overlay
         overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
@@ -182,7 +182,7 @@ class UIManager:
         else:
             restart_text = config.GAME_FONT.render("Pressione ESPAÇO para nova missão desde a Terra", True, (255, 255, 255))
         
-        # Calculate furthest planet reached
+        # Calcula o planeta mais distante alcançado
         furthest_planet = self.game.planets[min(self.game.current_planet_index, len(self.game.planets) - 1)].name
         furthest_planet_pt = PLANET_NAME_PT.get(furthest_planet, furthest_planet)
         planet_text = config.GAME_FONT.render(f"Planeta mais distante: {furthest_planet_pt}", True, (255, 255, 255))
@@ -193,24 +193,24 @@ class UIManager:
         screen.blit(restart_text, (config.SCREEN_WIDTH // 2 - restart_text.get_width() // 2, 400))
         
     def draw_transition_screen(self, screen):
-        """Draws the transition screen"""
-        # Semi-transparent overlay
+        """Desenha a tela de transição"""
+        # Sobreposição semitransparente
         overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 200))  # Darker overlay for text readability
+        overlay.fill((0, 0, 0, 200))  # Sobreposição mais escura para leitura
         screen.blit(overlay, (0, 0))
         
-        # Draw destination planet name
+        # Exibe o nome do planeta de destino
         display_name = PLANET_NAME_PT.get(self.game.current_planet.name, self.game.current_planet.name)
         planet_title = config.GAME_FONT.render(f"Bem-vindo a {display_name}", True, (255, 255, 255))
         screen.blit(planet_title, (config.SCREEN_WIDTH // 2 - planet_title.get_width() // 2, 100))
         
-        # Draw gravity information
+        # Mostra a informação de gravidade
         gravity_text = config.GAME_FONT.render(f"Gravidade: {self.game.current_planet.gravity_factor}% da Terra", True, (255, 255, 255))
         screen.blit(gravity_text, (config.SCREEN_WIDTH // 2 - gravity_text.get_width() // 2, 150))
         
-        # Draw planet info text
+        # Texto informativo do planeta
         info_text = self.game.current_planet.get_info_text()
-        # Wrap text to fit screen
+        # Quebra o texto para caber na tela
         wrapped_lines = []
         words = info_text.split()
         line = ""
@@ -222,18 +222,18 @@ class UIManager:
             else:
                 wrapped_lines.append(line)
                 line = word + " "
-        wrapped_lines.append(line)  # Add last line
+        wrapped_lines.append(line)  # Adiciona a última linha
         
-        # Draw wrapped text
+        # Desenha o texto quebrado
         for i, line in enumerate(wrapped_lines):
             line_surface = config.SMALL_FONT.render(line, True, (200, 200, 255))
             screen.blit(line_surface, (config.SCREEN_WIDTH // 2 - line_surface.get_width() // 2, 220 + i * 30))
             
-        # Draw progress indicator
+        # Indicador de progresso
         progress_text = config.SMALL_FONT.render(f"Planeta {self.game.current_planet_index + 1} de {len(self.game.planets)}", True, (180, 180, 180))
         screen.blit(progress_text, (config.SCREEN_WIDTH // 2 - progress_text.get_width() // 2, 350))
         
-        # Draw continue prompt
+        # Mostra instrução para continuar
         if self.game.state_manager.transition_time > 60:  # Only show after 1 second
             continue_text = config.SMALL_FONT.render("Pressione ESPAÇO para continuar", True, (255, 255, 255))
             # Pulsating effect
@@ -242,23 +242,23 @@ class UIManager:
             screen.blit(continue_text, (config.SCREEN_WIDTH // 2 - continue_text.get_width() // 2, 450))
             
     def draw_quiz_failure_screen(self, screen):
-        """Draws the quiz failure screen with countdown"""
-        # Add semi-transparent overlay
+        """Desenha a tela de falha no quiz com contagem regressiva"""
+        # Adiciona sobreposição semitransparente
         overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 180))  # More visible semi-transparent black
+        overlay.fill((0, 0, 0, 180))  # Preto semitransparente mais visível
         screen.blit(overlay, (0, 0))
         
-        # Calculate countdown number
+        # Calcula o número da contagem regressiva
         countdown_number = self.game.state_manager.quiz_failure_timer // 60 + 1
         
-        # Draw large countdown number
+        # Desenha o número grande de contagem
         self.game.visual_effects.draw_countdown(screen, countdown_number)
         
-        # Draw "Returning..." text with pulsing effect
+        # Desenha texto "Retornando..." com efeito pulsante
         self.game.visual_effects.draw_pulsing_text(
             screen,
             "Retornando à órbita...",
-            pygame.font.Font(None, 42),  # Create temporary font for pulsing text
+            pygame.font.Font(None, 42),  # Fonte temporária para texto pulsante
             (255, 255, 255),
             (config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2 + 100)
         )
