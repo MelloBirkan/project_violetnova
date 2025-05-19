@@ -184,10 +184,8 @@ class GameMechanics:
                 allow_save=config.DIFFICULTY_SETTINGS[self.game.difficulty]["save_checkpoint"],
             )
             
-            # Fade out da música antes de mudar de planeta
-            self.game.sound_manager.stop_music(1000)
-            
             # Inicia o quiz antes de incrementar o índice de planeta
+            # A música de fundo continua até a resposta correta do quiz
             self.game.state_manager.start_quiz()
             
     def handle_collectible_effect(self, collectible):
