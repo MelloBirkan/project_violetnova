@@ -28,6 +28,10 @@ class GameMechanics:
             if not pygame.mixer.get_busy() or not self.game.sound_manager.engine_thrust_sound.get_num_channels():
                 self.game.sound_manager.play_thrust()
                 
+        # Gerencia a música de fundo com base na pontuação
+        if self.game.sound_manager.music_active and self.game.score >= 2:
+            self.game.sound_manager.increase_music_volume_on_progress(self.game.score)
+                
         # Gera obstáculos
         current_time = pygame.time.get_ticks()
         if current_time - self.game.last_obstacle_time > self.game.obstacle_spawn_rate:
@@ -179,6 +183,9 @@ class GameMechanics:
                 update_furthest=True,
                 allow_save=config.DIFFICULTY_SETTINGS[self.game.difficulty]["save_checkpoint"],
             )
+            
+            # Fade out da música antes de mudar de planeta
+            self.game.sound_manager.stop_music(1000)
             
             # Inicia o quiz antes de incrementar o índice de planeta
             self.game.state_manager.start_quiz()

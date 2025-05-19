@@ -22,6 +22,11 @@ class StateManager:
             self.quiz_failure_timer = 180  # 3 segundos a 60fps
             self.last_countdown_number = 3
             
+        # Inicia música do planeta ao entrar no modo de jogo
+        if new_state == config.PLAYING and hasattr(self.game, 'sound_manager') and hasattr(self.game, 'current_planet'):
+            # Inicia a música de fundo específica do planeta com volume baixo
+            self.game.sound_manager.play_planet_music(self.game.current_planet.name)
+            
     def is_state(self, state):
         """Verifica se o estado atual corresponde ao estado fornecido"""
         return self.current_state == state
@@ -53,6 +58,8 @@ class StateManager:
                             self.start_transition()
                         else:
                             # Quiz falhou, define atraso antes de retornar ao jogo
+                            # NÃO parar a música, apenas continuar tocando
+                                
                             self.change_state(config.QUIZ_FAILURE)
                             self.quiz_failure_timer = 180  # 3 segundos a 60fps
                             self.last_countdown_number = 3
@@ -78,6 +85,9 @@ class StateManager:
                 # Verifica se o temporizador de falha está completo
                 if self.quiz_failure_timer <= 0:
                     self.change_state(config.PLAYING)
+                    
+                    # Não precisamos reiniciar a música, já que ela continua tocando
+                        
                     if hasattr(self.game, 'nova'):
                         self.game.nova.show_message(
                             "De volta ao voo orbital! Continue explorando.",
@@ -116,9 +126,10 @@ class StateManager:
         self.change_state(config.TRANSITION)
 
         try:
-            # Para todos os sons
+            # Para todos os sons e música de fundo
             if hasattr(self.game, 'sound_manager'):
                 self.game.sound_manager.stop_all_sounds()
+                self.game.sound_manager.stop_music(1000)  # Fade out da música em 1 segundo
 
             # Incrementa o índice do planeta
             if hasattr(self.game, 'current_planet_index') and hasattr(self.game, 'planets'):

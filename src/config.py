@@ -42,7 +42,8 @@ PLANET_NAME_PT = {
 }
 
 # Parâmetros do jogo
-DEFAULT_SOUND_VOLUME = 0.5
+DEFAULT_SOUND_VOLUME = 0.7
+THRUST_SOUND_VOLUME = 0.1  # Volume reduzido para o som do propulsor
 SOUND_FADEOUT_TIME = 500  # ms
 
 # Parâmetros da espaçonave
@@ -88,6 +89,7 @@ DEFAULT_DIFFICULTY = DIFFICULTY_MEDIUM
 DIFFICULTY_SETTINGS = {
     DIFFICULTY_EASY: {
         "lives": 3,
+        "max_lives": 5,  # Permite acumular até 5 vidas
         "life_collectible_chance": 0.15,
         "weapon_collectible_chance": 0.20,
         "obstacle_distance_multiplier": 1.5,

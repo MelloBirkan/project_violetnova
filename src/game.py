@@ -29,11 +29,10 @@ class Game:
 
         # Sistema de vidas e dificuldade
         self.difficulty = config.DEFAULT_DIFFICULTY
-        self.max_lives = config.DIFFICULTY_SETTINGS[self.difficulty].get(
-            "max_lives",
-            config.DIFFICULTY_SETTINGS[self.difficulty]["lives"],
-        )
-        self.lives = self.max_lives
+        settings = config.DIFFICULTY_SETTINGS[self.difficulty]
+        self.max_lives = settings.get("max_lives", settings["lives"])
+        # Sempre iniciar com o número de vidas da dificuldade, não o máximo possível
+        self.lives = settings["lives"]
         self.invulnerable = False
         self.invulnerable_timer = 0
         # Controle do menu de dificuldade
@@ -143,7 +142,8 @@ class Game:
         settings = config.DIFFICULTY_SETTINGS[self.difficulty]
         self.max_lives = settings.get("max_lives", settings["lives"])
         if not new_planet:
-            self.lives = self.max_lives
+            # Sempre iniciar com o número de vidas da dificuldade, não o máximo possível
+            self.lives = settings["lives"]
         
         if continue_from_saved:
             # Continue from the saved planet (checkpoint)
@@ -179,6 +179,10 @@ class Game:
         # Stop all sounds with smooth fadeout
         self.sound_manager.stop_thrust(config.SOUND_FADEOUT_TIME)
         self.sound_manager.hitting_obstacle_sound.fadeout(config.SOUND_FADEOUT_TIME)
+        
+        # Reinicia a música do planeta atual se entrando no modo de jogo
+        if new_planet and self.state == config.PLAYING:
+            self.sound_manager.play_planet_music(self.current_planet.name)
 
         # Handle welcome sounds based on reset type
         if not new_planet:
@@ -277,6 +281,7 @@ class Game:
                 self.state = config.GAME_OVER
                 self.sound_manager.stop_thrust(100)
                 self.sound_manager.hitting_obstacle_sound.fadeout(100)
+                self.sound_manager.stop_music(500)  # Para a música de fundo com fadeout rápido
                 self.sound_manager.play_explosion()
                 # Save the current planet index to continue from where player failed
                 self.planet_at_death = self.current_planet_index

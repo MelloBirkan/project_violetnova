@@ -178,6 +178,15 @@ class InputHandler:
         if self.game.state == config.MENU:
             if self.game.in_difficulty_menu:
                 self.game.difficulty = self.game.selected_difficulty
+                
+                # Atualiza o número máximo de vidas de acordo com a dificuldade
+                settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
+                self.game.max_lives = settings.get("max_lives", settings["lives"])
+                
+                # Limita as vidas ao novo máximo (se o máximo foi reduzido)
+                if self.game.lives > self.game.max_lives:
+                    self.game.lives = self.game.max_lives
+                    
                 self.game.in_difficulty_menu = False
             else:
                 self.game.reset()

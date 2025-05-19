@@ -1,5 +1,6 @@
 import pygame
-from src.config import DEFAULT_SOUND_VOLUME
+import os
+from src.config import DEFAULT_SOUND_VOLUME, THRUST_SOUND_VOLUME
 
 class SoundManager:
     def __init__(self):
@@ -8,6 +9,11 @@ class SoundManager:
         self.explosion_sound = None
         self.hitting_obstacle_sound = None
         self.welcome_sounds = {}
+        self.background_music = {}
+        self.current_music = None
+        self.music_active = False
+        self.music_volume = 0.3  # Volume inicial baixo
+        self.target_volume = 0.7  # Volume alvo após 2 pontos
         
         # Carrega todos os sons
         self.load_sounds()
@@ -32,8 +38,28 @@ class SoundManager:
                 "Neptune": pygame.mixer.Sound("assets/sounds/welcome/Netuno.mp3")
             }
             
-            # Define o volume padrão para os sons do jogo
-            self.engine_thrust_sound.set_volume(DEFAULT_SOUND_VOLUME)
+            # Carrega as músicas de fundo para cada planeta
+            music_files = {
+                "Earth": "Cosmic Dreams.mp3",
+                "Mercury": "Adorable Walk.mp3",
+                "Venus": "Aurora's Lullaby.mp3",
+                "Moon": "Lunar Tides.mp3",
+                "Mars": "Melancholia (Cover).mp3",
+                "Jupiter": "Interstellar Odyssey.mp3",
+                "Saturn": "Odyssey.mp3",
+                "Uranus": "Stellar Journey.mp3",
+                "Neptune": "Cosmic Dreams-2.mp3"
+            }
+            
+            for planet, music_file in music_files.items():
+                music_path = os.path.join("assets", "musics", music_file)
+                if os.path.exists(music_path):
+                    self.background_music[planet] = music_path
+                else:
+                    print(f"Aviso: Música para {planet} não encontrada: {music_path}")
+            
+            # Define o volume para os sons do jogo
+            self.engine_thrust_sound.set_volume(THRUST_SOUND_VOLUME)  # Volume do propulsor reduzido
             self.explosion_sound.set_volume(DEFAULT_SOUND_VOLUME)
             self.hitting_obstacle_sound.set_volume(DEFAULT_SOUND_VOLUME)
             
@@ -99,3 +125,65 @@ class SoundManager:
         """Ajusta o volume de um som de boas-vindas específico"""
         if planet_name in self.welcome_sounds:
             self.welcome_sounds[planet_name].set_volume(volume)
+            
+    def play_planet_music(self, planet_name):
+        """Inicia a música de fundo para um planeta específico"""
+        # Se já estiver tocando a música para este planeta, não faz nada
+        if self.music_active and self.current_music == planet_name and pygame.mixer.music.get_busy():
+            return True
+            
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.fadeout(1000)  # Fade out se houver música tocando
+            
+        if planet_name in self.background_music:
+            try:
+                pygame.mixer.music.load(self.background_music[planet_name])
+                pygame.mixer.music.set_volume(self.music_volume)  # Volume baixo no início
+                pygame.mixer.music.play(-1)  # Toca em loop
+                self.current_music = planet_name
+                self.music_active = True
+                return True
+            except pygame.error as e:
+                print(f"Erro ao reproduzir música para {planet_name}: {e}")
+                self.music_active = False
+                return False
+        else:
+            print(f"Sem música disponível para {planet_name}")
+            self.music_active = False
+            return False
+    
+    def stop_music(self, fadeout_time=1000):
+        """Para a música de fundo com fadeout"""
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.fadeout(fadeout_time)
+            self.music_active = False
+    
+    def adjust_music_volume(self, volume=None, fade_time=1000):
+        """Ajusta o volume da música de fundo com fadeout suave"""
+        if volume is not None:
+            self.music_volume = max(0.0, min(1.0, volume))  # Limita entre 0.0 e 1.0
+        
+        if pygame.mixer.music.get_busy():
+            current_volume = pygame.mixer.music.get_volume()
+            steps = 20
+            delay = fade_time / steps
+            volume_step = (self.music_volume - current_volume) / steps
+            
+            # Função que ajusta o volume gradualmente
+            def fade_volume():
+                for i in range(steps):
+                    new_volume = current_volume + (volume_step * (i + 1))
+                    new_volume = max(0.0, min(1.0, new_volume))  # Limita entre 0.0 e 1.0
+                    pygame.mixer.music.set_volume(new_volume)
+                    pygame.time.delay(int(delay))
+            
+            # Inicia fade em thread separada para não bloquear o jogo
+            import threading
+            fade_thread = threading.Thread(target=fade_volume)
+            fade_thread.daemon = True
+            fade_thread.start()
+    
+    def increase_music_volume_on_progress(self, score):
+        """Aumenta o volume da música quando o jogador alcança determinada pontuação"""
+        if score >= 2 and pygame.mixer.music.get_busy() and pygame.mixer.music.get_volume() < self.target_volume:
+            self.adjust_music_volume(self.target_volume)
