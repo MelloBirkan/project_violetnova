@@ -281,7 +281,8 @@ class UIManager:
                 "color": (50, 255, 50),  # Verde
                 "description": "Para novos exploradores espaciais",
                 "details": [
-                    "• 3 vidas desde o início",
+                    "• Pode chegar até 5 vidas",
+                    "• Colecionáveis de vida mais frequentes",
                     "• Obstáculos mais espaçados",
                     "• Salvamento de progresso"
                 ],

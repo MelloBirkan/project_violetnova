@@ -16,15 +16,15 @@ PLANET_NAME_PT = {
 
 # Limiares de progressão de nível
 LEVEL_PROGRESSION_THRESHOLDS = {
-    "Earth": 6,
-    "Mercury": 2,
-    "Venus": 4,
-    "Moon": 2,
-    "Mars": 3,
+    "Earth": 9,
+    "Mercury": 6,
+    "Venus": 7,
+    "Moon": 3,
+    "Mars": 5,
     "Jupiter": 20,
-    "Saturn": 15,
-    "Uranus": 12,
-    "Neptune": 11,
+    "Saturn": 17,
+    "Uranus": 15,
+    "Neptune": 14,
     "Pluto": 1
 }
 
