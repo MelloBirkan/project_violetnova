@@ -122,6 +122,19 @@ Each planet in the game has:
 - Educational quiz questions and facts
 - Specific progression thresholds
 
+## Game Difficulty Settings
+
+The game has three difficulty levels (Easy, Medium, Hard) defined in `src/config.py`:
+- Easy: 3 lives (max 5), checkpoints enabled, slower obstacles
+- Medium: 1 life (max 3), no checkpoints, standard obstacle speed
+- Hard: 1 life, no checkpoints, no power-ups, standard obstacle speed
+
+## Development Environment
+
+- Python 3.8+ is required
+- Pygame is the only external dependency
+- The game is designed to run on Windows, macOS, and Linux
+
 ## Recent Development History
 
 Recent work has focused on:
