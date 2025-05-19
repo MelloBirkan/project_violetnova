@@ -80,6 +80,14 @@ class InputHandler:
             # Ativa a arma com W se disponível
             if event.key == pygame.K_w and self.game.state == config.PLAYING and self.game.weapon_active:
                 self.game.weapon_system.use()
+                
+            # Alterna o controle de IA com A
+            if event.key == pygame.K_a and self.game.state == config.PLAYING:
+                self._handle_a_key_press()
+                
+            # Inicia o modo de treinamento com T (para desenvolvimento)
+            if event.key == pygame.K_t and self.game.state == config.PLAYING:
+                self._handle_t_key_press()
     
     def _handle_key_up(self, event):
         """Lida com eventos de soltura de tecla"""
@@ -148,6 +156,31 @@ class InputHandler:
             self.game.spacecraft.flame_colors = []
         self.game.spacecraft.update_image()
         self.game.nova.show_message(f"Modo de controle: {mode_name}", "info")
+        
+    def _handle_a_key_press(self):
+        """Trata a tecla A para alternar o controle de IA"""
+        # Desativa o modo de segurar espaço se a IA estiver ativada
+        if not self.game.ai_enabled:
+            # Se estamos ativando a IA, armazena o estado atual de space_held
+            self.prev_space_held = self.game.space_held
+            self.game.space_held = False
+        else:
+            # Se estamos desativando a IA, restaura o estado anterior de space_held
+            if hasattr(self, 'prev_space_held'):
+                self.game.space_held = self.prev_space_held
+        
+        # Alterna o modo de IA
+        self.game.toggle_ai()
+        
+    def _handle_t_key_press(self):
+        """Trata a tecla T para iniciar o treinamento acelerado da IA"""
+        # Verifica se já estamos em modo de treinamento
+        if self.game.ai_training_mode:
+            self.game.nova.show_message("Treinamento já em andamento!", "warning")
+            return
+            
+        # Inicia o treinamento acelerado
+        self.game.start_training_mode(iterations=10)
     
     def _handle_menu_selection(self):
         """Processa a seleção de opções do menu"""

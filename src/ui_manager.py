@@ -85,11 +85,101 @@ class UIManager:
         # Desenha ícones de vida
         self.game.visual_effects.draw_life_icons(screen, self.game.lives, self.game.max_lives)
         
-        # Exibe o status da arma no topo, se ativa
+        # Exibe indicadores de status no topo da tela
+        status_y = 20
+        status_elements = []
+        
+        # Status da arma (se ativa)
         if self.game.weapon_active:
             weapon_time = self.game.weapon_timer // 60  # Converte para segundos
             weapon_text = config.SMALL_FONT.render(f"Arma Ativa: {weapon_time}s", True, (255, 100, 100))
-            screen.blit(weapon_text, (config.SCREEN_WIDTH // 2 - weapon_text.get_width() // 2, 20))
+            status_elements.append(weapon_text)
+            
+        # Status do piloto automático (se ativo)
+        if hasattr(self.game, 'ai_enabled') and self.game.ai_enabled:
+            ai_color = (100, 255, 255)  # Ciano para indicar IA
+            ai_text = config.SMALL_FONT.render("PILOTO AUTOMÁTICO ATIVO", True, ai_color)
+            status_elements.append(ai_text)
+            
+            # Desenha um contorno ao redor da nave para indicar controle de IA
+            if self.game.state == config.PLAYING:
+                # Calcula a posição da nave
+                spacecraft_rect = pygame.Rect(
+                    self.game.spacecraft.x - 5,
+                    self.game.spacecraft.y - 5,
+                    self.game.spacecraft.WIDTH + 10,
+                    self.game.spacecraft.HEIGHT + 10
+                )
+                
+                # Animação pulsante do contorno
+                pulse = 0.5 + 0.5 * math.sin(pygame.time.get_ticks() * 0.005)
+                line_width = 1 + int(2 * pulse)
+                
+                # Desenha o contorno pulsante
+                pygame.draw.rect(screen, ai_color, spacecraft_rect, line_width, border_radius=5)
+                
+                # Desenha os "raios" de controle da IA
+                center_x = self.game.spacecraft.x + self.game.spacecraft.WIDTH // 2
+                center_y = self.game.spacecraft.y + self.game.spacecraft.HEIGHT // 2
+                
+                # Controla a visibilidade dos raios com base no tempo
+                show_rays = (pygame.time.get_ticks() // 300) % 3 != 0
+                
+                if show_rays:
+                    # Desenha raios de controle de IA
+                    for angle in range(0, 360, 45):
+                        rad = math.radians(angle)
+                        length = 20 + 10 * pulse
+                        
+                        end_x = center_x + math.cos(rad) * length
+                        end_y = center_y + math.sin(rad) * length
+                        
+                        # Desenha linha tracejada
+                        if angle % 90 == 0:  # Principais direções
+                            pygame.draw.line(screen, ai_color, 
+                                           (center_x, center_y), 
+                                           (end_x, end_y), 
+                                           line_width)
+                        else:  # Direções diagonais
+                            # Desenha como pontilhado
+                            for i in range(0, int(length), 4):
+                                seg_len = min(2, length - i)
+                                if seg_len <= 0:
+                                    break
+                                    
+                                seg_x = center_x + math.cos(rad) * i
+                                seg_y = center_y + math.sin(rad) * i
+                                end_seg_x = center_x + math.cos(rad) * (i + seg_len)
+                                end_seg_y = center_y + math.sin(rad) * (i + seg_len)
+                                
+                                pygame.draw.line(screen, ai_color, 
+                                               (seg_x, seg_y), 
+                                               (end_seg_x, end_seg_y), 
+                                               1)
+            
+        # Modo de treinamento (se ativo)
+        if hasattr(self.game, 'ai_training_mode') and self.game.ai_training_mode:
+            # Cor laranja para modo de treinamento
+            training_color = (255, 165, 0)
+            training_text = config.SMALL_FONT.render("MODO DE TREINAMENTO", True, training_color)
+            status_elements.append(training_text)
+            
+            # Adiciona estatísticas de treinamento
+            if hasattr(self.game, 'accelerated_training') and self.game.accelerated_training:
+                train_info = config.SMALL_FONT.render(
+                    f"Iteração: {self.game.accelerated_training.current_iteration+1}/{self.game.accelerated_training.iterations}",
+                    True, training_color
+                )
+                status_elements.append(train_info)
+                                
+        # Posiciona todos os elementos de status com espaçamento adequado
+        if status_elements:
+            total_width = sum(element.get_width() for element in status_elements) + (len(status_elements) - 1) * 20
+            current_x = (config.SCREEN_WIDTH - total_width) // 2
+            
+            for element in status_elements:
+                screen.blit(element, (current_x, status_y))
+                current_x += element.get_width() + 20
             
     def draw_menu_screen(self, screen):
         """Desenha a tela de menu"""
@@ -160,10 +250,12 @@ class UIManager:
         
         # Mostra controles do jogo
         game_controls_title = config.SMALL_FONT.render("Controles do Jogo:", True, (255, 255, 255))
-        controls_space = config.SMALL_FONT.render("ESPAÇO - Impulsionar | W - Usar Arma", True, (200, 200, 200))
+        controls_space = config.SMALL_FONT.render("ESPAÇO - Impulsionar | W - Usar Arma | C - Mudar Controle", True, (200, 200, 200))
+        controls_ai = config.SMALL_FONT.render("A - Ativar/Desativar Piloto Automático | T - Modo de Treinamento", True, (100, 255, 255))
         
         screen.blit(game_controls_title, (config.SCREEN_WIDTH // 2 - game_controls_title.get_width() // 2, controls_y + 60))
         screen.blit(controls_space, (config.SCREEN_WIDTH // 2 - controls_space.get_width() // 2, controls_y + 90))
+        screen.blit(controls_ai, (config.SCREEN_WIDTH // 2 - controls_ai.get_width() // 2, controls_y + 120))
         
     def draw_game_over_screen(self, screen):
         """Desenha a tela de fim de jogo"""

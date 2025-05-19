@@ -1,5 +1,6 @@
 import pygame
 import sys
+import torch
 from src.spacecraft import Spacecraft
 from src.planet import Planet
 from src.highscore import PlanetTracker
@@ -17,6 +18,7 @@ from src.input_handler import InputHandler
 from src.game_mechanics import GameMechanics
 from src.weapon_system import WeaponSystem
 from src.planet_data import create_planet_data, PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
+from src.spacecraft_ai import SpacecraftAI, AcceleratedTraining
 
 class Game:
     def __init__(self):
@@ -102,6 +104,28 @@ class Game:
 
         # Configurações de progressão
         self.difficulty_multiplier = 1.0
+
+        # AI Autopilot System
+        self.ai_enabled = False
+        self.ai_training_mode = False
+        self.prev_score = 0
+        
+        # Determina se deve usar CPU ou GPU (se disponível)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        
+        # Inicializa o sistema de IA
+        self.spacecraft_ai = SpacecraftAI(
+            state_size=6,
+            action_size=2,
+            planet_name=self.current_planet.name,
+            device=self.device
+        )
+        
+        # Tenta carregar modelo pré-treinado para o planeta atual
+        self.spacecraft_ai.load_model()
+        
+        # Inicializa o sistema de treinamento acelerado
+        self.accelerated_training = None
 
         # Inicializa os gerenciadores
         self.sound_manager = SoundManager()
@@ -212,6 +236,11 @@ class Game:
                 update_furthest=True,
                 allow_save=settings["save_checkpoint"],
             )
+            
+            # Update AI for new planet
+            if hasattr(self, 'spacecraft_ai'):
+                self.spacecraft_ai.update_planet(self.current_planet.name)
+                
         elif not continue_from_death:
             # Start from scratch on Earth (only when not continuing from death)
             self.score = 0
@@ -247,6 +276,10 @@ class Game:
                 self.welcome_sound_played = True
                 if hasattr(self, 'nova'):
                     self.nova.start_radio_signal(duration_ms)
+                    
+            # Reset AI to Earth
+            if hasattr(self, 'spacecraft_ai'):
+                self.spacecraft_ai.update_planet("Earth")
 
         # Reset spacecraft position
         self.spacecraft = Spacecraft(config.SCREEN_WIDTH // 2, config.SCREEN_HEIGHT // 2)
@@ -275,6 +308,9 @@ class Game:
                 self.current_planet.name,
                 self.current_planet.gravity_factor
             )
+            
+        # Reset previous score for AI reward calculation
+        self.prev_score = 0
 
     def lose_life(self):
         """Reduz o número de vidas e verifica se o jogo terminou"""
@@ -321,6 +357,53 @@ class Game:
         """Retorna o estado atual de invulnerabilidade"""
         return self.invulnerable
 
+    def toggle_ai(self):
+        """
+        Ativa ou desativa o modo de IA.
+        """
+        # Alterna o modo de IA
+        self.ai_enabled = self.spacecraft_ai.toggle()
+        
+        # Mostra uma mensagem sobre o estado atual
+        if self.ai_enabled:
+            # Indica que a IA está ativa
+            self.nova.show_message("Piloto automático ativado! NOVA assumindo o controle.", "excited")
+        else:
+            # Indica que o controle manual foi restaurado
+            self.nova.show_message("Controle manual restaurado. Boa sorte, piloto!", "normal")
+        
+        return self.ai_enabled
+        
+    def start_training_mode(self, iterations=1000):
+        """
+        Inicia o modo de treinamento acelerado da IA.
+        """
+        if self.state != config.PLAYING:
+            self.nova.show_message("O treinamento só pode ser iniciado durante o jogo!", "warning")
+            return False
+            
+        # Inicializa o sistema de treinamento acelerado
+        self.accelerated_training = AcceleratedTraining(
+            game=self,
+            ai=self.spacecraft_ai,
+            iterations=iterations,
+            render_frequency=50
+        )
+        
+        # Ativa o modo de treinamento
+        self.ai_training_mode = True
+        self.nova.show_message(f"Iniciando treinamento de IA para {self.current_planet.name}...", "info")
+        
+        # Inicia o treinamento
+        self.accelerated_training.start()
+        
+        # Restaura o jogo normal após o treinamento
+        self.ai_training_mode = False
+        self.accelerated_training = None
+        self.nova.show_message("Treinamento concluído! Modelos salvos.", "excited")
+        
+        return True
+    
     def update(self):
         try:
             # Update visual effects if available
@@ -361,7 +444,42 @@ class Game:
                 
             # Update game mechanics if playing
             if self.state == config.PLAYING and hasattr(self, 'game_mechanics'):
+                # Atualiza as mecânicas do jogo
                 self.game_mechanics.update()
+                
+                # Processa o controle de IA se estiver ativo
+                if self.ai_enabled and hasattr(self, 'spacecraft_ai'):
+                    # Obtém o estado atual do jogo para a IA
+                    state = self.spacecraft_ai.get_state(self)
+                    
+                    # IA decide a ação
+                    action = self.spacecraft_ai.act(state, training=False)
+                    
+                    # Executa a ação (thrust ou não)
+                    if action == 1:  # Ação de thrust
+                        self.spacecraft.thrust()
+                        # Ativa o som do propulsor
+                        self.sound_manager.play_thrust()
+                    
+                    # Se estiver em modo de treinamento, salva a experiência
+                    if self.ai_training_mode:
+                        # Calcula a recompensa
+                        reward = self.spacecraft_ai.calculate_reward(self, self.prev_score)
+                        
+                        # Obtém o próximo estado
+                        next_state = self.spacecraft_ai.get_state(self)
+                        
+                        # Verifica se o episódio terminou (game over)
+                        done = (self.state == config.GAME_OVER)
+                        
+                        # Armazena a experiência
+                        self.spacecraft_ai.remember(state, action, next_state, reward, done)
+                        
+                        # Treina o modelo
+                        self.spacecraft_ai.train()
+                        
+                        # Atualiza o score anterior para o próximo cálculo de recompensa
+                        self.prev_score = self.score
                 
         except AttributeError as e:
             # Print error for debugging
