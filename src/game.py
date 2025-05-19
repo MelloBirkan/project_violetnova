@@ -156,14 +156,21 @@ class Game:
             # Continue from the planet where the player died
             self.current_planet_index = self.planet_at_death
             self.current_planet = self.planets[self.current_planet_index]
-            self.state_manager.change_state(config.PLAYING)
-            self.state = config.PLAYING
+            
+            # Uniform behavior with first play - go through transition state
+            self.state_manager.change_state(config.TRANSITION)
+            self.state = config.TRANSITION
+            self.state_manager.welcome_sound_timer = 0  # Skip welcome sound timer
+            self.state_manager.transition_time = config.TRANSITION_DURATION - 60  # Set transition near end (1 second)
 
             # NOVA message about continuing on same planet
             from src.planet_data import PLANET_NAME_PT
             planet_name_pt = PLANET_NAME_PT.get(self.current_planet.name, self.current_planet.name)
             self.nova.show_message(f"Reabastecendo e retornando a {planet_name_pt}...", "info")
             self.score = 0
+            
+            # Start music for this planet
+            self.sound_manager.play_planet_music(self.current_planet.name)
         elif not new_planet:
             # When starting a new game, begin with Earth's transition screen
             self.state_manager.change_state(config.TRANSITION)
@@ -303,8 +310,10 @@ class Game:
         return False  # Already at maximum lives
 
     def reset_lives(self):
-        """Reseta as vidas para o valor máximo"""
-        self.lives = self.max_lives
+        """Reseta as vidas para o valor máximo ou para o valor padrão da dificuldade"""
+        settings = config.DIFFICULTY_SETTINGS[self.difficulty]
+        # Usa o valor default de vidas para a dificuldade, não o máximo
+        self.lives = settings["lives"]
         self.invulnerable = False
         self.invulnerable_timer = 0
 

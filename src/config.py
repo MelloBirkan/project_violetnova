@@ -83,7 +83,7 @@ DIFFICULTY_MEDIUM = 1
 DIFFICULTY_HARD = 2
 
 # Dificuldade padrão
-DEFAULT_DIFFICULTY = DIFFICULTY_MEDIUM
+DEFAULT_DIFFICULTY = DIFFICULTY_EASY  # Alterado para modo fácil
 
 # Configurações específicas de cada dificuldade
 DIFFICULTY_SETTINGS = {
@@ -91,14 +91,14 @@ DIFFICULTY_SETTINGS = {
         "lives": 3,
         "max_lives": 5,  # Permite acumular até 5 vidas
         "life_collectible_chance": 0.15,
-        "weapon_collectible_chance": 0.20,
-        "obstacle_distance_multiplier": 1.5,
+        "weapon_collectible_chance": 0.01,
+        "obstacle_distance_multiplier": 2.0,
         "save_checkpoint": True
     },
     DIFFICULTY_MEDIUM: {
         "lives": 1,
-        "life_collectible_chance": 0.05,
-        "weapon_collectible_chance": 0.10,
+        "life_collectible_chance": 0.10,
+        "weapon_collectible_chance": 0.01,
         "obstacle_distance_multiplier": 1.0,
         "save_checkpoint": False,
         "max_lives": 3

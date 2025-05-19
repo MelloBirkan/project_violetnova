@@ -1,4 +1,5 @@
 import pygame
+import pygame.time
 import sys
 import src.config as config
 
@@ -117,6 +118,11 @@ class InputHandler:
             # Verifica as configurações de dificuldade
             difficulty_settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
             
+            # Garante que qualquer som ou música ainda em execução seja pausada
+            self.game.sound_manager.stop_all_sounds()
+            self.game.sound_manager.stop_music(500)
+            pygame.time.delay(100)  # Pequena pausa para garantir que o mixer esteja pronto
+            
             # Se tem checkpoint, continua do planeta onde morreu
             # Se não tem checkpoint (médio/difícil), volta para a Terra
             if difficulty_settings["save_checkpoint"]:
@@ -198,6 +204,11 @@ class InputHandler:
             self.game.welcome_sound_played = False
             # Verifica as configurações de dificuldade
             difficulty_settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
+            
+            # Garante que qualquer som ou música ainda em execução seja pausada
+            self.game.sound_manager.stop_all_sounds()
+            self.game.sound_manager.stop_music(500)
+            pygame.time.delay(100)  # Pequena pausa para garantir que o mixer esteja pronto
             
             # Se tem checkpoint, continua do planeta onde morreu
             # Se não tem checkpoint (médio/difícil), volta para a Terra

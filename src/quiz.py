@@ -1,4 +1,5 @@
 import pygame
+import pygame.mixer
 import src.config as config
 
 class Quiz:
@@ -66,6 +67,16 @@ class Quiz:
             self.result = "incorrect"
             
         self.result_timer = config.QUIZ_RESULT_DURATION
+        
+        # Ajusta o volume da música quando o usuário responde
+        # (não é necessário parar a música, apenas regular volume)
+        if pygame.mixer.music.get_busy():
+            if self.result == "correct":
+                # Preparando para transição: aumenta um pouco o volume
+                pygame.mixer.music.set_volume(0.7)
+            else:
+                # Resposta incorreta: mantém volume normal
+                pygame.mixer.music.set_volume(0.6)
     
     def update(self):
         """Atualiza o estado do quiz"""

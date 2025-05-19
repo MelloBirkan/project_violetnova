@@ -1,3 +1,4 @@
+import pygame
 import src.config as config
 
 class StateManager:
@@ -44,7 +45,16 @@ class StateManager:
 
                 # Verifica se a transição está completa
                 if self.transition_time >= config.TRANSITION_DURATION and self.welcome_sound_timer <= 0:
-                    self.game.reset(new_planet=True)
+                    # Se estiver em transição após a morte, mantém o mesmo planeta
+                    if hasattr(self.game, 'planet_at_death') and self.game.current_planet_index == self.game.planet_at_death:
+                        # Continua no mesmo planeta após a morte
+                        self.change_state(config.PLAYING)
+                        # Garante que a música esteja tocando
+                        if hasattr(self.game, 'sound_manager') and hasattr(self.game, 'current_planet'):
+                            self.game.sound_manager.play_planet_music(self.game.current_planet.name)
+                    else:
+                        # Transição normal entre planetas
+                        self.game.reset(new_planet=True)
 
             elif self.current_state == config.QUIZ:
                 # Atualiza o quiz
@@ -86,7 +96,14 @@ class StateManager:
                 if self.quiz_failure_timer <= 0:
                     self.change_state(config.PLAYING)
                     
-                    # Não precisamos reiniciar a música, já que ela continua tocando
+                    # Verifica se a música está tocando e só reinicia se necessário
+                    if hasattr(self.game, 'sound_manager') and hasattr(self.game, 'current_planet'):
+                        if not pygame.mixer.music.get_busy():
+                            # Música parou, reinicia com fade in suave
+                            self.game.sound_manager.music_volume = 0.3  # Volume baixo para fade in
+                            self.game.sound_manager.play_planet_music(self.game.current_planet.name)
+                            self.game.sound_manager.adjust_music_volume(0.7, 2000)  # Fade in para volume normal
+                        # Caso contrário, deixa a música continuar tocando
                         
                     if hasattr(self.game, 'nova'):
                         self.game.nova.show_message(
@@ -100,6 +117,21 @@ class StateManager:
                 
     def start_quiz(self):
         """Inicia o estado do quiz com uma pergunta aleatória"""
+        # Garante que a música atual continue durante o quiz
+        # Não precisamos parar nem reiniciar a música
+        current_music_was_active = False
+        current_music_planet = None
+        
+        if hasattr(self.game, 'sound_manager'):
+            # Armazena o estado atual da música para restaurar se necessário
+            current_music_was_active = self.game.sound_manager.music_active
+            current_music_planet = self.game.sound_manager.current_music
+            current_volume = 0.7
+            if pygame.mixer.music.get_busy():
+                current_volume = pygame.mixer.music.get_volume()
+                # Pode reduzir um pouco o volume durante o quiz (opcional)
+                pygame.mixer.music.set_volume(current_volume * 0.8)
+            
         self.change_state(config.QUIZ)
         self.last_countdown_number = 2
 
@@ -117,6 +149,12 @@ class StateManager:
                     question_data["answer"],
                     question_data.get("explanation")
                 )
+                
+                # Certifica-se de que a música continue tocando durante o quiz
+                if hasattr(self.game, 'sound_manager') and not pygame.mixer.music.get_busy():
+                    # A música parou por algum motivo, reinicia
+                    if current_music_was_active and current_music_planet:
+                        self.game.sound_manager.play_planet_music(current_music_planet)
         except (AttributeError, IndexError) as e:
             # Registra o erro e continua
             print(f"Erro ao iniciar o quiz: {e}")
@@ -126,10 +164,15 @@ class StateManager:
         self.change_state(config.TRANSITION)
 
         try:
-            # Para todos os sons e música de fundo
+            # Para todos os sons do jogo, mas mantém a música se estivermos no mesmo planeta
             if hasattr(self.game, 'sound_manager'):
+                # Paramos apenas os efeitos sonoros
                 self.game.sound_manager.stop_all_sounds()
-                self.game.sound_manager.stop_music(1000)  # Fade out da música em 1 segundo
+                
+                # Só paramos a música se vamos para um novo planeta
+                # (quando acertamos o quiz e avançamos)
+                if self.game.quiz.is_correct():
+                    self.game.sound_manager.stop_music(1000)  # Fade out da música em 1 segundo
 
             # Incrementa o índice do planeta
             if hasattr(self.game, 'current_planet_index') and hasattr(self.game, 'planets'):

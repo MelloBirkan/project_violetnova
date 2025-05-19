@@ -12,10 +12,10 @@ Project Violetnova is an educational space-themed arcade game that teaches playe
 
 ```bash
 # Install dependencies
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 
 # Run the game
-python3 main.py
+python main.py
 ```
 
 ### Development
@@ -87,6 +87,9 @@ Players progress through the solar system by:
 ## File Structure
 
 - `/assets`: Contains images and sounds
+  - `/images`: Game sprites and visual assets
+  - `/musics`: Background music for different planets
+  - `/sounds`: Sound effects and welcome messages
 - `/src`: Main game code
   - Core gameplay files (main.py, game.py, spacecraft.py, obstacle.py)
   - Educational content (planet.py, planet_data.py, quiz.py, nova_ai.py)
@@ -107,33 +110,22 @@ The game supports Brazilian Portuguese with translation dictionaries for planet 
 
 ## Development Directives
 
-- Leave all the UI and comments in the code in Brazilian Portuguese.
+- UI and comments in the code should be maintained in Brazilian Portuguese
+- New educational content should be scientifically accurate
+- Accessibility considerations should be maintained for color choices and text presentation
 
-## Memory Tracking
+## Planet Configuration
 
-- Please ask the user to run the game so I can test the changes I made.
+Each planet in the game has:
+- Unique gravity factor (relative to Earth's 1.0g)
+- Custom background and obstacle sprites
+- Educational quiz questions and facts
+- Specific progression thresholds
 
-## Recent Refactoring
+## Recent Development History
 
-The codebase was refactored following SOLID principles:
-
-1. **Single Responsibility Principle**: Each class now has a single responsibility
-   - Extracted UI rendering to `ui_manager.py`
-   - Created `input_handler.py` for processing user input
-   - Moved game mechanics to `game_mechanics.py`
-   - Created dedicated `weapon_system.py`
-
-2. **Open/Closed Principle**: Code is now more extensible 
-   - New features can be added by extending existing classes rather than modifying them
-
-3. **Dependency Inversion**: Components depend on abstractions rather than implementations
-   - Game components access configuration via the `config` module
-
-4. **Improved Code Organization**:
-   - Constant data moved to appropriate modules
-   - Planet data and progression thresholds defined in `planet_data.py`
-   - Game loop simplified in `main.py`
-
-## Asset Management
-
-- All planet sprites will be at @assets/images/planets_sprites/ and will have 3 sprites for each planet ceu_..., obstaculo_..., chao_...
+Recent work has focused on:
+- Adding explanations to quiz questions to enhance educational value
+- Translating UI elements and comments to Brazilian Portuguese
+- Refining graphics and animations for improved visual appeal
+- Implementing the complete solar system progression system

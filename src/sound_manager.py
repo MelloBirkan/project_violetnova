@@ -15,6 +15,14 @@ class SoundManager:
         self.music_volume = 0.3  # Volume inicial baixo
         self.target_volume = 0.7  # Volume alvo após 2 pontos
         
+        # Garante que o mixer esteja inicializado corretamente
+        if not pygame.mixer.get_init():
+            try:
+                pygame.mixer.quit()
+                pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
+            except pygame.error as e:
+                print(f"Erro ao reinicializar o mixer: {e}")
+        
         # Carrega todos os sons
         self.load_sounds()
         
@@ -137,16 +145,49 @@ class SoundManager:
             
         if planet_name in self.background_music:
             try:
+                # Adicionando tratamento de erro robusto
+                try:
+                    pygame.mixer.music.unload()  # Descarrega qualquer música anterior
+                except (pygame.error, AttributeError):
+                    # Alguns sistemas/versões não suportam unload
+                    pass
+                    
+                # Tenta carregar e reproduzir a música com verificação
                 pygame.mixer.music.load(self.background_music[planet_name])
                 pygame.mixer.music.set_volume(self.music_volume)  # Volume baixo no início
                 pygame.mixer.music.play(-1)  # Toca em loop
-                self.current_music = planet_name
-                self.music_active = True
-                return True
+                
+                # Verifica se conseguiu reproduzir
+                if pygame.mixer.music.get_busy():
+                    self.current_music = planet_name
+                    self.music_active = True
+                    return True
+                else:
+                    # Se não estiver tocando, tente novamente uma vez
+                    pygame.time.delay(100)  # Pequeno atraso
+                    pygame.mixer.music.play(-1)
+                    self.current_music = planet_name
+                    self.music_active = True
+                    return True
+                    
             except pygame.error as e:
                 print(f"Erro ao reproduzir música para {planet_name}: {e}")
-                self.music_active = False
-                return False
+                # Tenta recuperar o mixer em caso de falha
+                try:
+                    pygame.mixer.quit()
+                    pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
+                    pygame.time.delay(500)  # Espera a reinicialização
+                    # Tenta novamente após reiniciar o mixer
+                    pygame.mixer.music.load(self.background_music[planet_name])
+                    pygame.mixer.music.set_volume(self.music_volume)
+                    pygame.mixer.music.play(-1)
+                    self.current_music = planet_name
+                    self.music_active = True
+                    return True
+                except pygame.error as e2:
+                    print(f"Tentativa de recuperação falhou: {e2}")
+                    self.music_active = False
+                    return False
         else:
             print(f"Sem música disponível para {planet_name}")
             self.music_active = False
