@@ -90,6 +90,12 @@ class UIManager:
             weapon_time = self.game.weapon_timer // 60  # Converte para segundos
             weapon_text = config.SMALL_FONT.render(f"Arma Ativa: {weapon_time}s", True, (255, 100, 100))
             screen.blit(weapon_text, (config.SCREEN_WIDTH // 2 - weapon_text.get_width() // 2, 20))
+
+        # Indicador de autopiloto
+        auto_color = (100, 255, 100) if self.game.autopilot.enabled else (255, 100, 100)
+        auto_text = "ON" if self.game.autopilot.enabled else "OFF"
+        autopilot_text = config.SMALL_FONT.render(f"Autopiloto: {auto_text}", True, auto_color)
+        screen.blit(autopilot_text, (config.SCREEN_WIDTH - autopilot_text.get_width() - 20, 20))
             
     def draw_menu_screen(self, screen):
         """Desenha a tela de menu"""

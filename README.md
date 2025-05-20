@@ -92,6 +92,7 @@ python main.py
 
 - **ESPAÇO** - Impulsionar nave
 - **W** - Usar arma (quando disponível)
+- **A** - Alternar Autopiloto
 - **ESC** - Sair do jogo
 
 ## Planetas e Mecânicas

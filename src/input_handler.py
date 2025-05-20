@@ -76,10 +76,15 @@ class InputHandler:
             # Alterna o modo de controle com C
             if event.key == pygame.K_c and self.game.state == config.PLAYING:
                 self._handle_c_key_press()
-                
+
             # Ativa a arma com W se disponível
             if event.key == pygame.K_w and self.game.state == config.PLAYING and self.game.weapon_active:
                 self.game.weapon_system.use()
+
+            # Alterna o autopiloto com A
+            if event.key == pygame.K_a and self.game.state == config.PLAYING:
+                # Mostra mensagem de ativação/desativação
+                self.game.autopilot.toggle()
     
     def _handle_key_up(self, event):
         """Lida com eventos de soltura de tecla"""

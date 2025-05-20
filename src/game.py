@@ -17,6 +17,7 @@ from src.input_handler import InputHandler
 from src.game_mechanics import GameMechanics
 from src.weapon_system import WeaponSystem
 from src.planet_data import create_planet_data, PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
+from src.autopilot import Autopilot
 
 class Game:
     def __init__(self):
@@ -111,6 +112,8 @@ class Game:
         self.input_handler = InputHandler(self)
         self.game_mechanics = GameMechanics(self)
         self.weapon_system = WeaponSystem(self)
+        # Sistema de autopiloto baseado em aprendizado de máquina simples
+        self.autopilot = Autopilot(self)
 
         # Inicializa o gerenciador de estado por último para evitar dependências circulares
         self.state_manager = StateManager(self)
@@ -358,9 +361,11 @@ class Game:
             # Update weapon system
             if hasattr(self, 'weapon_system'):
                 self.weapon_system.update()
-                
+
             # Update game mechanics if playing
             if self.state == config.PLAYING and hasattr(self, 'game_mechanics'):
+                if hasattr(self, 'autopilot') and self.autopilot.enabled:
+                    self.autopilot.step()
                 self.game_mechanics.update()
                 
         except AttributeError as e:
