@@ -5,6 +5,8 @@ from src.planet import Planet
 from src.highscore import PlanetTracker
 from src.nova_ai import NovaAI
 from src.quiz import Quiz
+from src.violet import Violet
+from src.dialogue_manager import DialogueManager
 
 # Import refactored modules
 import src.config as config
@@ -38,6 +40,7 @@ class Game:
         # Controle do menu de dificuldade
         self.in_difficulty_menu = False
         self.selected_difficulty = self.difficulty
+        self.selected_menu_option = 0  # Opção selecionada no menu principal
         # Rastreia o planeta em que o jogador morreu para continuar dali
         self.planet_at_death = 0
 
@@ -93,12 +96,22 @@ class Game:
         self.obstacle_speed = 3
         self.weapon_active = False
         self.weapon_timer = 0
+        
+        # Configurações de controle
+        self.space_held = False
+        self.control_mode = config.CONTROL_MODE_HOLD  # Modo de controle padrão
 
         # Inicializa a assistente NOVA AI
         self.nova = NovaAI(config.SCREEN_WIDTH, config.SCREEN_HEIGHT, PLANET_NAME_PT)
+        
+        # Inicializa o personagem Violet
+        self.violet = Violet(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
 
         # Inicializa o sistema de quiz
         self.quiz = Quiz(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
+        
+        # Inicializa o gerenciador de diálogos
+        self.dialogue_manager = DialogueManager(self)
 
         # Configurações de progressão
         self.difficulty_multiplier = 1.0
@@ -117,10 +130,18 @@ class Game:
 
         # Inicializa o estado do jogo (usa o valor existente de _state)
         self.state_manager.change_state(config.MENU)
-
-        # Control settings
-        self.space_held = False
-        self.control_mode = config.CONTROL_MODE_HOLD  # Padrão alterado para HOLD
+        
+    def start_character_dialogue(self):
+        """Inicia uma sequência de diálogo entre Violet e Nova"""
+        dialogue = [
+            {"speaker": "Violet", "text": "Olá, eu sou Violet! Estou muito animada com nossa missão espacial.", "expression": "excited"},
+            {"speaker": "Nova", "text": "Bem-vinda, Violet! Eu sou Nova, sua assistente de IA para essa jornada pelo sistema solar.", "expression": "happy"},
+            {"speaker": "Violet", "text": "Qual planeta visitaremos primeiro?", "expression": "curious"},
+            {"speaker": "Nova", "text": "Começaremos nossa exploração pela Terra, e então visitaremos outros planetas à medida que progredimos.", "expression": "normal"},
+            {"speaker": "Violet", "text": "Mal posso esperar para aprender sobre a gravidade de cada planeta!", "expression": "excited"},
+            {"speaker": "Nova", "text": "Lembre-se que cada planeta tem sua própria força gravitacional. Você precisará adaptar seus controles de voo!", "expression": "warning"}
+        ]
+        self.state_manager.start_dialogue(dialogue)  # Padrão alterado para HOLD
         
         # Menu navigation
         self.selected_menu_option = 0

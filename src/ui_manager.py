@@ -32,9 +32,20 @@ class UIManager:
             self.game.quiz.draw(screen)
         elif self.game.state == config.QUIZ_FAILURE:
             self.draw_quiz_failure_screen(screen)
+        elif self.game.state == config.DIALOGUE:
+            # Desenha os personagens primeiro
+            if hasattr(self.game, 'violet'):
+                self.game.violet.draw(screen)
+            # Em seguida, desenha o diálogo
+            if hasattr(self.game, 'dialogue_manager'):
+                self.game.dialogue_manager.draw(screen)
+            # Nova sempre é desenhada no último passo
+            self.game.nova.draw(screen)
+            return  # Retorna para impedir a renderização redundante da NOVA abaixo
             
-        # Sempre desenha a assistente NOVA por cima
-        self.game.nova.draw(screen)
+        # Sempre desenha a assistente NOVA por cima, a menos que no estado DIALOGUE
+        if self.game.state != config.DIALOGUE:
+            self.game.nova.draw(screen)
             
     def _draw_game_elements(self, screen):
         """Desenha elementos comuns do jogo (obstáculos, itens, nave, etc.)"""

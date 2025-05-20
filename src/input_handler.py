@@ -69,6 +69,26 @@ class InputHandler:
             # Só repassa eventos ao quiz se estiver no estado QUIZ
             if self.game.state == config.QUIZ:
                 self.game.quiz.handle_event(event)
+        elif self.game.state == config.DIALOGUE:
+            if event.key == pygame.K_SPACE:
+                # Avança o diálogo quando espaço é pressionado
+                if hasattr(self.game, 'dialogue_manager'):
+                    current_dialogue = self.game.dialogue_manager.get_current_dialogue()
+                    
+                    # Avança para o próximo diálogo
+                    continued = self.game.dialogue_manager.advance_dialogue()
+                    
+                    # Se continuar para um novo diálogo, atualiza as expressões dos personagens
+                    if continued:
+                        next_dialogue = self.game.dialogue_manager.get_current_dialogue()
+                        speaker = next_dialogue.get("speaker", "")
+                        expression = next_dialogue.get("expression", "normal")
+                        
+                        # Define expressões para o personagem que está falando
+                        if speaker == "Nova" and hasattr(self.game, 'nova'):
+                            self.game.nova.set_expression(expression)
+                        elif speaker == "Violet" and hasattr(self.game, 'violet'):
+                            self.game.violet.set_expression(expression)
         else:
             if event.key == pygame.K_SPACE:
                 self._handle_space_key_press()
@@ -169,9 +189,9 @@ class InputHandler:
         elif selected_option == "Dificuldade":
             self.game.in_difficulty_menu = True
             self.game.selected_difficulty = self.game.difficulty
-        elif selected_option == "Configurações":
-            # TODO: Implement settings screen
-            self.game.nova.show_message("Configurações em breve!", "info")
+        elif selected_option == "Diálogo Demo":
+            # Inicia o diálogo de demonstração
+            self.game.start_character_dialogue()
         elif selected_option == "Créditos":
             # TODO: Implement credits screen
             self.game.nova.show_message("Créditos em breve!", "info")

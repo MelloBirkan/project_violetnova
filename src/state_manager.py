@@ -32,6 +32,26 @@ class StateManager:
         """Verifica se o estado atual corresponde ao estado fornecido"""
         return self.current_state == state
         
+    def start_dialogue(self, dialogue_list):
+        """Inicia uma sequência de diálogo entre Violet e Nova"""
+        self.change_state(config.DIALOGUE)
+        
+        # Define as expressões para os personagens com base no primeiro diálogo
+        if dialogue_list and hasattr(self.game, 'dialogue_manager'):
+            self.game.dialogue_manager.load_dialogue(dialogue_list)
+            
+            # Obtém o primeiro diálogo para definir as expressões iniciais
+            first = dialogue_list[0] if dialogue_list else None
+            if first:
+                speaker = first.get("speaker", "")
+                expression = first.get("expression", "normal")
+                
+                # Define expressões para o personagem falante
+                if speaker == "Nova" and hasattr(self.game, 'nova'):
+                    self.game.nova.set_expression(expression)
+                elif speaker == "Violet" and hasattr(self.game, 'violet'):
+                    self.game.violet.set_expression(expression)
+        
     def update(self):
         """Atualiza temporizadores e transições de estado"""
         # Atualiza o temporizador do som de boas-vindas
@@ -111,6 +131,18 @@ class StateManager:
                             "info"
                         )
                     self.last_countdown_number = 0
+                    
+            elif self.current_state == config.DIALOGUE:
+                # Atualiza o sistema de diálogo
+                if hasattr(self.game, 'dialogue_manager'):
+                    self.game.dialogue_manager.update()
+                
+                # Atualiza as animações dos personagens
+                if hasattr(self.game, 'violet'):
+                    self.game.violet.update()
+                
+                if hasattr(self.game, 'nova'):
+                    self.game.nova.update()
         except AttributeError:
             # Se algum atributo estiver faltando durante a inicialização, apenas pula a atualização
             pass
