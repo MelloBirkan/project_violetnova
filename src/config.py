@@ -74,6 +74,13 @@ QUIZ_DURATION = 600  # quadros (10s a 60fps)
 QUIZ_RESULT_DURATION = 120  # quadros (2s a 60fps)
 
 # ================================
+# Configurações de Piloto Automático
+# ================================
+AUTOPILOT_ENABLED = False  # Desativado por padrão
+AUTOPILOT_DECISION_INTERVAL = 100  # ms entre decisões do piloto automático
+AUTOPILOT_MODEL_PATH = "q_model.npy"  # Caminho padrão para salvar/carregar modelo
+
+# ================================
 # Configurações de dificuldade
 # ================================
 

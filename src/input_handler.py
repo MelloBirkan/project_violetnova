@@ -10,18 +10,22 @@ class InputHandler:
     def handle_events(self):
         """Processa todos os eventos de entrada do jogo"""
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+            self.handle_event(event)
+    
+    def handle_event(self, event):
+        """Processa um único evento de entrada"""
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+            
+        if event.type == pygame.KEYDOWN:
+            self._handle_key_down(event)
                 
-            if event.type == pygame.KEYDOWN:
-                self._handle_key_down(event)
-                    
-            if event.type == pygame.KEYUP:
-                self._handle_key_up(event)
-                    
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                self._handle_mouse_down(event)
+        if event.type == pygame.KEYUP:
+            self._handle_key_up(event)
+                
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self._handle_mouse_down(event)
     
     def _handle_key_down(self, event):
         """Lida com eventos de pressionamento de tecla"""

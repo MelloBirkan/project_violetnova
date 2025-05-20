@@ -92,7 +92,35 @@ python main.py
 
 - **ESPAÇO** - Impulsionar nave
 - **W** - Usar arma (quando disponível)
+- **C** - Alternar modo de controle (toque/segurar)
+- **A** - Ativar/desativar piloto automático (quando disponível)
 - **ESC** - Sair do jogo
+
+## Piloto Automático com Aprendizado de Máquina
+
+Project Violetnova inclui um sistema de piloto automático baseado em Q-Learning, uma técnica de aprendizado por reforço que permite à nave aprender a jogar o jogo através de tentativa e erro.
+
+### Características do Piloto Automático
+
+- Aprende a controlar a nave adaptando-se à gravidade de cada planeta
+- Responde automaticamente aos quizzes para progredir no jogo
+- Reinicia automaticamente após perder vidas
+- Melhora seu desempenho ao longo do tempo conforme mais partidas são jogadas
+
+### Como usar o Piloto Automático
+
+```bash
+# Executar o jogo com piloto automático ativado
+python main.py --autopilot
+
+# Carregar um modelo de piloto automático previamente treinado
+python main.py --autopilot --load-model modelo_salvo.npy
+
+# Salvar o modelo treinado ao sair do jogo
+python main.py --autopilot --save-model novo_modelo.npy
+```
+
+Durante o jogo, você pode alternar entre controle manual e piloto automático pressionando a tecla **A**.
 
 ## Planetas e Mecânicas
 
