@@ -45,6 +45,10 @@ class UIManager:
         # Desenha os colecionáveis
         for collectible in self.game.collectibles:
             collectible.draw(screen)
+
+        # Desenha os projéteis disparados
+        for proj in self.game.weapon_system.projectiles:
+            proj.desenhar(screen)
             
         # Desenha o chão
         self.game.current_planet.draw_ground(screen, self.game.floor_x, config.SCREEN_HEIGHT)

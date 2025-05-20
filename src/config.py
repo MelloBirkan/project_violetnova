@@ -91,14 +91,14 @@ DIFFICULTY_SETTINGS = {
         "lives": 3,
         "max_lives": 5,  # Permite acumular até 5 vidas
         "life_collectible_chance": 0.15,
-        "weapon_collectible_chance": 0.01,
+        "weapon_collectible_chance": 0.05,
         "obstacle_distance_multiplier": 2.0,
         "save_checkpoint": True
     },
     DIFFICULTY_MEDIUM: {
         "lives": 1,
         "life_collectible_chance": 0.10,
-        "weapon_collectible_chance": 0.01,
+        "weapon_collectible_chance": 0.05,
         "obstacle_distance_multiplier": 1.0,
         "save_checkpoint": False,
         "max_lives": 3
@@ -106,8 +106,8 @@ DIFFICULTY_SETTINGS = {
     DIFFICULTY_HARD: {
         "lives": 1,
         "life_collectible_chance": 0.0,
-        "weapon_collectible_chance": 0.0,
-        "obstacle_distance_multiplier": 1.0,
+        "weapon_collectible_chance": 0.01,
+        "obstacle_distance_multiplier": 0.6,
         "save_checkpoint": False
     },
 }

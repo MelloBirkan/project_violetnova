@@ -254,6 +254,8 @@ class Game:
         # Clear all obstacles and collectibles
         self.obstacles = []
         self.collectibles = []
+        if hasattr(self, 'weapon_system'):
+            self.weapon_system.projectiles = []
         # Initialize time tracking for immediate obstacle generation
         self.last_obstacle_time = pygame.time.get_ticks() - 2000
         self.last_collectible_time = pygame.time.get_ticks()
