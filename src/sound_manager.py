@@ -1,6 +1,6 @@
 import pygame
 import os
-from src.config import DEFAULT_SOUND_VOLUME, THRUST_SOUND_VOLUME
+from src.config import DEFAULT_SOUND_VOLUME, THRUST_SOUND_VOLUME, HIT_SOUND_VOLUME
 
 class SoundManager:
     def __init__(self):
@@ -69,7 +69,7 @@ class SoundManager:
             # Define o volume para os sons do jogo
             self.engine_thrust_sound.set_volume(THRUST_SOUND_VOLUME)  # Volume do propulsor reduzido
             self.explosion_sound.set_volume(DEFAULT_SOUND_VOLUME)
-            self.hitting_obstacle_sound.set_volume(DEFAULT_SOUND_VOLUME)
+            self.hitting_obstacle_sound.set_volume(HIT_SOUND_VOLUME)  # Volume de colisão igualado ao do propulsor
             
             # Define o volume máximo para os sons de boas-vindas (narração)
             for sound in self.welcome_sounds.values():

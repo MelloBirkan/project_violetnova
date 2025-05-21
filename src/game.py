@@ -134,12 +134,20 @@ class Game:
     def start_character_dialogue(self):
         """Inicia uma sequência de diálogo entre Violet e Nova"""
         dialogue = [
-            {"speaker": "Violet", "text": "Olá, eu sou Violet! Estou muito animada com nossa missão espacial.", "expression": "excited"},
-            {"speaker": "Nova", "text": "Bem-vinda, Violet! Eu sou Nova, sua assistente de IA para essa jornada pelo sistema solar.", "expression": "happy"},
-            {"speaker": "Violet", "text": "Qual planeta visitaremos primeiro?", "expression": "curious"},
-            {"speaker": "Nova", "text": "Começaremos nossa exploração pela Terra, e então visitaremos outros planetas à medida que progredimos.", "expression": "normal"},
-            {"speaker": "Violet", "text": "Mal posso esperar para aprender sobre a gravidade de cada planeta!", "expression": "excited"},
-            {"speaker": "Nova", "text": "Lembre-se que cada planeta tem sua própria força gravitacional. Você precisará adaptar seus controles de voo!", "expression": "warning"}
+            {"speaker": "NOVA-22", "text": "Sistemas online. Preparando missão de exploração do Sistema Solar. Cadete Violet, você está pronta para iniciar?", "expression": "normal"},
+            {"speaker": "Violet", "text": "[Ajustando o capacete espacial] Miau!", "expression": "excited"},
+            {"speaker": "NOVA-22", "text": "Excelente! Detectei seu entusiasmo nos sensores. Lembre-se que nossa missão é educacional: vamos explorar as diferenças gravitacionais entre os planetas e coletar dados científicos.", "expression": "happy"},
+            {"speaker": "NOVA-22", "text": "A começar pela Terra, com gravidade padrão de 1g.", "expression": "normal"},
+            {"speaker": "Violet", "text": "[Olhando pela janela da nave com olhos arregalados] Miau miau...", "expression": "curious"},
+            {"speaker": "NOVA-22", "text": "[Tom divertido] Sim, eu sei que você preferiria começar por Júpiter, mas precisamos calibrar os controles no ambiente terrestre primeiro.", "expression": "hint"},
+            {"speaker": "NOVA-22", "text": "Além disso, sua aptidão para navegação em alta gravidade ainda precisa de... aperfeiçoamento, digamos assim. Lembra do incidente no simulador?", "expression": "normal"},
+            {"speaker": "Violet", "text": "[Cruza os braços e faz uma cara emburrada] Miaaau!", "expression": "warning"},
+            {"speaker": "NOVA-22", "text": "[Luzes piscando em padrão de riso] Entendo sua indignação, mas as regras de segurança da Academia Espacial Felina são claras.", "expression": "happy"},
+            {"speaker": "NOVA-22", "text": "Agora prepare-se! Vamos iniciar a descida para a órbita terrestre. Use o propulsor para controlar a nave e desvie dos obstáculos.", "expression": "alert"},
+            {"speaker": "NOVA-22", "text": "A cada módulo de dados que coletarmos, aprenderemos mais sobre nosso próprio planeta antes de seguir para os próximos.", "expression": "hint"},
+            {"speaker": "NOVA-22", "text": "[Painel de controle ilumina-se, mostrando os botões de comando]", "expression": "normal"},
+            {"speaker": "NOVA-22", "text": "Controles ativados, sistemas de coleta prontos. Módulos de quiz configurados.", "expression": "normal"},
+            {"speaker": "NOVA-22", "text": "Gravidade terrestre calibrada. Cadete Violet, a exploração espacial começa agora!", "expression": "excited"}
         ]
         self.state_manager.start_dialogue(dialogue)  # Padrão alterado para HOLD
         

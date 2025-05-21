@@ -34,6 +34,10 @@ class StateManager:
         
     def start_dialogue(self, dialogue_list):
         """Inicia uma sequência de diálogo entre Violet e Nova"""
+        # Para qualquer música que esteja tocando (será iniciada no final do diálogo)
+        if hasattr(self.game, 'sound_manager'):
+            self.game.sound_manager.stop_music(500)  # Fade out gradual
+            
         self.change_state(config.DIALOGUE)
         
         # Define as expressões para os personagens com base no primeiro diálogo
@@ -47,7 +51,7 @@ class StateManager:
                 expression = first.get("expression", "normal")
                 
                 # Define expressões para o personagem falante
-                if speaker == "Nova" and hasattr(self.game, 'nova'):
+                if speaker == "Nova" or speaker == "NOVA-22" and hasattr(self.game, 'nova'):
                     self.game.nova.set_expression(expression)
                 elif speaker == "Violet" and hasattr(self.game, 'violet'):
                     self.game.violet.set_expression(expression)

@@ -45,6 +45,7 @@ PLANET_NAME_PT = {
 # Parâmetros do jogo
 DEFAULT_SOUND_VOLUME = 0.7
 THRUST_SOUND_VOLUME = 0.1  # Volume reduzido para o som do propulsor
+HIT_SOUND_VOLUME = 0.1     # Volume reduzido para o som de colisão (igual ao propulsor)
 SOUND_FADEOUT_TIME = 500  # ms
 
 # Parâmetros da espaçonave

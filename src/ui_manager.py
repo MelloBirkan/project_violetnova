@@ -33,14 +33,32 @@ class UIManager:
         elif self.game.state == config.QUIZ_FAILURE:
             self.draw_quiz_failure_screen(screen)
         elif self.game.state == config.DIALOGUE:
-            # Desenha os personagens primeiro
-            if hasattr(self.game, 'violet'):
-                self.game.violet.draw(screen)
-            # Em seguida, desenha o diálogo
+            # Obtém o falante atual para ordenamento z-index
+            current_speaker = ""
             if hasattr(self.game, 'dialogue_manager'):
-                self.game.dialogue_manager.draw(screen)
-            # Nova sempre é desenhada no último passo
-            self.game.nova.draw(screen)
+                current = self.game.dialogue_manager.get_current_dialogue()
+                current_speaker = current.get("speaker", "")
+            
+            # Desenha o fundo do diálogo primeiro
+            if hasattr(self.game, 'dialogue_manager'):
+                self.game.dialogue_manager.draw_background(screen)
+            
+            # Desenha os personagens na ordem correta baseada em quem está falando
+            if current_speaker == "NOVA-22" or current_speaker == "Nova":
+                # NOVA está falando, então VIOLET vai atrás
+                if hasattr(self.game, 'violet'):
+                    self.game.violet.draw(screen)
+                self.game.nova.draw(screen)
+            else:
+                # VIOLET está falando ou ninguém está falando, então NOVA vai atrás
+                self.game.nova.draw(screen)
+                if hasattr(self.game, 'violet'):
+                    self.game.violet.draw(screen)
+            
+            # Desenha o texto do diálogo por cima
+            if hasattr(self.game, 'dialogue_manager'):
+                self.game.dialogue_manager.draw_text(screen)
+                
             return  # Retorna para impedir a renderização redundante da NOVA abaixo
             
         # Sempre desenha a assistente NOVA por cima, a menos que no estado DIALOGUE

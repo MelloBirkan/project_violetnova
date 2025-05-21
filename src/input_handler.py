@@ -73,8 +73,13 @@ class InputHandler:
             if event.key == pygame.K_SPACE:
                 # Avança o diálogo quando espaço é pressionado
                 if hasattr(self.game, 'dialogue_manager'):
-                    current_dialogue = self.game.dialogue_manager.get_current_dialogue()
-                    
+                    # Se o texto ainda não estiver completo, apenas completa o texto
+                    # sem avançar para o próximo diálogo
+                    if not self.game.dialogue_manager.text_complete:
+                        self.game.dialogue_manager.displayed_text = self.game.dialogue_manager.get_current_dialogue()["text"]
+                        self.game.dialogue_manager.text_complete = True
+                        return
+                        
                     # Avança para o próximo diálogo
                     continued = self.game.dialogue_manager.advance_dialogue()
                     
@@ -85,7 +90,7 @@ class InputHandler:
                         expression = next_dialogue.get("expression", "normal")
                         
                         # Define expressões para o personagem que está falando
-                        if speaker == "Nova" and hasattr(self.game, 'nova'):
+                        if (speaker == "Nova" or speaker == "NOVA-22") and hasattr(self.game, 'nova'):
                             self.game.nova.set_expression(expression)
                         elif speaker == "Violet" and hasattr(self.game, 'violet'):
                             self.game.violet.set_expression(expression)

@@ -235,6 +235,25 @@ class NovaAI:
         """Encerra a animação de sinal de rádio"""
         self.audio_playing = False
         self.audio_timer = 0
+        
+    def set_focused(self, focused):
+        """Define o foco para o personagem durante diálogos"""
+        # Implementa o comportamento de foco para NOVA-22
+        # Quando focused=True, aumenta ligeiramente o tamanho
+        # Quando focused=False, diminui ligeiramente o tamanho
+        
+        # Ajusta a pulsação com base no foco
+        if focused:
+            # Aumenta a pulsação quando em foco
+            self.pulse_min = 1.0
+            self.pulse_max = 1.1
+        else:
+            # Reduz a pulsação quando não está em foco
+            self.pulse_min = 0.85
+            self.pulse_max = 0.95
+            
+        # Força atualização da superfície
+        self.update_surface()
     
     def set_expression(self, expression):
         """Muda a expressão da IA com transição suave"""
