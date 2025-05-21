@@ -44,7 +44,7 @@ class Spacecraft:
         # Cria a base da espaçonave e os quadros de empuxo
         self.create_animation_frames()
     
-    def update(self, gravity, screen_height=720, floor_height=100):
+    def update(self, gravity, screen_height=720, floor_height=100, planet_name=None):
         # Aplica a gravidade e atualiza a posição
         self.velocity += gravity
 
@@ -64,8 +64,13 @@ class Spacecraft:
             new_y = 0
             self.velocity = 0  # Zera a velocidade para evitar oscilação
 
+        # Ajusta a altura do chão para planetas após Mercúrio
+        adjusted_floor_height = floor_height
+        if planet_name and planet_name != "Earth" and planet_name != "Mercury":
+            adjusted_floor_height = 60  # Mesma altura usada no collision_manager
+
         # Impede que a nave ultrapasse o chão, mas permite que colida com ele
-        ground_limit = screen_height - floor_height - self.HITBOX_HEIGHT
+        ground_limit = screen_height - adjusted_floor_height - self.HITBOX_HEIGHT
         if new_y > ground_limit:
             new_y = ground_limit
             # Mantém a verificação de colisão no método check_collision,

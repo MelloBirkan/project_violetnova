@@ -15,7 +15,12 @@ class GameMechanics:
             return
             
         # Atualiza a nave com a gravidade do planeta e limites de tela
-        self.game.spacecraft.update(self.game.current_planet.gravity, config.SCREEN_HEIGHT, config.FLOOR_HEIGHT)
+        self.game.spacecraft.update(
+            self.game.current_planet.gravity, 
+            config.SCREEN_HEIGHT, 
+            config.FLOOR_HEIGHT,
+            self.game.current_planet.name
+        )
         
         # Impulso contínuo quando espaço é mantido pressionado
         if self.game.control_mode == config.CONTROL_MODE_HOLD and self.game.space_held:
@@ -82,21 +87,26 @@ class GameMechanics:
         # Define o espaçamento fixo entre obstáculos
         gap_size = Obstacle.GAP
         
+        # Ajusta a altura do chão para planetas após Mercúrio
+        floor_height = config.FLOOR_HEIGHT
+        if self.game.current_planet.name != "Earth" and self.game.current_planet.name != "Mercury":
+            floor_height = 60  # Mesma altura usada no collision_manager
+        
         # Calcula valores mínimo e máximo para o centro do vão
         min_gap_center_y = gap_size // 2
-        max_gap_center_y = config.SCREEN_HEIGHT - config.FLOOR_HEIGHT - (gap_size // 2)
+        max_gap_center_y = config.SCREEN_HEIGHT - floor_height - (gap_size // 2)
         
         # Trata casos extremos com valores extremos
         if min_gap_center_y > max_gap_center_y:
-            target_y = ((gap_size // 2) + (config.SCREEN_HEIGHT - config.FLOOR_HEIGHT - (gap_size // 2))) // 2
+            target_y = ((gap_size // 2) + (config.SCREEN_HEIGHT - floor_height - (gap_size // 2))) // 2
             
             # Define limites absolutos para correção
             abs_min_y = gap_size // 2
-            abs_max_y = config.SCREEN_HEIGHT - config.FLOOR_HEIGHT - (gap_size // 2)
+            abs_max_y = config.SCREEN_HEIGHT - floor_height - (gap_size // 2)
             
             if abs_min_y > abs_max_y:  # Ex.: gap_size > altura jogável
                 # Usa o meio da área jogável
-                target_y = (config.SCREEN_HEIGHT - config.FLOOR_HEIGHT) // 2
+                target_y = (config.SCREEN_HEIGHT - floor_height) // 2
             else:
                 # Corrige target_y para um valor fisicamente possível
                 target_y = max(abs_min_y, min(target_y, abs_max_y))

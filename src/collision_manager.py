@@ -98,12 +98,17 @@ class CollisionManager:
         """Lida com a colisão com os limites da tela"""
         spacecraft = self.game.spacecraft
         
+        # Determina a altura correta do chão para o planeta atual
+        floor_height = config.FLOOR_HEIGHT
+        if self.game.current_planet.name != "Earth" and self.game.current_planet.name != "Mercury":
+            floor_height = 60  # Mesma altura usada no _check_boundary_collision
+        
         # Se colidir com o chão
-        if spacecraft.y + spacecraft.HITBOX_HEIGHT >= config.SCREEN_HEIGHT - config.FLOOR_HEIGHT:
+        if spacecraft.y + spacecraft.HITBOX_HEIGHT >= config.SCREEN_HEIGHT - floor_height:
             # Aplica knockback para cima
             spacecraft.velocity = config.SPACECRAFT_KNOCKBACK * 0.8
             # Garante que a nave não vá abaixo do chão
-            spacecraft.y = config.SCREEN_HEIGHT - config.FLOOR_HEIGHT - spacecraft.HITBOX_HEIGHT
+            spacecraft.y = config.SCREEN_HEIGHT - floor_height - spacecraft.HITBOX_HEIGHT
         else:
             # Se colidir com o teto, aplica knockback para baixo
             spacecraft.velocity = abs(config.SPACECRAFT_KNOCKBACK) * 0.8
