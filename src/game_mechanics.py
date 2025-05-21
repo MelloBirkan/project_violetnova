@@ -163,9 +163,26 @@ class GameMechanics:
             10  # Limite padrão
         )
         
+        # Verifica se é Netuno e o jogador atingiu 14 pontos
+        if (self.game.current_planet.name == "Neptune" and self.game.score >= current_threshold):
+            # Mostra a mensagem de congratulações
+            self.game.nova.show_message("Parabéns! Missão completa! Sistema Solar explorado!", "excited")
+            # Muda para o estado de jogo concluído
+            self.game.mission_failed = False
+            self.game.state_manager.change_state(config.GAME_OVER)
+            # Atualiza o planeta mais distante alcançado
+            self.game.furthest_planet_index = self.game.current_planet_index
+            # Salva o progresso
+            self.game.planet_tracker.save(
+                self.game.current_planet.name.lower(),
+                update_furthest=True,
+                allow_save=config.DIFFICULTY_SETTINGS[self.game.difficulty]["save_checkpoint"],
+            )
+            return
+        
         # Verifica se a pontuação atingiu o limite para avançar automaticamente
-        if (self.game.score >= current_threshold and 
-            self.game.current_planet_index < len(self.game.planets) - 1):
+        elif (self.game.score >= current_threshold and 
+              self.game.current_planet_index < len(self.game.planets) - 1):
             
             # NOVA anuncia a progressão automática
             next_planet_en = self.game.planets[self.game.current_planet_index + 1].name

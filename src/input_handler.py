@@ -160,10 +160,12 @@ class InputHandler:
             # Reset welcome_sound_played flag
             self.game.welcome_sound_played = False
             
-            # Verifica se completou Netuno (o último planeta)
-            if not self.game.mission_failed and self.game.current_planet_index >= len(self.game.planets):
-                # Retorna para a tela de splash após concluir a missão
-                self.game.state_manager.change_state(config.SPLASH)
+            # Verifica se completou Netuno com 14 pontos ou atingiu o fim da lista de planetas
+            if (not self.game.mission_failed and 
+                ((self.game.current_planet.name == "Neptune" and self.game.score >= 14) or
+                 self.game.current_planet_index >= len(self.game.planets))):
+                # Retorna para o menu após concluir a missão
+                self.game.state_manager.change_state(config.MENU)
                 return
                 
             # Verifica as configurações de dificuldade
@@ -254,10 +256,12 @@ class InputHandler:
             # Reset welcome_sound_played flag
             self.game.welcome_sound_played = False
             
-            # Verifica se completou Netuno (o último planeta)
-            if not self.game.mission_failed and self.game.current_planet_index >= len(self.game.planets):
-                # Retorna para a tela de splash após concluir a missão
-                self.game.state_manager.change_state(config.SPLASH)
+            # Verifica se completou Netuno com 14 pontos ou atingiu o fim da lista de planetas
+            if (not self.game.mission_failed and 
+                ((self.game.current_planet.name == "Neptune" and self.game.score >= 14) or
+                 self.game.current_planet_index >= len(self.game.planets))):
+                # Retorna para o menu após concluir a missão
+                self.game.state_manager.change_state(config.MENU)
                 return
                 
             # Verifica as configurações de dificuldade

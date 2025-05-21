@@ -241,7 +241,11 @@ class UIManager:
         if self.game.mission_failed:
             game_over_text = config.GAME_FONT.render("MISSÃO FRACASSADA", True, (255, 50, 50))
         else:
-            game_over_text = config.GAME_FONT.render("MISSÃO CONCLUÍDA", True, (255, 215, 0))
+            # Verifica se é Netuno completo para mensagem especial
+            if self.game.current_planet.name == "Neptune" and self.game.score >= LEVEL_PROGRESSION_THRESHOLDS["Neptune"]:
+                game_over_text = config.GAME_FONT.render("PARABÉNS! SISTEMA SOLAR EXPLORADO!", True, (255, 215, 0))
+            else:
+                game_over_text = config.GAME_FONT.render("MISSÃO CONCLUÍDA", True, (255, 215, 0))
         score_text = config.GAME_FONT.render(f"Pontuação Final: {self.game.score}", True, (255, 255, 255))
         
         # Mensagem personalizada baseada no checkpoint
