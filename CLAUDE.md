@@ -33,17 +33,20 @@ The main development files are located in the `/src` directory. There are no spe
 ### Game States
 
 The game uses a state-based architecture with these primary states:
+- `SPLASH`: Initial splash screen
 - `MENU`: Title screen
 - `PLAYING`: Active gameplay
 - `GAME_OVER`: End screen showing score
 - `TRANSITION`: Screen when moving between planets
 - `QUIZ`: Educational quizzes about each planet
 - `QUIZ_FAILURE`: Cooldown period when player fails a quiz
+- `DIALOGUE`: Character dialogue sequences
 
 ### Key Components
 
 1. **Player Character**
    - `spacecraft.py`: Implements the player-controlled spacecraft with physics, visualization, and animation
+   - `violet.py`: The main character (a cat astronaut)
 
 2. **Level Elements**
    - `obstacle.py`: Implements game obstacles with different themes (asteroid, debris, storm)
@@ -54,6 +57,7 @@ The game uses a state-based architecture with these primary states:
 3. **Educational Elements**
    - `quiz.py`: Interactive quiz system about space facts
    - `nova_ai.py`: AI assistant character that provides educational information
+   - `dialogue_manager.py`: Handles character interactions and educational dialogue
 
 4. **Game Management**
    - `game.py`: Core game state management and orchestration
@@ -68,6 +72,7 @@ The game uses a state-based architecture with these primary states:
    - `sound_manager.py`: Handles audio playback
    - `visual_effects.py`: Manages visual effects and animations
    - `collision_manager.py`: Manages collision detection and handling
+   - `portal.py`: Handles transitions between planets
 
 ### Physics and Mechanics
 
@@ -76,6 +81,7 @@ The game implements a simplified physics system where:
 - The spacecraft has thrust capabilities to counteract gravity
 - Collision detection uses hitboxes for more accurate interactions
 - Obstacle movement creates the game challenge
+- Weapons can be used to destroy obstacles when power-ups are collected
 
 ### Progression System
 
@@ -88,6 +94,8 @@ Players progress through the solar system by:
 
 - `/assets`: Contains images and sounds
   - `/images`: Game sprites and visual assets
+    - `/nova_expressions`: Expression images for NOVA AI assistant
+    - `/planets_sprites`: Planet-specific background and obstacle sprites
   - `/musics`: Background music for different planets
   - `/sounds`: Sound effects and welcome messages
 - `/src`: Main game code
@@ -104,6 +112,12 @@ Players progress through the solar system by:
 - **C**: Change spacecraft color (in menu) or control mode (during gameplay)
 - **ESC**: Exit game
 
+## Control Modes
+
+The game supports two control modes:
+- **HOLD**: Hold the SPACE key for continuous thrust (default mode)
+- **FLAPPY**: Tap the SPACE key for burst thrust (similar to Flappy Bird mechanics)
+
 ## Translation Support
 
 The game supports Brazilian Portuguese with translation dictionaries for planet names and other text elements. Translation mappings are defined in `src/planet_data.py` and `src/config.py`, and passed to various components.
@@ -119,15 +133,24 @@ The game supports Brazilian Portuguese with translation dictionaries for planet 
 Each planet in the game has:
 - Unique gravity factor (relative to Earth's 1.0g)
 - Custom background and obstacle sprites
-- Educational quiz questions and facts
+- Educational quiz questions and facts (with explanations)
 - Specific progression thresholds
 
 ## Game Difficulty Settings
 
 The game has three difficulty levels (Easy, Medium, Hard) defined in `src/config.py`:
-- Easy: 3 lives (max 5), checkpoints enabled, slower obstacles
-- Medium: 1 life (max 3), no checkpoints, standard obstacle speed
-- Hard: 1 life, no checkpoints, no power-ups, standard obstacle speed
+- Easy: 3 lives (max 5), checkpoints enabled, slower obstacles, higher chance of power-ups
+- Medium: 1 life (max 3), no checkpoints, standard obstacle speed, moderate power-up chance
+- Hard: 1 life, no checkpoints, no power-ups, faster obstacles
+
+## Save System
+
+The game uses a simple JSON-based save system to track:
+- Last played planet (for resuming)
+- Furthest planet reached (for progression)
+- Checkpoints (when enabled in easy mode)
+
+The save file is located at `planet_progress.json` in the root directory.
 
 ## Development Environment
 
@@ -142,3 +165,6 @@ Recent work has focused on:
 - Translating UI elements and comments to Brazilian Portuguese
 - Refining graphics and animations for improved visual appeal
 - Implementing the complete solar system progression system
+- Adding weapon system functionality for destroying obstacles
+- Enhancing the difficulty settings and planet progression mechanics
+- Implementing character dialogue for educational storytelling
