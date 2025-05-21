@@ -62,7 +62,6 @@ class Violet:
             self.image = pygame.image.load(image_path).convert_alpha()
         except pygame.error as e:
             print(f"Erro ao carregar a imagem de Violet: {e}")
-            # Cria uma superfície vazia como fallback se a imagem não puder ser carregada
             self.image = pygame.Surface((self.BASE_WIDTH, self.BASE_HEIGHT), pygame.SRCALPHA)
             self.image.fill((0, 0, 0, 0))
     
