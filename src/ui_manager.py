@@ -37,6 +37,9 @@ class UIManager:
             self.game.quiz.draw(screen)
         elif self.game.state == config.QUIZ_FAILURE:
             self.draw_quiz_failure_screen(screen)
+        elif self.game.state == config.MUSIC_PLAYER:
+            # Desenha o player de música
+            self.game.music_player.draw(screen)
         elif self.game.state == config.DIALOGUE:
             # Obtém o falante atual para ordenamento z-index
             current_speaker = ""
@@ -66,8 +69,8 @@ class UIManager:
                 
             return  # Retorna para impedir a renderização redundante da NOVA abaixo
             
-        # Sempre desenha a assistente NOVA por cima, a menos que no estado DIALOGUE
-        if self.game.state != config.DIALOGUE:
+        # Sempre desenha a assistente NOVA por cima, a menos que no estado DIALOGUE ou MUSIC_PLAYER
+        if self.game.state != config.DIALOGUE and self.game.state != config.MUSIC_PLAYER:
             self.game.nova.draw(screen)
     
     def draw_splash_screen(self, screen):

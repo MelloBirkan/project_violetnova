@@ -14,6 +14,7 @@ TRANSITION = 4
 QUIZ = 5
 QUIZ_FAILURE = 6
 DIALOGUE = 7
+MUSIC_PLAYER = 8
 
 # Modos de controle
 CONTROL_MODE_FLAPPY = 0  # Toque para empuxo, estilo Flappy Bird
@@ -54,7 +55,7 @@ SPACECRAFT_MAX_LIVES = 3
 SPACECRAFT_INVULNERABILITY_TIME = 90  # quadros (1.5s a 60fps)
 
 # Configurações do menu
-MENU_OPTIONS = ["Jogar", "Dificuldade", "Diálogo Demo", "Créditos", "Sair"]
+MENU_OPTIONS = ["Jogar", "Dificuldade", "Player de Música", "Diálogo Demo", "Créditos", "Sair"]
 MENU_OPTION_SPACING = 50
 MENU_START_Y = 280
 SPACECRAFT_KNOCKBACK = -3.5

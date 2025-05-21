@@ -7,6 +7,7 @@ from src.nova_ai import NovaAI
 from src.quiz import Quiz
 from src.violet import Violet
 from src.dialogue_manager import DialogueManager
+from src.music_player import MusicPlayer
 
 # Import refactored modules
 import src.config as config
@@ -113,6 +114,9 @@ class Game:
         
         # Inicializa o gerenciador de diálogos
         self.dialogue_manager = DialogueManager(self)
+        
+        # Inicializa o player de música
+        self.music_player = MusicPlayer(config.SCREEN_WIDTH, config.SCREEN_HEIGHT)
 
         # Configurações de progressão
         self.difficulty_multiplier = 1.0

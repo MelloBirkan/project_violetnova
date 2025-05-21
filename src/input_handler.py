@@ -48,6 +48,13 @@ class InputHandler:
                     # Se está no menu principal, sai do jogo
                     pygame.quit()
                     sys.exit()
+            elif self.game.state == config.MUSIC_PLAYER:
+                # Volta ao menu principal a partir do player de música
+                if self.game.music_player.is_playing:
+                    pygame.mixer.music.fadeout(500)
+                    self.game.music_player.is_playing = False
+                self.game.state_manager.change_state(config.MENU)
+                self.game.state = config.MENU
             else:
                 # Se está jogando, volta ao menu
                 self.game.state_manager.change_state(config.MENU)
@@ -78,6 +85,12 @@ class InputHandler:
                         self.game.sound_manager.menu_select_sound.play()
                 elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     self._handle_menu_selection()
+        elif self.game.state == config.MUSIC_PLAYER:
+            # Envia eventos para o player de música
+            if not self.game.music_player.handle_event(event):
+                # Se retornar False, voltar para o menu
+                self.game.state_manager.change_state(config.MENU)
+                self.game.state = config.MENU
         elif self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
             # Só repassa eventos ao quiz se estiver no estado QUIZ
             if self.game.state == config.QUIZ:
@@ -140,6 +153,13 @@ class InputHandler:
                 # Só repassa eventos ao quiz se estiver no estado QUIZ
                 if self.game.state == config.QUIZ:
                     self.game.quiz.handle_event(event)
+            elif self.game.state == config.MUSIC_PLAYER:
+                # Repassa o clique para o player de música como se fosse a tecla espaço (reproduz/pausa)
+                mouse_event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_SPACE})
+                if not self.game.music_player.handle_event(mouse_event):
+                    # Se retornar False, voltar para o menu
+                    self.game.state_manager.change_state(config.MENU)
+                    self.game.state = config.MENU
             else:
                 self._handle_left_click()
     
@@ -222,6 +242,15 @@ class InputHandler:
         elif selected_option == "Dificuldade":
             self.game.in_difficulty_menu = True
             self.game.selected_difficulty = self.game.difficulty
+        elif selected_option == "Player de Música":
+            # Atualiza a lista de planetas desbloqueados antes de abrir o player
+            self.game.music_player.load_unlocked_planets()
+            # Para a música atual para preparar para o player de música
+            if pygame.mixer.music.get_busy():
+                pygame.mixer.music.fadeout(500)
+            # Muda para o estado do player de música
+            self.game.state_manager.change_state(config.MUSIC_PLAYER)
+            self.game.state = config.MUSIC_PLAYER
         elif selected_option == "Diálogo Demo":
             # Inicia o diálogo de demonstração
             self.game.start_character_dialogue()

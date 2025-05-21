@@ -20,12 +20,11 @@ LEVEL_PROGRESSION_THRESHOLDS = {
     "Mercury": 7,
     "Venus": 7,
     "Moon": 3,
-    "Mars": 5,
+    "Mars": 6,
     "Jupiter": 20,
     "Saturn": 17,
     "Uranus": 15,
     "Neptune": 14,
-    "Pluto": 1
 }
 
 def create_planet_data():
