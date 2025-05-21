@@ -217,6 +217,8 @@ class StateManager:
 
                 # Verifica se chegamos ao fim de todos os planetas
                 if self.game.current_planet_index >= len(self.game.planets):
+                    # Missão foi concluída com sucesso (diferente de quando falha)
+                    self.game.mission_failed = False
                     self.change_state(config.GAME_OVER)
                     if hasattr(self.game, 'sound_manager'):
                         self.game.sound_manager.play_explosion()

@@ -28,6 +28,7 @@ class Game:
         self.last_planet = self.planet_tracker.get_last_planet()
         self.furthest_planet = self.planet_tracker.get_furthest_planet()
         self.furthest_planet_index = 0  # Registra o planeta mais distante alcançado
+        self.mission_failed = False  # Flag para rastrear se a missão fracassou
 
         # Sistema de vidas e dificuldade
         self.difficulty = config.DEFAULT_DIFFICULTY
@@ -173,6 +174,9 @@ class Game:
         if not new_planet:
             # Sempre iniciar com o número de vidas da dificuldade, não o máximo possível
             self.lives = settings["lives"]
+            
+        # Resetar o estado da missão
+        self.mission_failed = False
         
         if continue_from_saved:
             # Continue from the saved planet (checkpoint)
@@ -315,6 +319,7 @@ class Game:
             if self.lives <= 0:
                 self.lives = 0
                 self.nova.show_message("Dano crítico! Fim de jogo!", "alert")
+                self.mission_failed = True  # Marca a missão como fracassada
                 self.state_manager.change_state(config.GAME_OVER)
                 self.state = config.GAME_OVER
                 self.sound_manager.stop_thrust(100)

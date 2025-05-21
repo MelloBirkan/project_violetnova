@@ -23,8 +23,12 @@ class CollisionManager:
         spacecraft = self.game.spacecraft
         
         # Verifica se a nave atingiu o teto ou o chão
+        floor_height = config.FLOOR_HEIGHT
+        if self.game.current_planet.name != "Earth" and self.game.current_planet.name != "Mercury":
+            floor_height = 60  # Ajusta a altura do chão para planetas depois de Mercúrio
+            
         if (spacecraft.y <= 0 or 
-            spacecraft.y + spacecraft.HITBOX_HEIGHT >= config.SCREEN_HEIGHT - config.FLOOR_HEIGHT):
+            spacecraft.y + spacecraft.HITBOX_HEIGHT >= config.SCREEN_HEIGHT - floor_height):
             
             return self.handle_collision("boundary")
         

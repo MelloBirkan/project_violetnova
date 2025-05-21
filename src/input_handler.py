@@ -159,6 +159,13 @@ class InputHandler:
         elif self.game.state == config.GAME_OVER:
             # Reset welcome_sound_played flag
             self.game.welcome_sound_played = False
+            
+            # Verifica se completou Netuno (o último planeta)
+            if not self.game.mission_failed and self.game.current_planet_index >= len(self.game.planets):
+                # Retorna para a tela de splash após concluir a missão
+                self.game.state_manager.change_state(config.SPLASH)
+                return
+                
             # Verifica as configurações de dificuldade
             difficulty_settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
             
@@ -246,6 +253,13 @@ class InputHandler:
         elif self.game.state == config.GAME_OVER:
             # Reset welcome_sound_played flag
             self.game.welcome_sound_played = False
+            
+            # Verifica se completou Netuno (o último planeta)
+            if not self.game.mission_failed and self.game.current_planet_index >= len(self.game.planets):
+                # Retorna para a tela de splash após concluir a missão
+                self.game.state_manager.change_state(config.SPLASH)
+                return
+                
             # Verifica as configurações de dificuldade
             difficulty_settings = config.DIFFICULTY_SETTINGS[self.game.difficulty]
             

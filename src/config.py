@@ -3,7 +3,7 @@ import pygame
 # Configuração da tela
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
-FLOOR_HEIGHT = 100
+FLOOR_HEIGHT = 80
 
 # Estados do jogo
 SPLASH = 0

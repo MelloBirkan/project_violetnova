@@ -237,7 +237,11 @@ class UIManager:
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
         
-        game_over_text = config.GAME_FONT.render("MISSÃO CONCLUÍDA", True, (255, 215, 0))
+        # Determina se foi falha ou conclusão baseado no estado do jogo
+        if self.game.mission_failed:
+            game_over_text = config.GAME_FONT.render("MISSÃO FRACASSADA", True, (255, 50, 50))
+        else:
+            game_over_text = config.GAME_FONT.render("MISSÃO CONCLUÍDA", True, (255, 215, 0))
         score_text = config.GAME_FONT.render(f"Pontuação Final: {self.game.score}", True, (255, 255, 255))
         
         # Mensagem personalizada baseada no checkpoint

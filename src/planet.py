@@ -136,7 +136,11 @@ class Planet:
     def draw_ground(self, screen, x, screen_height):
         """Desenha o solo para este planeta"""
         # Calcula a posição para desenhar o solo
-        ground_y = screen_height - 100
+        if self.name == "Earth" or self.name == "Mercury":
+            ground_y = screen_height - 100
+        else:
+            # Solo mais baixo para planetas após Mercúrio
+            ground_y = screen_height - 57
 
         # Obtém a largura da tela para determinar quantas cópias precisamos
         screen_width = screen.get_width()
