@@ -45,7 +45,7 @@ class Game:
         self.planet_at_death = 0
 
         # Inicializa o estado interno antes de usar a propriedade
-        self._state = config.MENU
+        self._state = config.SPLASH
 
         # Controle de som de boas-vindas
         self.welcome_sound_played = False
@@ -129,7 +129,7 @@ class Game:
         self.state_manager = StateManager(self)
 
         # Inicializa o estado do jogo (usa o valor existente de _state)
-        self.state_manager.change_state(config.MENU)
+        self.state_manager.change_state(config.SPLASH)
         
     def start_character_dialogue(self):
         """Inicia uma sequência de diálogo entre Violet e Nova"""

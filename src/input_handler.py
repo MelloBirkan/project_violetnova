@@ -25,6 +25,19 @@ class InputHandler:
     
     def _handle_key_down(self, event):
         """Lida com eventos de pressionamento de tecla"""
+        # Verifica se está na tela inicial (splash screen)
+        if self.game.state == config.SPLASH:
+            if event.key == pygame.K_SPACE:
+                # Transição da tela inicial para o menu principal
+                self.game.state_manager.change_state(config.MENU)
+                self.game.state = config.MENU
+                return
+            elif event.key == pygame.K_ESCAPE:
+                # Sai do jogo se Escape for pressionado na tela inicial
+                pygame.quit()
+                sys.exit()
+            return
+        
         if event.key == pygame.K_ESCAPE:
             # Se está no menu principal ou submenu de dificuldade
             if self.game.state == config.MENU:
@@ -117,6 +130,12 @@ class InputHandler:
     def _handle_mouse_down(self, event):
         """Lida com cliques do mouse"""
         if event.button == 1:  # Botão esquerdo do mouse
+            # Se estiver na tela inicial (splash screen), o clique do mouse também leva ao menu principal
+            if self.game.state == config.SPLASH:
+                self.game.state_manager.change_state(config.MENU)
+                self.game.state = config.MENU
+                return
+                
             if self.game.state == config.QUIZ or self.game.state == config.QUIZ_FAILURE:
                 # Só repassa eventos ao quiz se estiver no estado QUIZ
                 if self.game.state == config.QUIZ:

@@ -10,6 +10,16 @@ class VisualEffectsManager:
         self.flash_effect = 0
         self.stars = self._generate_stars(100)
         
+        # Carrega os sprites de vida
+        self.life_full_sprite = pygame.image.load("assets/images/vida_cheia.png")
+        self.life_empty_sprite = pygame.image.load("assets/images/vida_vazia.png")
+        
+        # Redimensiona os sprites para um tamanho adequado
+        self.life_icon_width = 30
+        self.life_icon_height = 30
+        self.life_full_sprite = pygame.transform.scale(self.life_full_sprite, (self.life_icon_width, self.life_icon_height))
+        self.life_empty_sprite = pygame.transform.scale(self.life_empty_sprite, (self.life_icon_width, self.life_icon_height))
+        
     def update(self):
         """Atualiza todos os efeitos visuais"""
         # Atualiza o efeito de cintilação das estrelas
@@ -127,58 +137,40 @@ class VisualEffectsManager:
             screen.blit(flash_overlay, (0, 0))
     
     def draw_life_icons(self, screen, lives, max_lives):
-        """Desenha ícones indicadores de vida"""
-        # Configura dimensões
-        life_icon_width = 30
-        life_icon_height = 15
+        """Desenha ícones indicadores de vida usando sprites"""
+        # Configura dimensões e posicionamento
         life_icon_padding = 5
         life_base_x = 80
         life_y = 112
         
         for i in range(max_lives):
-            # Determina a cor com base se esta vida está disponível
-            if i < lives:
-                # Vida disponível - usa cor padrão prata
-                color = (192, 192, 192) # Cor prata
-                alpha = 255
-            else:
-                # Vida perdida - cinza e semitransparente
-                color = (100, 100, 100)
-                alpha = 128
-            
-            # Cria ícone de mini-espaçonave
-            life_icon = pygame.Surface((life_icon_width, life_icon_height), pygame.SRCALPHA)
-            life_icon.fill((0, 0, 0, 0))  # Transparente
-            
-            # Desenha forma simplificada da espaçonave
-            pygame.draw.ellipse(life_icon, (*color, alpha),
-                              (0, 0, life_icon_width, life_icon_height))
-            
-            # Adiciona pequena janela/cabine
-            window_color = (135, 206, 250) # Azul céu claro
-            pygame.draw.ellipse(life_icon, (*window_color, alpha),
-                              (life_icon_width // 2, life_icon_height // 4,
-                               life_icon_width // 4, life_icon_height // 2))
-            
             # Posiciona o ícone
-            icon_x = life_base_x + (life_icon_width + life_icon_padding) * i
+            icon_x = life_base_x + (self.life_icon_width + life_icon_padding) * i
             
-            # Efeito pulsante para a última vida
-            if i == 0 and lives == 1:  # Última vida
-                pulse = abs(math.sin(pygame.time.get_ticks() * 0.01)) * 255
-                pulse_overlay = pygame.Surface((life_icon_width, life_icon_height), pygame.SRCALPHA)
-                pulse_overlay.fill((255, 0, 0, int(pulse * 0.5)))  # Vermelho pulsante
-                life_icon.blit(pulse_overlay, (0, 0))
-            
-            # Efeito de invulnerabilidade
-            if self.game.invulnerable and i < lives:
-                # Efeito de piscar
-                blink = (pygame.time.get_ticks() // 200) % 2  # Alterna 0/1 a cada 200ms
-                if blink:
-                    # Sobreposição azul para indicar invulnerabilidade
-                    shield_overlay = pygame.Surface((life_icon_width, life_icon_height), pygame.SRCALPHA)
-                    shield_overlay.fill((100, 100, 255, 100))  # Azul claro translúcido
-                    life_icon.blit(shield_overlay, (0, 0))
+            # Seleciona o sprite baseado em vidas disponíveis
+            if i < lives:
+                # Vida disponível - usa o sprite de vida cheia
+                life_icon = self.life_full_sprite.copy()
+                
+                # Efeito pulsante para a última vida
+                if i == 0 and lives == 1:  # Última vida
+                    pulse = abs(math.sin(pygame.time.get_ticks() * 0.01)) * 255
+                    pulse_overlay = pygame.Surface((self.life_icon_width, self.life_icon_height), pygame.SRCALPHA)
+                    pulse_overlay.fill((255, 0, 0, int(pulse * 0.5)))  # Vermelho pulsante
+                    life_icon.blit(pulse_overlay, (0, 0))
+                
+                # Efeito de invulnerabilidade
+                if self.game.invulnerable:
+                    # Efeito de piscar
+                    blink = (pygame.time.get_ticks() // 200) % 2  # Alterna 0/1 a cada 200ms
+                    if blink:
+                        # Sobreposição azul para indicar invulnerabilidade
+                        shield_overlay = pygame.Surface((self.life_icon_width, self.life_icon_height), pygame.SRCALPHA)
+                        shield_overlay.fill((100, 100, 255, 100))  # Azul claro translúcido
+                        life_icon.blit(shield_overlay, (0, 0))
+            else:
+                # Vida perdida - usa o sprite de vida vazia
+                life_icon = self.life_empty_sprite.copy()
             
             # Desenha o ícone
             screen.blit(life_icon, (icon_x, life_y))

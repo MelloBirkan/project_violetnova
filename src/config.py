@@ -6,13 +6,14 @@ SCREEN_HEIGHT = 720
 FLOOR_HEIGHT = 100
 
 # Estados do jogo
-MENU = 0
-PLAYING = 1
-GAME_OVER = 2
-TRANSITION = 3
-QUIZ = 4
-QUIZ_FAILURE = 5
-DIALOGUE = 6
+SPLASH = 0
+MENU = 1
+PLAYING = 2
+GAME_OVER = 3
+TRANSITION = 4
+QUIZ = 5
+QUIZ_FAILURE = 6
+DIALOGUE = 7
 
 # Modos de controle
 CONTROL_MODE_FLAPPY = 0  # Toque para empuxo, estilo Flappy Bird

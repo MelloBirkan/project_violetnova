@@ -9,7 +9,12 @@ class UIManager:
         
     def draw(self, screen):
         """Desenha a interface do jogo de acordo com o estado atual"""
-        # Desenha o plano de fundo
+        # Verifica se está na tela inicial (splash screen)
+        if self.game.state == config.SPLASH:
+            self.draw_splash_screen(screen)
+            return
+            
+        # Desenha o plano de fundo para outros estados
         self.game.visual_effects.draw_background(screen, self.game.current_planet)
         
         # Desenha conteúdo conforme o estado do jogo
@@ -64,6 +69,33 @@ class UIManager:
         # Sempre desenha a assistente NOVA por cima, a menos que no estado DIALOGUE
         if self.game.state != config.DIALOGUE:
             self.game.nova.draw(screen)
+    
+    def draw_splash_screen(self, screen):
+        """Desenha a tela inicial com a imagem de splash"""
+        # Preenche a tela com preto para garantir que nenhum resíduo de outras telas apareça
+        screen.fill((0, 0, 0))
+        
+        # Obtém a imagem de splash do gerenciador de estado
+        splash_image = self.game.state_manager.splash_image
+        
+        # Redimensiona a imagem para preencher a tela, mantendo a proporção
+        screen_width, screen_height = pygame.display.get_surface().get_size()
+        img_width, img_height = splash_image.get_size()
+        
+        # Calcula a escala necessária para preencher a tela
+        scale = max(screen_width / img_width, screen_height / img_height)
+        new_width = int(img_width * scale)
+        new_height = int(img_height * scale)
+        
+        # Redimensiona a imagem
+        scaled_image = pygame.transform.scale(splash_image, (new_width, new_height))
+        
+        # Centraliza a imagem na tela
+        x = (screen_width - new_width) // 2
+        y = (screen_height - new_height) // 2
+        
+        # Desenha a imagem
+        screen.blit(scaled_image, (x, y))
             
     def _draw_game_elements(self, screen):
         """Desenha elementos comuns do jogo (obstáculos, itens, nave, etc.)"""

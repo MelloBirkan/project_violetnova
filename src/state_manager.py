@@ -4,11 +4,12 @@ import src.config as config
 class StateManager:
     def __init__(self, game):
         self.game = game
-        self.current_state = config.MENU
+        self.current_state = config.SPLASH
         self.transition_time = 0
         self.welcome_sound_timer = 0
         self.quiz_failure_timer = 0
         self.last_countdown_number = 0
+        self.splash_image = pygame.image.load("assets/images/inicial.png")
         
     def change_state(self, new_state):
         """Muda o estado do jogo e realiza a configuração necessária"""
