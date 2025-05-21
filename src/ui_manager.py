@@ -1,5 +1,6 @@
 import pygame
 import math
+import os
 import src.config as config
 from src.planet_data import PLANET_NAME_PT, LEVEL_PROGRESSION_THRESHOLDS
 
@@ -277,8 +278,8 @@ class UIManager:
         # Remove acentos e caracteres especiais para o caminho do arquivo
         planet_name_pt = planet_name_pt.replace("ê", "e").replace("ú", "u").replace("í", "i").replace("ô", "o").replace("á", "a").replace("é", "e")
         
-        # O caminho de arquivo usa o nome em português sem acentos
-        transition_image_path = f"assets/images/planets_sprites/{planet_name_pt}/transicao_{planet_name_pt}.png"
+        # O caminho de arquivo usa o nome em português sem acentos com os.path.join para compatibilidade entre plataformas
+        transition_image_path = os.path.join("assets", "images", "planets_sprites", planet_name_pt, f"transicao_{planet_name_pt}.png")
         
         try:
             transition_image = pygame.image.load(transition_image_path)
