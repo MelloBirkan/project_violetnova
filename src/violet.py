@@ -5,8 +5,8 @@ import os
 
 class Violet:
     # Dimensões base
-    BASE_WIDTH = 200
-    BASE_HEIGHT = 200
+    BASE_WIDTH = 250
+    BASE_HEIGHT = 250
     
     # Tamanhos para foco/não-foco
     FOCUSED_SCALE = 1.3
@@ -140,13 +140,18 @@ class Violet:
             blurred = pygame.transform.smoothscale(scaled_image, blur_size)
             scaled_image = pygame.transform.smoothscale(blurred, (width, height))
         
-        # Aplica a cor e a opacidade à imagem
-        color_surface = pygame.Surface((width, height), pygame.SRCALPHA)
-        color_surface.fill((*color, int(alpha * 0.3)))  # Cor leve apenas como tingimento
-        
-        # Combina imagem e cor
-        self.surface.blit(scaled_image, (0, 0))
-        self.surface.blit(color_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        # Quando em foco, usa a imagem original sem tinting
+        if self.is_focused:
+            # Mantém a cor original quando em foco
+            self.surface.blit(scaled_image, (0, 0))
+        else:
+            # Aplica o efeito de cor apenas quando não está em foco
+            color_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+            color_surface.fill((*color, int(alpha * 0.3)))  # Cor leve apenas como tingimento
+            
+            # Combina imagem e cor
+            self.surface.blit(scaled_image, (0, 0))
+            self.surface.blit(color_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
             
     def update(self):
         """Atualiza a animação de Violet"""
