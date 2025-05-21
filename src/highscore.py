@@ -1,6 +1,9 @@
 import os
 import json
 
+# Toggle debug prints for PlanetTracker
+DEBUG_PLANET_TRACKER = False
+
 class PlanetTracker:
     def __init__(self, file_path="planet_progress.json"):
         self.file_path = file_path
@@ -43,9 +46,10 @@ class PlanetTracker:
                 self.furthest_planet = planet_lower
             
             # Debug para verificar a atualização
-            print(f"Current planet: {planet_lower}, idx: {current_idx}")
-            print(f"Furthest planet: {furthest_lower}, idx: {furthest_idx}")
-            print(f"Updated furthest: {self.furthest_planet}")
+            if DEBUG_PLANET_TRACKER:
+                print(f"Current planet: {planet_lower}, idx: {current_idx}")
+                print(f"Furthest planet: {furthest_lower}, idx: {furthest_idx}")
+                print(f"Updated furthest: {self.furthest_planet}")
         
         try:
             with open(self.file_path, 'w') as f:

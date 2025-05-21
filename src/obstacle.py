@@ -6,6 +6,16 @@ class Obstacle:
     WIDTH = 80
     GAP = 225  # Espaço entre obstáculos superior e inferior
 
+    # Cache para sprites já carregados, evitando carregamento repetido
+    SPRITE_CACHE = {}
+
+    @classmethod
+    def _load_sprite(cls, path):
+        """Carrega um sprite e armazena em cache."""
+        if path not in cls.SPRITE_CACHE and os.path.exists(path):
+            cls.SPRITE_CACHE[path] = pygame.image.load(path).convert_alpha()
+        return cls.SPRITE_CACHE.get(path)
+
     # Tipos de obstáculos espaciais
     TYPES = {
         "asteroid": {
@@ -61,9 +71,9 @@ class Obstacle:
                 
                 # Verificando existência dos arquivos antes de carregar
                 if os.path.exists(self.top_sprite_path) and os.path.exists(self.bottom_sprite_path):
-                    # Carrega os sprites
-                    self.top_sprite = pygame.image.load(self.top_sprite_path).convert_alpha()
-                    self.bottom_sprite = pygame.image.load(self.bottom_sprite_path).convert_alpha()
+                    # Carrega os sprites usando cache
+                    self.top_sprite = self._load_sprite(self.top_sprite_path)
+                    self.bottom_sprite = self._load_sprite(self.bottom_sprite_path)
                     
                     # Obtém as dimensões reais dos sprites
                     self.top_width = self.top_sprite.get_width()
@@ -80,7 +90,7 @@ class Obstacle:
                 
                 # Verificando existência do arquivo antes de carregar
                 if os.path.exists(obstacle_path):
-                    obstacle_sprite = pygame.image.load(obstacle_path).convert_alpha()
+                    obstacle_sprite = self._load_sprite(obstacle_path)
                     
                     # Usa o mesmo sprite para o topo e a base
                     self.top_sprite = obstacle_sprite
