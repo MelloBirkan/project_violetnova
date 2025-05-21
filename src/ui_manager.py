@@ -269,53 +269,107 @@ class UIManager:
         screen.blit(restart_text, (config.SCREEN_WIDTH // 2 - restart_text.get_width() // 2, 400))
         
     def draw_transition_screen(self, screen):
-        """Desenha a tela de transição"""
-        # Sobreposição semitransparente
-        overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 200))  # Sobreposição mais escura para leitura
-        screen.blit(overlay, (0, 0))
+        """Desenha a tela de transição usando imagens de cada planeta"""
+        # Obtém o nome do planeta em português para o caminho do arquivo
+        planet_name = self.game.current_planet.name
+        planet_name_pt = PLANET_NAME_PT.get(planet_name, planet_name).lower()
         
-        # Exibe o nome do planeta de destino
-        display_name = PLANET_NAME_PT.get(self.game.current_planet.name, self.game.current_planet.name)
-        planet_title = config.GAME_FONT.render(f"Bem-vindo a {display_name}", True, (255, 255, 255))
-        screen.blit(planet_title, (config.SCREEN_WIDTH // 2 - planet_title.get_width() // 2, 100))
+        # Remove acentos e caracteres especiais para o caminho do arquivo
+        planet_name_pt = planet_name_pt.replace("ê", "e").replace("ú", "u").replace("í", "i").replace("ô", "o").replace("á", "a").replace("é", "e")
         
-        # Mostra a informação de gravidade
-        gravity_text = config.GAME_FONT.render(f"Gravidade: {self.game.current_planet.gravity_factor}% da Terra", True, (255, 255, 255))
-        screen.blit(gravity_text, (config.SCREEN_WIDTH // 2 - gravity_text.get_width() // 2, 150))
+        # O caminho de arquivo usa o nome em português sem acentos
+        transition_image_path = f"assets/images/planets_sprites/{planet_name_pt}/transicao_{planet_name_pt}.png"
         
-        # Texto informativo do planeta
-        info_text = self.game.current_planet.get_info_text()
-        # Quebra o texto para caber na tela
-        wrapped_lines = []
-        words = info_text.split()
-        line = ""
-        for word in words:
-            test_line = line + word + " "
-            test_surface = config.SMALL_FONT.render(test_line, True, (255, 255, 255))
-            if test_surface.get_width() < config.SCREEN_WIDTH - 100:
-                line = test_line
-            else:
-                wrapped_lines.append(line)
-                line = word + " "
-        wrapped_lines.append(line)  # Adiciona a última linha
-        
-        # Desenha o texto quebrado
-        for i, line in enumerate(wrapped_lines):
-            line_surface = config.SMALL_FONT.render(line, True, (200, 200, 255))
-            screen.blit(line_surface, (config.SCREEN_WIDTH // 2 - line_surface.get_width() // 2, 220 + i * 30))
+        try:
+            transition_image = pygame.image.load(transition_image_path)
             
-        # Indicador de progresso
-        progress_text = config.SMALL_FONT.render(f"Planeta {self.game.current_planet_index + 1} de {len(self.game.planets)}", True, (180, 180, 180))
-        screen.blit(progress_text, (config.SCREEN_WIDTH // 2 - progress_text.get_width() // 2, 350))
-        
-        # Mostra instrução para continuar
-        if self.game.state_manager.transition_time > 60:  # Only show after 1 second
-            continue_text = config.SMALL_FONT.render("Pressione ESPAÇO para continuar", True, (255, 255, 255))
-            # Pulsating effect
-            alpha = int(128 + 127 * math.sin(pygame.time.get_ticks() * 0.005))
-            continue_text.set_alpha(alpha)
-            screen.blit(continue_text, (config.SCREEN_WIDTH // 2 - continue_text.get_width() // 2, 450))
+            # Redimensiona a imagem para preencher a tela mantendo proporção
+            screen_width, screen_height = pygame.display.get_surface().get_size()
+            img_width, img_height = transition_image.get_size()
+            
+            # Calcula a escala necessária para preencher a tela
+            scale = max(screen_width / img_width, screen_height / img_height)
+            new_width = int(img_width * scale)
+            new_height = int(img_height * scale)
+            
+            # Redimensiona a imagem
+            scaled_image = pygame.transform.scale(transition_image, (new_width, new_height))
+            
+            # Centraliza a imagem na tela
+            x = (screen_width - new_width) // 2
+            y = (screen_height - new_height) // 2
+            
+            # Desenha a imagem
+            screen.blit(scaled_image, (x, y))
+            
+            # Sobreposição semitransparente apenas para parte inferior (para texto)
+            overlay_height = 100
+            overlay = pygame.Surface((screen_width, overlay_height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 150))
+            screen.blit(overlay, (0, screen_height - overlay_height))
+            
+            # Indicador de progresso
+            progress_text = config.SMALL_FONT.render(f"Planeta {self.game.current_planet_index + 1} de {len(self.game.planets)}", True, (180, 180, 180))
+            screen.blit(progress_text, (screen_width // 2 - progress_text.get_width() // 2, screen_height - overlay_height + 10))
+            
+            # Mostra instrução para continuar
+            if self.game.state_manager.transition_time > 60:  # Only show after 1 second
+                continue_text = config.SMALL_FONT.render("Pressione ESPAÇO para continuar", True, (255, 255, 255))
+                # Pulsating effect
+                alpha = int(128 + 127 * math.sin(pygame.time.get_ticks() * 0.005))
+                continue_text.set_alpha(alpha)
+                screen.blit(continue_text, (screen_width // 2 - continue_text.get_width() // 2, screen_height - overlay_height + 50))
+                
+        except Exception as e:
+            # Fallback para o método original caso a imagem não seja encontrada
+            print(f"Erro ao carregar imagem de transição: {e}")
+            
+            # Sobreposição semitransparente
+            overlay = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 200))  # Sobreposição mais escura para leitura
+            screen.blit(overlay, (0, 0))
+            
+            # Exibe o nome do planeta de destino
+            display_name = PLANET_NAME_PT.get(self.game.current_planet.name, self.game.current_planet.name)
+            planet_title = config.GAME_FONT.render(f"Bem-vindo a {display_name}", True, (255, 255, 255))
+            screen.blit(planet_title, (config.SCREEN_WIDTH // 2 - planet_title.get_width() // 2, 100))
+            
+            # Mostra a informação de gravidade
+            gravity_text = config.GAME_FONT.render(f"Gravidade: {self.game.current_planet.gravity_factor}% da Terra", True, (255, 255, 255))
+            screen.blit(gravity_text, (config.SCREEN_WIDTH // 2 - gravity_text.get_width() // 2, 150))
+            
+            # Texto informativo do planeta
+            info_text = self.game.current_planet.get_info_text()
+            # Quebra o texto para caber na tela
+            wrapped_lines = []
+            words = info_text.split()
+            line = ""
+            for word in words:
+                test_line = line + word + " "
+                test_surface = config.SMALL_FONT.render(test_line, True, (255, 255, 255))
+                if test_surface.get_width() < config.SCREEN_WIDTH - 100:
+                    line = test_line
+                else:
+                    wrapped_lines.append(line)
+                    line = word + " "
+            wrapped_lines.append(line)  # Adiciona a última linha
+            
+            # Desenha o texto quebrado
+            for i, line in enumerate(wrapped_lines):
+                line_surface = config.SMALL_FONT.render(line, True, (200, 200, 255))
+                screen.blit(line_surface, (config.SCREEN_WIDTH // 2 - line_surface.get_width() // 2, 220 + i * 30))
+                
+            # Indicador de progresso
+            progress_text = config.SMALL_FONT.render(f"Planeta {self.game.current_planet_index + 1} de {len(self.game.planets)}", True, (180, 180, 180))
+            screen.blit(progress_text, (config.SCREEN_WIDTH // 2 - progress_text.get_width() // 2, 350))
+            
+            # Mostra instrução para continuar
+            if self.game.state_manager.transition_time > 60:  # Only show after 1 second
+                continue_text = config.SMALL_FONT.render("Pressione ESPAÇO para continuar", True, (255, 255, 255))
+                # Pulsating effect
+                alpha = int(128 + 127 * math.sin(pygame.time.get_ticks() * 0.005))
+                continue_text.set_alpha(alpha)
+                screen.blit(continue_text, (config.SCREEN_WIDTH // 2 - continue_text.get_width() // 2, 450))
             
     def draw_quiz_failure_screen(self, screen):
         """Desenha a tela de falha no quiz com contagem regressiva"""
